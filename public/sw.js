@@ -1,4 +1,4 @@
-const CACHE = "mori-book-forest-v3";
+const CACHE = "mori-book-forest-v4";
 const ROOT = self.location.pathname.replace(/sw\.js$/, "");
 const SHELL = [
   ROOT,

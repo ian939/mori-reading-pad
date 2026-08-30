@@ -18,6 +18,34 @@ html {
   -webkit-text-size-adjust: 100%;
   touch-action: manipulation;
 }
+.kid-safe-interactions,
+.kid-safe-interactions body {
+  overscroll-behavior: none;
+}
+.kid-safe-interactions body,
+.kid-safe-interactions #root,
+.kid-safe-interactions .app {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.kid-safe-interactions img,
+.kid-safe-interactions svg {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+.kid-safe-interactions button,
+.kid-safe-interactions label,
+.kid-safe-interactions [role="button"] {
+  touch-action: manipulation;
+}
+.kid-safe-interactions [data-allow-native-editing="true"] input[type="text"],
+.kid-safe-interactions [data-allow-native-editing="true"] textarea,
+.kid-safe-interactions [data-allow-native-editing="true"] [contenteditable="true"] {
+  -webkit-touch-callout: default;
+  -webkit-user-select: text;
+  user-select: text;
+}
 body {
   margin: 0;
   min-width: 320px;

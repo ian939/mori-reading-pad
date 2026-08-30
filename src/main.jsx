@@ -17,6 +17,7 @@ import {
   Volume2,
   X,
 } from "lucide-react";
+import { enableKidSafeInteractions } from "./kidSafeInteractions";
 import "./styles.css";
 
 const asset = (path) => `${import.meta.env.BASE_URL}${path}`;
@@ -996,6 +997,7 @@ function ReviewDraft({ book, back, publish }) {
   return (
     <form
       className="page review-page"
+      data-allow-native-editing="true"
       onSubmit={(event) => {
         event.preventDefault();
         if (canPublish) publish(draft);
@@ -1192,6 +1194,8 @@ function Profile({ childPhoto, upload }) {
     </div>
   );
 }
+
+enableKidSafeInteractions();
 
 createRoot(document.getElementById("root")).render(<App />);
 
