@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.vite/
+*.log
+.DS_Store
+Thumbs.db
+
+# Local book scans are test inputs and must not be published.
+돈이 뭐야/
+우리가 어디서 왔게/
