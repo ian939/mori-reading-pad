@@ -1,4 +1,4 @@
-const CACHE = "mori-book-forest-v4";
+const CACHE = "mori-book-forest-v5";
 const ROOT = self.location.pathname.replace(/sw\.js$/, "");
 const SHELL = [
   ROOT,
@@ -6,6 +6,8 @@ const SHELL = [
   `${ROOT}assets/mori-mascot.png`,
   `${ROOT}assets/money-cover-v2.png`,
   `${ROOT}assets/origin-cover-v2.png`,
+  `${ROOT}assets/money-situation-v1.png`,
+  `${ROOT}assets/origin-situation-v1.png`,
 ];
 self.addEventListener("install", (event) =>
   event.waitUntil(

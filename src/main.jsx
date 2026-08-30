@@ -31,7 +31,7 @@ const DEFAULT_BOOKS = [
     color: "#ff735c",
     light: "#fff0e7",
     age: "6–8세",
-    minutes: 7,
+    minutes: 12,
     desc: "오영이의 방에 찾아온 또보와 함께 돈의 쓰임, 가격, 저축을 알아봐요.",
     creature: {
       emoji: "🐷",
@@ -40,6 +40,8 @@ const DEFAULT_BOOKS = [
     },
     questions: [
       {
+        kind: "choice",
+        skill: "retrieve",
         type: "내용 찾기",
         q: "오영이의 방에 불쑥 들어온 친구는 누구였나요?",
         options: [
@@ -52,6 +54,22 @@ const DEFAULT_BOOKS = [
         why: "이야기의 시작에서 저금통 또보가 오영이 방에 찾아왔어요.",
       },
       {
+        kind: "choice",
+        skill: "retrieve",
+        type: "내용 찾기",
+        q: "또보가 보여 준 동전과 지폐의 모습으로 알맞은 것은?",
+        options: [
+          "동전은 둥글고 단단하며, 지폐는 네모난 종이 모양이에요.",
+          "동전과 지폐는 모두 똑같은 크기의 세모 모양이에요.",
+          "동전은 종이이고, 지폐는 금속으로 만들어요.",
+          "동전과 지폐에는 아무 숫자도 없어요.",
+        ],
+        answer: 0,
+        why: "또보는 둥글고 단단한 동전과 네모난 지폐를 보여 주었어요.",
+      },
+      {
+        kind: "choice",
+        skill: "vocabulary",
         type: "낱말 이해",
         q: "물건에 붙은 “가격”은 무엇을 알려 줄까요?",
         options: [
@@ -64,6 +82,74 @@ const DEFAULT_BOOKS = [
         why: "가격은 그 물건을 사려면 돈이 얼마나 필요한지 알려 줘요.",
       },
       {
+        kind: "match",
+        skill: "connect",
+        type: "생각 잇기",
+        q: "이야기 속 행동과 돈의 쓰임을 알맞게 연결해 보세요.",
+        leftItems: [
+          { id: "candy", emoji: "🍬", label: "사탕을 산다" },
+          { id: "ride", emoji: "🎡", label: "놀이기구를 탄다" },
+          { id: "chores", emoji: "🧹", label: "집안일을 돕고 용돈을 받는다" },
+        ],
+        rightItems: [
+          { id: "earn", label: "일을 하고 돈을 벌어요" },
+          { id: "goods", label: "물건을 사요" },
+          { id: "service", label: "서비스를 이용해요" },
+        ],
+        answer: {
+          candy: "goods",
+          ride: "service",
+          chores: "earn",
+        },
+        why: "돈으로 물건을 사거나 서비스를 이용할 수 있고, 일을 한 대가로 돈을 벌기도 해요.",
+      },
+      {
+        kind: "choice",
+        skill: "infer",
+        type: "까닭 추론",
+        q: "또보가 친구들이 그린 돈을 쓸 수 없다고 말한 까닭은?",
+        options: [
+          "색연필이 너무 짧아서",
+          "진짜 돈은 일을 해서 벌어야 하고, 그린 돈은 가짜라서",
+          "종이가 너무 커서",
+          "친구들이 숫자를 몰라서",
+        ],
+        answer: 1,
+        why: "친구들이 마음대로 그린 가짜 돈은 사용할 수 없고, 진짜 돈은 일을 한 대가로 얻어요.",
+      },
+      {
+        kind: "sequence",
+        skill: "sequence",
+        type: "순서 이해",
+        q: "이야기의 흐름에 맞게 장면을 차례대로 눌러 보세요.",
+        items: [
+          { id: "work", emoji: "💼", label: "또보가 돈은 일을 해서 번다고 알려 줘요." },
+          { id: "enter", emoji: "🐷", label: "또보가 오영이의 방에 들어와요." },
+          { id: "save", emoji: "🪙", label: "오영이가 또보에게 동전을 넣어요." },
+          { id: "show", emoji: "💵", label: "또보가 동전과 지폐를 보여 줘요." },
+        ],
+        answer: ["enter", "show", "work", "save"],
+        why: "또보가 방에 찾아와 돈을 보여 주고, 돈을 버는 방법을 설명한 뒤 오영이가 동전을 넣어요.",
+      },
+      {
+        kind: "image-choice",
+        skill: "visual-infer",
+        type: "그림 추론",
+        q: "그림 속 아이가 사탕을 사기 전에 가장 먼저 확인해야 할 것은?",
+        visual: asset("assets/money-situation-v1.png"),
+        visualAlt: "동전을 들고 사탕 기계 앞에서 생각하는 아이",
+        options: [
+          "사탕의 가격과 내가 가진 돈",
+          "강아지의 꼬리 길이",
+          "가게 지붕의 색깔",
+          "구름이 움직이는 방향",
+        ],
+        answer: 0,
+        why: "물건을 사기 전에는 가격을 보고 내가 가진 돈으로 살 수 있는지 확인해야 해요.",
+      },
+      {
+        kind: "choice",
+        skill: "numeracy",
         type: "수리 문해",
         q: "사탕 1개가 100원이라면 1,000원으로 몇 개를 살 수 있을까요?",
         options: ["1개", "5개", "10개", "100개"],
@@ -71,13 +157,8 @@ const DEFAULT_BOOKS = [
         why: "100원이 10번 모이면 1,000원이므로 사탕 10개를 살 수 있어요.",
       },
       {
-        type: "마음 읽기",
-        q: "또보가 친구들에게 받고 싶어 한 것은 무엇이었나요?",
-        options: ["동전", "케이크", "편지", "모자"],
-        answer: 0,
-        why: "또보는 돈을 모아 두는 저금통이라 오영이에게 동전을 받았어요.",
-      },
-      {
+        kind: "choice",
+        skill: "apply",
         type: "생활 적용",
         q: "사고 싶은 장난감이 있지만 돈이 부족할 때 가장 알맞은 행동은?",
         options: [
@@ -89,6 +170,20 @@ const DEFAULT_BOOKS = [
         answer: 1,
         why: "이야기처럼 목표를 정하고 저축하면 기다림과 선택을 배울 수 있어요.",
       },
+      {
+        kind: "choice",
+        skill: "summarize",
+        type: "중심 생각",
+        q: "이 책의 내용을 가장 잘 정리한 문장은 무엇일까요?",
+        options: [
+          "돈은 그림으로 만들어 마음대로 쓸 수 있어요.",
+          "돈은 일을 통해 벌고, 물건이나 서비스에 쓰거나 저축할 수 있어요.",
+          "돈은 장난감 친구들에게만 필요해요.",
+          "돈은 크기가 클수록 언제나 더 값져요.",
+        ],
+        answer: 1,
+        why: "이 책은 돈을 버는 방법과 돈의 쓰임, 그리고 저축을 함께 알려 줘요.",
+      },
     ],
   },
   {
@@ -99,7 +194,7 @@ const DEFAULT_BOOKS = [
     color: "#67a85b",
     light: "#edf7df",
     age: "6–8세",
-    minutes: 8,
+    minutes: 13,
     desc: "우주 친구들과 마트 음식의 고향을 찾아 농장과 공장으로 출발해요.",
     creature: {
       emoji: "🍎",
@@ -108,6 +203,8 @@ const DEFAULT_BOOKS = [
     },
     questions: [
       {
+        kind: "choice",
+        skill: "retrieve",
         type: "내용 찾기",
         q: "우주 친구들이 지구에서 가장 먼저 궁금해한 것은?",
         options: [
@@ -120,30 +217,22 @@ const DEFAULT_BOOKS = [
         why: "친구들은 마트의 맛있는 음식이 어디에서 왔는지 궁금해했어요.",
       },
       {
-        type: "순서 찾기",
-        q: "토마토가 케첩이 되는 순서로 알맞은 것은?",
+        kind: "choice",
+        skill: "retrieve",
+        type: "내용 찾기",
+        q: "배추의 여행이 가장 먼저 시작된 곳은 어디인가요?",
         options: [
-          "마트→농장→공장",
-          "농장→공장→마트",
-          "공장→농장→냉장고",
-          "냉장고→밭→마트",
-        ],
-        answer: 1,
-        why: "밭에서 자란 토마토가 공장에서 케첩이 된 뒤 마트로 와요.",
-      },
-      {
-        type: "원인 추론",
-        q: "젖소 농장에서 우유를 짜는 까닭은 무엇일까요?",
-        options: [
-          "치즈 같은 음식을 만들려고",
-          "소를 씻겨 주려고",
-          "풀을 자라게 하려고",
-          "트럭을 움직이려고",
+          "흙에 심은 작은 씨앗",
+          "마트의 계산대",
+          "식탁 위 접시",
+          "냉장고 안",
         ],
         answer: 0,
-        why: "젖소의 젖에서 얻은 우유는 치즈와 여러 유제품의 재료가 돼요.",
+        why: "배추는 밭의 흙에 심은 작은 씨앗에서 여행을 시작해요.",
       },
       {
+        kind: "choice",
+        skill: "vocabulary",
         type: "낱말 이해",
         q: "“재료”와 뜻이 가장 가까운 것은?",
         options: [
@@ -156,6 +245,88 @@ const DEFAULT_BOOKS = [
         why: "재료는 다른 물건이나 음식을 만들 때 바탕으로 쓰는 것이에요.",
       },
       {
+        kind: "match",
+        skill: "connect",
+        type: "생각 잇기",
+        q: "음식과 여행이 시작된 곳을 알맞게 연결해 보세요.",
+        leftItems: [
+          { id: "cabbage", emoji: "🥬", label: "배추" },
+          { id: "egg", emoji: "🥚", label: "달걀" },
+          { id: "milk", emoji: "🥛", label: "우유" },
+        ],
+        rightItems: [
+          { id: "cow", label: "젖소 농장" },
+          { id: "field", label: "배추밭" },
+          { id: "chicken", label: "닭이 있는 양계장" },
+        ],
+        answer: {
+          cabbage: "field",
+          egg: "chicken",
+          milk: "cow",
+        },
+        why: "배추는 밭에서, 달걀은 닭을 기르는 양계장에서, 우유는 젖소 농장에서 출발해요.",
+      },
+      {
+        kind: "choice",
+        skill: "infer",
+        type: "까닭 추론",
+        q: "농장에서 모은 우유를 치즈 공장으로 보내는 까닭은 무엇일까요?",
+        options: [
+          "우유로 치즈를 만들기 위해서",
+          "트럭의 색을 바꾸기 위해서",
+          "젖소에게 우유를 돌려주기 위해서",
+          "밭에 우유를 뿌리기 위해서",
+        ],
+        answer: 0,
+        why: "젖소에게서 얻은 우유는 공장에서 치즈를 만드는 중요한 재료가 돼요.",
+      },
+      {
+        kind: "sequence",
+        skill: "sequence",
+        type: "순서 이해",
+        q: "토마토가 케첩이 되어 우리에게 오는 순서대로 눌러 보세요.",
+        items: [
+          { id: "market", emoji: "🛒", label: "케첩이 마트에 도착해요." },
+          { id: "grow", emoji: "🍅", label: "토마토가 농장에서 자라요." },
+          { id: "factory", emoji: "🏭", label: "공장에서 토마토를 케첩으로 만들어요." },
+          { id: "truck", emoji: "🚚", label: "잘 익은 토마토를 트럭에 실어요." },
+        ],
+        answer: ["grow", "truck", "factory", "market"],
+        why: "농장에서 자란 토마토를 트럭으로 옮겨 공장에서 케첩으로 만든 뒤 마트로 보내요.",
+      },
+      {
+        kind: "image-choice",
+        skill: "visual-infer",
+        type: "그림 추론",
+        q: "그림 속 장면 다음에 일어날 일로 가장 알맞은 것은?",
+        visual: asset("assets/origin-situation-v1.png"),
+        visualAlt: "농부가 젖소 농장에서 우유통을 냉장 트럭에 싣는 장면",
+        options: [
+          "냉장 트럭이 우유를 치즈 공장으로 옮겨요.",
+          "농부가 우유통을 다시 비워 버려요.",
+          "젖소가 트럭을 타고 마트에 가요.",
+          "우유통으로 배추를 심어요.",
+        ],
+        answer: 0,
+        why: "농장에서 모은 우유는 상하지 않도록 차갑게 운반되어 치즈 같은 음식의 재료가 돼요.",
+      },
+      {
+        kind: "choice",
+        skill: "infer",
+        type: "생각 추론",
+        q: "치즈, 빵, 배추, 토마토가 한곳에 모인 까닭은 무엇일까요?",
+        options: [
+          "함께 샌드위치의 재료가 되기 위해서",
+          "각자 다시 농장으로 돌아가기 위해서",
+          "누가 더 무거운지 겨루기 위해서",
+          "마트 문을 닫기 위해서",
+        ],
+        answer: 0,
+        why: "서로 다른 곳에서 온 재료들이 모여 하나의 샌드위치가 돼요.",
+      },
+      {
+        kind: "choice",
+        skill: "apply",
         type: "생활 적용",
         q: "사과 주스가 어디서 왔는지 알고 싶을 때 가장 좋은 질문은?",
         options: [
@@ -167,11 +338,102 @@ const DEFAULT_BOOKS = [
         answer: 0,
         why: "재료의 출발점을 물으면 음식이 우리에게 오는 과정을 추적할 수 있어요.",
       },
+      {
+        kind: "choice",
+        skill: "summarize",
+        type: "중심 생각",
+        q: "이 책의 중심 생각을 가장 잘 나타낸 문장은 무엇일까요?",
+        options: [
+          "모든 음식은 처음부터 마트에서 생겨나요.",
+          "음식은 농장과 공장, 운반 과정을 거쳐 우리 식탁에 와요.",
+          "음식은 색깔이 같으면 모두 같은 곳에서 와요.",
+          "트럭은 음식보다 먼저 밭에서 자라요.",
+        ],
+        answer: 1,
+        why: "책은 여러 음식이 어디서 시작해 어떤 과정을 거쳐 식탁에 오는지 보여 줘요.",
+      },
     ],
   },
 ];
 
-const starsForScore = (score) => (score >= 4 ? 3 : score >= 2 ? 2 : 1);
+const starsForScore = (score, total = 5) => {
+  if (!total) return 0;
+  const ratio = score / total;
+  if (ratio >= 0.85) return 3;
+  if (ratio >= 0.55) return 2;
+  return 1;
+};
+
+const questionKind = (question) => question.kind || "choice";
+
+const isQuestionComplete = (question, response) => {
+  const kind = questionKind(question);
+  if (kind === "sequence") {
+    return Array.isArray(response) && response.length === question.answer.length;
+  }
+  if (kind === "match") {
+    return (
+      response?.pairs &&
+      question.leftItems.every((item) => Boolean(response.pairs[item.id]))
+    );
+  }
+  return Number.isInteger(response);
+};
+
+const isQuestionCorrect = (question, response) => {
+  const kind = questionKind(question);
+  if (kind === "sequence") {
+    return (
+      Array.isArray(response) &&
+      response.length === question.answer.length &&
+      response.every((item, index) => item === question.answer[index])
+    );
+  }
+  if (kind === "match") {
+    return question.leftItems.every(
+      (item) => response?.pairs?.[item.id] === question.answer[item.id],
+    );
+  }
+  return response === question.answer;
+};
+
+const answerLabel = (question) => {
+  const kind = questionKind(question);
+  if (kind === "sequence") {
+    return question.answer
+      .map((id) => question.items.find((item) => item.id === id)?.label)
+      .filter(Boolean)
+      .join(" → ");
+  }
+  if (kind === "match") {
+    return question.leftItems
+      .map((left) => {
+        const right = question.rightItems.find(
+          (item) => item.id === question.answer[left.id],
+        );
+        return `${left.label} → ${right?.label || ""}`;
+      })
+      .join(" · ");
+  }
+  return question.options[question.answer];
+};
+
+const spokenPrompt = (question) => {
+  const kind = questionKind(question);
+  if (kind === "sequence") {
+    return `${question.q}. 장면 카드. ${question.items.map((item) => item.label).join(". ")}`;
+  }
+  if (kind === "match") {
+    return `${question.q}. 왼쪽 카드. ${question.leftItems.map((item) => item.label).join(". ")}. 오른쪽 카드. ${question.rightItems.map((item) => item.label).join(". ")}`;
+  }
+  return `${question.q}. ${question.options.map((option, index) => `${index + 1}번, ${option}`).join(". ")}`;
+};
+
+const quizStage = (index) => {
+  if (index < 3) return "단서 찾기";
+  if (index < 7) return "생각 탐험";
+  return "마지막 열쇠";
+};
 
 const loadBooks = () => {
   try {
@@ -192,16 +454,41 @@ const loadBooks = () => {
 const loadProgress = () => {
   try {
     const saved = JSON.parse(localStorage.getItem("mori-progress"));
+    const completed = Array.isArray(saved?.completed) ? saved.completed : [];
+    const bestScores =
+      saved?.bestScores && typeof saved.bestScores === "object"
+        ? saved.bestScores
+        : {};
+    const bestTotals =
+      saved?.bestTotals && typeof saved.bestTotals === "object"
+        ? saved.bestTotals
+        : Object.fromEntries(
+            Object.keys(bestScores).map((bookId) => [bookId, 5]),
+          );
+    const bookStars =
+      saved?.bookStars && typeof saved.bookStars === "object"
+        ? saved.bookStars
+        : Object.fromEntries(
+            completed.map((bookId) => [
+              bookId,
+              starsForScore(bestScores[bookId] || 0, bestTotals[bookId] || 5),
+            ]),
+          );
     return {
-      completed: Array.isArray(saved?.completed) ? saved.completed : [],
+      completed,
       stars: Number.isFinite(saved?.stars) ? saved.stars : 0,
-      bestScores:
-        saved?.bestScores && typeof saved.bestScores === "object"
-          ? saved.bestScores
-          : {},
+      bestScores,
+      bestTotals,
+      bookStars,
     };
   } catch {
-    return { completed: [], stars: 0, bestScores: {} };
+    return {
+      completed: [],
+      stars: 0,
+      bestScores: {},
+      bestTotals: {},
+      bookStars: {},
+    };
   }
 };
 
@@ -270,8 +557,12 @@ function App() {
     go("review", book);
   };
   const answer = () => {
-    if (choice === null) return;
-    setAnswers((a) => [...a, choice === selected.questions[quizIndex].answer]);
+    const question = selected.questions[quizIndex];
+    if (!isQuestionComplete(question, choice)) return;
+    setAnswers((current) => [
+      ...current,
+      isQuestionCorrect(question, choice),
+    ]);
     setView("feedback");
   };
   const next = () => {
@@ -281,21 +572,34 @@ function App() {
       setView("quiz");
     } else {
       const correct = answers.filter(Boolean).length;
-      const earned = starsForScore(correct);
+      const total = selected.questions.length;
+      const earned = starsForScore(correct, total);
       setProgress((p) => {
-        const previousBest = p.bestScores?.[selected.id] || 0;
         const hasPreviousScore = Number.isFinite(p.bestScores?.[selected.id]);
-        const previousStars = p.completed.includes(selected.id)
-          ? hasPreviousScore
-            ? starsForScore(previousBest)
-            : earned
+        const previousBest = hasPreviousScore
+          ? p.bestScores[selected.id]
           : 0;
+        const previousTotal = p.bestTotals?.[selected.id] || 5;
+        const previousRatio = hasPreviousScore
+          ? previousBest / previousTotal
+          : -1;
+        const isNewBest = correct / total >= previousRatio;
+        const previousStars = p.bookStars?.[selected.id] || 0;
+        const bestStars = Math.max(previousStars, earned);
         return {
           completed: [...new Set([...p.completed, selected.id])],
-          stars: p.stars + Math.max(0, earned - previousStars),
+          stars: p.stars + Math.max(0, bestStars - previousStars),
           bestScores: {
             ...p.bestScores,
-            [selected.id]: Math.max(previousBest, correct),
+            [selected.id]: isNewBest ? correct : previousBest,
+          },
+          bestTotals: {
+            ...p.bestTotals,
+            [selected.id]: isNewBest ? total : previousTotal,
+          },
+          bookStars: {
+            ...p.bookStars,
+            [selected.id]: bestStars,
           },
         };
       });
@@ -637,23 +941,25 @@ function Detail({ book, done, back, start, review }) {
               ? "돈은 왜 필요하고, 어떻게 모을까요?"
               : "내가 먹는 음식은 어디에서 올까요?"}
           </h2>
-          <p>책에서 찾은 단서로 5개의 문을 열어 보세요.</p>
+          <p>
+            책에서 찾은 단서로 {book.questions.length}개의 문을 열어 보세요.
+          </p>
         </div>
       </div>
       <div className="skill-row">
         <div>
           <strong>1</strong>
-          <span>내용 찾기</span>
+          <span>단서 찾기</span>
         </div>
         <i />
         <div>
           <strong>2</strong>
-          <span>생각 잇기</span>
+          <span>생각 탐험</span>
         </div>
         <i />
         <div>
           <strong>3</strong>
-          <span>생활 적용</span>
+          <span>마지막 열쇠</span>
         </div>
       </div>
       <button className="primary wide" onClick={start}>
@@ -667,12 +973,11 @@ function Detail({ book, done, back, start, review }) {
 }
 function Quiz({ book, index, choice, setChoice, submit, close }) {
   const q = book.questions[index];
+  const complete = isQuestionComplete(q, choice);
   const speak = () => {
     if (!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    const message = new SpeechSynthesisUtterance(
-      `${q.q}. ${q.options.map((option, i) => `${i + 1}번, ${option}`).join(". ")}`,
-    );
+    const message = new SpeechSynthesisUtterance(spokenPrompt(q));
     message.lang = "ko-KR";
     message.rate = 0.88;
     window.speechSynthesis.speak(message);
@@ -700,34 +1005,39 @@ function Quiz({ book, index, choice, setChoice, submit, close }) {
       </div>
       <div className="quiz-body">
         <div className="question-label">
-          <span style={{ background: book.light, color: book.color }}>
-            {q.type}
-          </span>
+          <div className="question-tags">
+            <span className="stage-tag">{quizStage(index)}</span>
+            <span style={{ background: book.light, color: book.color }}>
+              {q.type}
+            </span>
+          </div>
           <button aria-label="문제와 선택지 읽어주기" onClick={speak}>
             <Volume2 size={22} />
             <span>읽어주기</span>
           </button>
         </div>
         <h1>{q.q}</h1>
-        <div className="options">
-          {q.options.map((o, i) => (
-            <button
-              key={o}
-              className={choice === i ? "selected" : ""}
-              aria-pressed={choice === i}
-              onClick={() => setChoice(i)}
-            >
-              <span>{String.fromCharCode(65 + i)}</span>
-              {o}
-              {choice === i && <Check size={20} />}
-            </button>
-          ))}
-        </div>
+        {q.visual && (
+          <figure className="question-visual">
+            <img src={q.visual} alt={q.visualAlt} draggable="false" />
+            <figcaption>그림 속 단서를 천천히 살펴보세요.</figcaption>
+          </figure>
+        )}
+        {(questionKind(q) === "choice" ||
+          questionKind(q) === "image-choice") && (
+          <ChoiceQuestion q={q} choice={choice} setChoice={setChoice} />
+        )}
+        {questionKind(q) === "sequence" && (
+          <SequenceQuestion q={q} choice={choice} setChoice={setChoice} />
+        )}
+        {questionKind(q) === "match" && (
+          <MatchQuestion q={q} choice={choice} setChoice={setChoice} />
+        )}
       </div>
       <div className="quiz-bottom">
         <button
           className="primary wide"
-          disabled={choice === null}
+          disabled={!complete}
           onClick={submit}
         >
           정답 확인하기
@@ -736,8 +1046,149 @@ function Quiz({ book, index, choice, setChoice, submit, close }) {
     </div>
   );
 }
+
+function ChoiceQuestion({ q, choice, setChoice }) {
+  return (
+    <div className="options">
+      {q.options.map((option, optionIndex) => (
+        <button
+          key={option}
+          className={choice === optionIndex ? "selected" : ""}
+          aria-pressed={choice === optionIndex}
+          onClick={() => setChoice(optionIndex)}
+        >
+          <span>{String.fromCharCode(65 + optionIndex)}</span>
+          {option}
+          {choice === optionIndex && <Check size={20} />}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function SequenceQuestion({ q, choice, setChoice }) {
+  const selectedItems = Array.isArray(choice) ? choice : [];
+  const toggleItem = (itemId) => {
+    setChoice((current) => {
+      const currentItems = Array.isArray(current) ? current : [];
+      return currentItems.includes(itemId)
+        ? currentItems.filter((id) => id !== itemId)
+        : [...currentItems, itemId];
+    });
+  };
+
+  return (
+    <div className="sequence-question">
+      <div className="interaction-help">
+        <span>1</span>
+        먼저 일어난 장면부터 눌러 주세요. 다시 누르면 순서에서 빠져요.
+      </div>
+      <div className="sequence-grid">
+        {q.items.map((item) => {
+          const order = selectedItems.indexOf(item.id);
+          return (
+            <button
+              key={item.id}
+              className={order >= 0 ? "selected" : ""}
+              aria-pressed={order >= 0}
+              onClick={() => toggleItem(item.id)}
+            >
+              <span className="sequence-order">
+                {order >= 0 ? order + 1 : "?"}
+              </span>
+              <span className="sequence-emoji" aria-hidden="true">
+                {item.emoji}
+              </span>
+              <strong>{item.label}</strong>
+            </button>
+          );
+        })}
+      </div>
+      {selectedItems.length > 0 && (
+        <button className="reset-answer" onClick={() => setChoice([])}>
+          <RotateCcw size={16} /> 순서 다시 고르기
+        </button>
+      )}
+    </div>
+  );
+}
+
+function MatchQuestion({ q, choice, setChoice }) {
+  const response = choice?.pairs ? choice : { active: null, pairs: {} };
+  const selectLeft = (leftId) => {
+    setChoice((current) => ({
+      active: leftId,
+      pairs: current?.pairs || {},
+    }));
+  };
+  const selectRight = (rightId) => {
+    if (!response.active) return;
+    setChoice((current) => {
+      const pairs = { ...(current?.pairs || {}) };
+      Object.keys(pairs).forEach((leftId) => {
+        if (pairs[leftId] === rightId) delete pairs[leftId];
+      });
+      pairs[current.active] = rightId;
+      return { active: null, pairs };
+    });
+  };
+  const usedRightIds = Object.values(response.pairs);
+
+  return (
+    <div className="match-question">
+      <div className="interaction-help">
+        <span>1</span>
+        왼쪽 카드를 누른 뒤 어울리는 오른쪽 카드를 눌러 주세요.
+      </div>
+      <div className="match-board">
+        <div className="match-column" aria-label="연결할 이야기 카드">
+          {q.leftItems.map((item) => {
+            const paired = q.rightItems.find(
+              (right) => right.id === response.pairs[item.id],
+            );
+            return (
+              <button
+                key={item.id}
+                className={response.active === item.id ? "active" : ""}
+                aria-pressed={response.active === item.id}
+                onClick={() => selectLeft(item.id)}
+              >
+                <span aria-hidden="true">{item.emoji}</span>
+                <strong>{item.label}</strong>
+                <small>{paired ? `→ ${paired.label}` : "짝을 골라요"}</small>
+              </button>
+            );
+          })}
+        </div>
+        <div className="match-arrow" aria-hidden="true">→</div>
+        <div className="match-column answers" aria-label="연결할 뜻 카드">
+          {q.rightItems.map((item) => {
+            const used = usedRightIds.includes(item.id);
+            return (
+              <button
+                key={item.id}
+                className={used ? "used" : ""}
+                aria-pressed={used}
+                onClick={() => selectRight(item.id)}
+              >
+                {item.label}
+                {used && <Check size={17} />}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      {Object.keys(response.pairs).length > 0 && (
+        <button className="reset-answer" onClick={() => setChoice(null)}>
+          <RotateCcw size={16} /> 연결 다시 하기
+        </button>
+      )}
+    </div>
+  );
+}
+
 function Feedback({ q, choice, next, last }) {
-  const ok = choice === q.answer;
+  const ok = isQuestionCorrect(q, choice);
   return (
     <div className={`feedback ${ok ? "correct" : "wrong"}`}>
       <div className="confetti">{ok ? "✦  ·  ✦" : "⌁"}</div>
@@ -749,6 +1200,7 @@ function Feedback({ q, choice, next, last }) {
       <div className="explain">
         <strong>{ok ? "왜 그럴까요?" : "책 속 단서"}</strong>
         <p>{q.why}</p>
+        {!ok && <small className="answer-reveal">정답: {answerLabel(q)}</small>}
       </div>
       <button className="primary wide" onClick={next}>
         {last ? "모험 마치기" : "다음 문제"} <ChevronRight />
@@ -785,9 +1237,7 @@ function Result({ book, correct, go }) {
               <Star
                 key={i}
                 fill="currentColor"
-                className={
-                  i < starsForScore(score) ? "on" : ""
-                }
+                className={i < starsForScore(score, book.questions.length) ? "on" : ""}
               />
             ))}
           </div>
@@ -923,9 +1373,9 @@ function AddBook({ draftImage, scanState, book, upload, review }) {
             </span>
           </div>
           <ul>
-            <li>내용 확인 문제 2개</li>
-            <li>생각 문제 2개</li>
-            <li>생활 연결 문제 1개</li>
+            <li>단서 찾기 3개</li>
+            <li>생각 탐험 4개</li>
+            <li>마지막 열쇠 3개</li>
           </ul>
           <button className="primary wide" onClick={review}>
             문제 초안 확인하기 <ChevronRight size={18} />
@@ -944,28 +1394,63 @@ function AddBook({ draftImage, scanState, book, upload, review }) {
   );
 }
 
+const cloneQuestionForReview = (question) => ({
+  ...question,
+  options: question.options ? [...question.options] : undefined,
+  items: question.items?.map((item) => ({ ...item })),
+  leftItems: question.leftItems?.map((item) => ({ ...item })),
+  rightItems: question.rightItems?.map((item) => ({ ...item })),
+  answer: Array.isArray(question.answer)
+    ? [...question.answer]
+    : question.answer && typeof question.answer === "object"
+      ? { ...question.answer }
+      : question.answer,
+});
+
+const isReviewQuestionValid = (question) => {
+  const hasCopy = question.q.trim().length > 0 && question.why.trim().length > 0;
+  const kind = questionKind(question);
+  if (kind === "sequence") {
+    const itemIds = question.items.map((item) => item.id);
+    return (
+      hasCopy &&
+      question.items.every((item) => item.label.trim().length > 0) &&
+      question.answer.length === itemIds.length &&
+      new Set(question.answer).size === itemIds.length &&
+      question.answer.every((id) => itemIds.includes(id))
+    );
+  }
+  if (kind === "match") {
+    const rightIds = question.rightItems.map((item) => item.id);
+    return (
+      hasCopy &&
+      question.leftItems.every(
+        (item) =>
+          item.label.trim().length > 0 && rightIds.includes(question.answer[item.id]),
+      ) &&
+      question.rightItems.every((item) => item.label.trim().length > 0) &&
+      new Set(Object.values(question.answer)).size === question.leftItems.length
+    );
+  }
+  return (
+    hasCopy &&
+    question.options.every((option) => option.trim().length > 0) &&
+    question.answer >= 0 &&
+    question.answer < question.options.length
+  );
+};
+
 function ReviewDraft({ book, back, publish }) {
   const [draft, setDraft] = useState(() => ({
     ...book,
-    questions: book.questions.map((question) => ({
-      ...question,
-      options: [...question.options],
-    })),
+    questions: book.questions.map(cloneQuestionForReview),
   }));
   const [approved, setApproved] = useState(() =>
     Array(book.questions.length).fill(false),
   );
 
   const validQuestions = useMemo(
-    () =>
-      draft.questions.map(
-        (question) =>
-          question.q.trim().length > 0 &&
-          question.why.trim().length > 0 &&
-          question.options.every((option) => option.trim().length > 0) &&
-          question.answer >= 0 &&
-          question.answer < question.options.length,
-      ),
+    () => draft.questions.map(isReviewQuestionValid),
     [draft.questions],
   );
   const approvedCount = approved.filter(Boolean).length;
@@ -990,6 +1475,21 @@ function ReviewDraft({ book, back, publish }) {
     const options = [...draft.questions[questionIndex].options];
     options[optionIndex] = value;
     updateQuestion(questionIndex, { options });
+  };
+
+  const updateSequenceAnswer = (questionIndex, orderIndex, itemId) => {
+    const answer = [...draft.questions[questionIndex].answer];
+    answer[orderIndex] = itemId;
+    updateQuestion(questionIndex, { answer });
+  };
+
+  const updateMatchAnswer = (questionIndex, leftId, rightId) => {
+    updateQuestion(questionIndex, {
+      answer: {
+        ...draft.questions[questionIndex].answer,
+        [leftId]: rightId,
+      },
+    });
   };
 
   const approveAll = () => setApproved(validQuestions.map(Boolean));
@@ -1065,31 +1565,90 @@ function ReviewDraft({ book, back, publish }) {
                   }
                 />
               </label>
-              <fieldset>
-                <legend>선택지와 정답</legend>
-                <p>정답으로 공개할 선택지의 동그라미를 골라 주세요.</p>
-                {question.options.map((option, optionIndex) => (
-                  <label className="review-option" key={optionIndex}>
-                    <input
-                      type="radio"
-                      name={`answer-${questionIndex}`}
-                      checked={question.answer === optionIndex}
-                      onChange={() =>
-                        updateQuestion(questionIndex, { answer: optionIndex })
-                      }
-                    />
-                    <span>{String.fromCharCode(65 + optionIndex)}</span>
-                    <input
-                      type="text"
-                      value={option}
-                      aria-label={`${questionIndex + 1}번 문제 ${optionIndex + 1}번 선택지`}
-                      onChange={(event) =>
-                        updateOption(questionIndex, optionIndex, event.target.value)
-                      }
-                    />
-                  </label>
-                ))}
-              </fieldset>
+              {(questionKind(question) === "choice" ||
+                questionKind(question) === "image-choice") && (
+                <fieldset>
+                  <legend>선택지와 정답</legend>
+                  <p>정답으로 공개할 선택지의 동그라미를 골라 주세요.</p>
+                  {question.options.map((option, optionIndex) => (
+                    <label className="review-option" key={optionIndex}>
+                      <input
+                        type="radio"
+                        name={`answer-${questionIndex}`}
+                        checked={question.answer === optionIndex}
+                        onChange={() =>
+                          updateQuestion(questionIndex, { answer: optionIndex })
+                        }
+                      />
+                      <span>{String.fromCharCode(65 + optionIndex)}</span>
+                      <input
+                        type="text"
+                        value={option}
+                        aria-label={`${questionIndex + 1}번 문제 ${optionIndex + 1}번 선택지`}
+                        onChange={(event) =>
+                          updateOption(questionIndex, optionIndex, event.target.value)
+                        }
+                      />
+                    </label>
+                  ))}
+                </fieldset>
+              )}
+              {questionKind(question) === "sequence" && (
+                <fieldset className="review-structured">
+                  <legend>정답 순서</legend>
+                  <p>각 자리에서 먼저 일어날 장면부터 차례대로 골라 주세요.</p>
+                  {question.answer.map((itemId, orderIndex) => (
+                    <label key={orderIndex}>
+                      <span>{orderIndex + 1}</span>
+                      <select
+                        value={itemId}
+                        aria-label={`${orderIndex + 1}번째 장면`}
+                        onChange={(event) =>
+                          updateSequenceAnswer(
+                            questionIndex,
+                            orderIndex,
+                            event.target.value,
+                          )
+                        }
+                      >
+                        {question.items.map((item) => (
+                          <option key={item.id} value={item.id}>
+                            {item.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ))}
+                </fieldset>
+              )}
+              {questionKind(question) === "match" && (
+                <fieldset className="review-structured">
+                  <legend>짝 연결 정답</legend>
+                  <p>왼쪽 카드마다 알맞은 오른쪽 카드를 골라 주세요.</p>
+                  {question.leftItems.map((left) => (
+                    <label className="match-review-row" key={left.id}>
+                      <strong>{left.label}</strong>
+                      <select
+                        value={question.answer[left.id]}
+                        aria-label={`${left.label}의 연결 정답`}
+                        onChange={(event) =>
+                          updateMatchAnswer(
+                            questionIndex,
+                            left.id,
+                            event.target.value,
+                          )
+                        }
+                      >
+                        {question.rightItems.map((right) => (
+                          <option key={right.id} value={right.id}>
+                            {right.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ))}
+                </fieldset>
+              )}
               <label>
                 <span>아이에게 보여 줄 책 속 단서</span>
                 <textarea
