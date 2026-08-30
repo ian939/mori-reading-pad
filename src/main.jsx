@@ -26,7 +26,7 @@ const DEFAULT_BOOKS = [
     id: "money",
     title: "돈이 뭐야?",
     tag: "생활 · 경제",
-    cover: asset("assets/money-cover.jpg"),
+    cover: asset("assets/money-cover-v2.png"),
     color: "#ff735c",
     light: "#fff0e7",
     age: "6–8세",
@@ -94,7 +94,7 @@ const DEFAULT_BOOKS = [
     id: "origin",
     title: "우리가 어디서 왔게?",
     tag: "자연 · 음식",
-    cover: asset("assets/origin-cover.jpg"),
+    cover: asset("assets/origin-cover-v2.png"),
     color: "#67a85b",
     light: "#edf7df",
     age: "6–8세",
@@ -560,11 +560,28 @@ function HomeView({ books, progress, go, startQuiz }) {
     </>
   );
 }
+
+function BookCover({ book, className = "" }) {
+  return (
+    <div
+      className={`book-cover ${className}`.trim()}
+      role="img"
+      aria-label={`${book.title} 모리 책 모험 표지`}
+    >
+      <img src={book.cover} alt="" />
+      <span className="book-cover-copy">
+        <small>모리의 책 모험</small>
+        <strong>{book.title}</strong>
+      </span>
+    </div>
+  );
+}
+
 function BookCard({ book, done, onClick }) {
   return (
     <button className="book-card" onClick={onClick}>
       <div className="cover-wrap" style={{ background: book.light }}>
-        <img src={book.cover} alt={`${book.title} 표지`} />
+        <BookCover book={book} />
         {done && (
           <span className="done-badge">
             <Check size={15} /> 완독
@@ -596,7 +613,7 @@ function Detail({ book, done, back, start, review }) {
         className="detail-hero"
         style={{ "--accent": book.color, "--light": book.light }}
       >
-        <img src={book.cover} alt="책 표지" />
+        <BookCover book={book} className="detail-cover" />
         <div>
           <span className="eyebrow">{book.tag}</span>
           <h1>{book.title}</h1>
@@ -754,9 +771,9 @@ function Result({ book, correct, go }) {
         <strong>{book.title}</strong>의 단서를 끝까지 찾았어요.
       </p>
       <div className="result-card">
-        <span className="result-book" style={{ background: book.light }}>
-          <img src={book.cover} alt={`${book.title} 표지`} />
-        </span>
+        <div className="result-book" style={{ background: book.light }}>
+          <BookCover book={book} />
+        </div>
         <div>
           <span>나의 기록</span>
           <strong>
@@ -809,7 +826,7 @@ function LibraryView({ books, progress, go }) {
                 onClick={() => go("detail", b)}
                 style={{ "--book": b.color }}
               >
-                <img src={b.cover} alt={`${b.title} 표지`} />
+                <BookCover book={b} className="shelf-cover" />
                 <span>{b.title}</span>
               </button>
             ) : (
@@ -1000,7 +1017,7 @@ function ReviewDraft({ book, back, publish }) {
       </div>
 
       <div className="review-book">
-        <img src={book.cover} alt={`${book.title} 표지`} />
+        <BookCover book={book} className="review-cover" />
         <div>
           <span>분석된 책</span>
           <strong>{book.title}</strong>
