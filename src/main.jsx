@@ -30,6 +30,7 @@ import {
 } from "./audioStore";
 import { getRegisteredBook, registerBook } from "./bookApi";
 import { generateCharacterVariations } from "./characterApi";
+import { importCharacterImages } from "./characterSheet";
 import { enableKidSafeInteractions } from "./kidSafeInteractions";
 import {
   clearCharacterVariants,
@@ -51,6 +52,8 @@ import "./styles.css";
 
 const asset = (path) => `${import.meta.env.BASE_URL}${path}`;
 const CURRENT_USER = getCurrentUser();
+const API_CHARACTER_GENERATION_ENABLED =
+  import.meta.env.VITE_CHARACTER_GENERATION_MODE === "api";
 const childShelfTitle = (name) => {
   const cleanName = name?.trim();
   if (!cleanName) return "모리의 책숲";
@@ -1295,6 +1298,40 @@ function App() {
     }
   };
 
+  const storeChildCharacterVariants = async (generated) => {
+    if (generated.length !== 8) {
+      throw new Error("캐릭터 8개를 모두 불러오지 못했어요. 다시 시도해 주세요.");
+    }
+    await clearCharacterVariants(
+      CURRENT_USER.id,
+      childProfile.variantOptions,
+    );
+    await saveCharacterVariants(CURRENT_USER.id, generated);
+    profileMedia.variants.forEach((variant) => releaseProfileUrl(variant.url));
+    const withUrls = generated.map((variant) => {
+      const url = URL.createObjectURL(variant.blob);
+      profileUrlsRef.current.add(url);
+      return { ...variant, url };
+    });
+    const variantOptions = generated.map(
+      ({ id, label, description, mimeType }) => ({
+        id,
+        label,
+        description,
+        mimeType,
+      }),
+    );
+    setProfileMedia((current) => ({ ...current, variants: withUrls }));
+    setChildProfile((current) =>
+      saveChildProfile({
+        ...current,
+        selectedVariantId: null,
+        variantOptions,
+        completed: false,
+      }),
+    );
+  };
+
   const generateChildCharacters = async () => {
     setCharacterState("generating");
     setCharacterError("");
@@ -1304,41 +1341,32 @@ function App() {
       const generated = await generateCharacterVariations(photo.blob, {
         userId: CURRENT_USER.id,
       });
-      if (generated.length !== 8) {
-        throw new Error("캐릭터 8개를 모두 만들지 못했어요. 다시 시도해 주세요.");
-      }
-      await clearCharacterVariants(
-        CURRENT_USER.id,
-        childProfile.variantOptions,
-      );
-      await saveCharacterVariants(CURRENT_USER.id, generated);
-      profileMedia.variants.forEach((variant) => releaseProfileUrl(variant.url));
-      const withUrls = generated.map((variant) => {
-        const url = URL.createObjectURL(variant.blob);
-        profileUrlsRef.current.add(url);
-        return { ...variant, url };
-      });
-      const variantOptions = generated.map(
-        ({ id, label, description, mimeType }) => ({
-          id,
-          label,
-          description,
-          mimeType,
-        }),
-      );
-      setProfileMedia((current) => ({ ...current, variants: withUrls }));
-      setChildProfile((current) =>
-        saveChildProfile({
-          ...current,
-          selectedVariantId: null,
-          variantOptions,
-          completed: false,
-        }),
-      );
+      await storeChildCharacterVariants(generated);
       setCharacterState("ready");
     } catch (error) {
       setCharacterState("error");
       setCharacterError(error.message || "캐릭터를 만들지 못했어요.");
+    }
+  };
+
+  const importChildCharacterSheet = async (event) => {
+    const files = [...(event.target.files || [])];
+    event.target.value = "";
+    if (!files.length) return;
+    if (files.some((file) => file.size > 25 * 1024 * 1024)) {
+      setCharacterError("캐릭터 이미지는 한 장당 25MB 이하로 골라 주세요.");
+      return;
+    }
+    setCharacterState("importing");
+    setCharacterError("");
+    try {
+      const generated = await importCharacterImages(files);
+      await storeChildCharacterVariants(generated);
+      setCharacterState("ready");
+      setToast("캐릭터 시트를 여덟 가지 모습으로 나눴어요.");
+    } catch (error) {
+      setCharacterState("error");
+      setCharacterError(error.message || "캐릭터 이미지를 불러오지 못했어요.");
     }
   };
 
@@ -1644,6 +1672,8 @@ function App() {
             characterError={characterError}
             uploadPhoto={uploadChildPhoto}
             generateCharacters={generateChildCharacters}
+            importCharacterSheet={importChildCharacterSheet}
+            apiGenerationEnabled={API_CHARACTER_GENERATION_ENABLED}
             registerCharacter={registerChildCharacter}
             quizLevel={quizLevel}
             selectQuizLevel={selectQuizLevel}
@@ -3517,6 +3547,8 @@ function Profile({
   characterError,
   uploadPhoto,
   generateCharacters,
+  importCharacterSheet,
+  apiGenerationEnabled,
   registerCharacter,
   quizLevel,
   selectQuizLevel,
@@ -3529,7 +3561,7 @@ function Profile({
   const selectedVariant = variants.find(
     (variant) => variant.id === selectedVariantId,
   );
-  const generating = characterState === "generating";
+  const generating = ["generating", "importing"].includes(characterState);
 
   useEffect(() => {
     if (!variants.length) {
@@ -3617,34 +3649,61 @@ function Profile({
           </label>
         </div>
 
-        <label className="guardian-consent">
-          <input
-            type="checkbox"
-            checked={guardianConsent}
-            onChange={(event) => setGuardianConsent(event.target.checked)}
-          />
-          <span>
-            <strong>보호자가 이미지 생성에 동의했어요.</strong>
-            <small>
-              사진은 캐릭터 생성 시 설정된 AI 이미지 서버로 전송됩니다. 모리
-              서버는 원본 사진과 생성 결과를 보관하지 않아요.
-            </small>
-          </span>
-        </label>
+        {apiGenerationEnabled ? (
+          <>
+            <label className="guardian-consent">
+              <input
+                type="checkbox"
+                checked={guardianConsent}
+                onChange={(event) => setGuardianConsent(event.target.checked)}
+              />
+              <span>
+                <strong>보호자가 이미지 생성에 동의했어요.</strong>
+                <small>
+                  사진은 캐릭터 생성 시 설정된 AI 이미지 서버로 전송됩니다. 모리
+                  서버는 원본 사진과 생성 결과를 보관하지 않아요.
+                </small>
+              </span>
+            </label>
 
-        <button
-          className="primary wide generate-character-button"
-          type="button"
-          disabled={!name.trim() || !photoUrl || !guardianConsent || generating}
-          onClick={generateCharacters}
-        >
-          <Sparkles />
-          {generating
-            ? "8가지 모습을 그리고 있어요…"
-            : variants.length
-              ? "8가지 모습 다시 만들기"
-              : "8가지 캐릭터 만들기"}
-        </button>
+            <button
+              className="primary wide generate-character-button"
+              type="button"
+              disabled={!name.trim() || !photoUrl || !guardianConsent || generating}
+              onClick={generateCharacters}
+            >
+              <Sparkles />
+              {generating
+                ? "8가지 모습을 그리고 있어요…"
+                : variants.length
+                  ? "8가지 모습 다시 만들기"
+                  : "8가지 캐릭터 만들기"}
+            </button>
+          </>
+        ) : (
+          <section className="mvp-character-import" aria-labelledby="mvp-character-title">
+            <span className="mvp-mode-badge"><Sparkles /> MVP 무료 제작 방식</span>
+            <h3 id="mvp-character-title">Codex에서 캐릭터 시트를 만들어요</h3>
+            <ol>
+              <li>위에서 고른 아이 사진을 이 Codex 대화에도 첨부해 주세요.</li>
+              <li>“이 사진으로 책 읽는 캐릭터 8종을 만들어 줘”라고 말해 주세요.</li>
+              <li>완성된 2×4 이미지 한 장을 내려받아 아래에서 불러오세요.</li>
+            </ol>
+            <label
+              className={`character-sheet-button ${!name.trim() || !photoUrl ? "disabled" : ""}`}
+            >
+              <Plus /> 완성된 캐릭터 시트 불러오기
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                disabled={!name.trim() || !photoUrl || generating}
+                onChange={importCharacterSheet}
+              />
+            </label>
+            <small>2행 × 4열 시트 한 장 또는 개별 캐릭터 이미지 8장을 지원해요.</small>
+          </section>
+        )}
 
         {generating && (
           <div className="character-generating" role="status" aria-live="polite">
@@ -3653,8 +3712,16 @@ function Profile({
                 <i key={index} style={{ "--delay": `${index * 90}ms` }} />
               ))}
             </div>
-            <strong>크레파스와 색연필로 캐릭터를 그리고 있어요.</strong>
-            <p>한 장의 캐릭터 시트를 만든 뒤 여덟 모습으로 나누고 있어요.</p>
+            <strong>
+              {characterState === "importing"
+                ? "캐릭터 시트를 여덟 모습으로 나누고 있어요."
+                : "크레파스와 색연필로 캐릭터를 그리고 있어요."}
+            </strong>
+            <p>
+              {characterState === "importing"
+                ? "이미지는 이 브라우저 안에서만 처리해요."
+                : "한 장의 캐릭터 시트를 만든 뒤 여덟 모습으로 나누고 있어요."}
+            </p>
           </div>
         )}
 

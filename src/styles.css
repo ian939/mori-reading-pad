@@ -2486,6 +2486,82 @@ button {
   font-size: 9px;
   line-height: 1.5;
 }
+.mvp-character-import {
+  margin-top: 15px;
+  padding: 16px;
+  border: 2px solid #d5e2dc;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #f0f7f2, #fff9e8);
+}
+.mvp-mode-badge {
+  width: fit-content;
+  min-height: 32px;
+  border-radius: 16px;
+  background: #173f3f;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+}
+.mvp-mode-badge svg {
+  width: 15px;
+  height: 15px;
+}
+.mvp-character-import h3 {
+  margin: 11px 0 8px;
+  font: 400 20px "Jua";
+}
+.mvp-character-import ol {
+  margin: 0;
+  padding-left: 21px;
+  color: #526d67;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.65;
+}
+.character-sheet-button {
+  min-height: 52px;
+  margin-top: 13px;
+  border-radius: 16px;
+  background: #173f3f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #0c2e2f;
+}
+.character-sheet-button.disabled {
+  background: #aeb9b5;
+  box-shadow: 0 5px 0 #8e9995;
+  cursor: not-allowed;
+}
+.character-sheet-button input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.character-sheet-button input:disabled {
+  cursor: not-allowed;
+}
+.mvp-character-import > small {
+  display: block;
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.45;
+}
 .generate-character-button,
 .register-character-button {
   min-height: 52px;
@@ -3737,8 +3813,20 @@ button {
   }
   .guardian-consent small,
   .local-profile-note p,
-  .character-variant-grid small {
+  .character-variant-grid small,
+  .mvp-character-import ol,
+  .mvp-character-import > small {
     font-size: 11px;
+  }
+  .mvp-character-import {
+    padding: 21px;
+  }
+  .mvp-character-import h3 {
+    font-size: 26px;
+  }
+  .character-sheet-button {
+    min-height: 58px;
+    font-size: 15px;
   }
   .character-variant-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));

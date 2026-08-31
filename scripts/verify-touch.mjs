@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { access } from "node:fs/promises";
 import { chromium } from "playwright-core";
+import sharp from "sharp";
 
 const chromeCandidates = [
   process.env.CHROME_PATH,
@@ -45,21 +46,16 @@ try {
   const touchCdp = await context.newCDPSession(page);
   const generatedCharacterPng =
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
-  await page.route("**/api/characters/generate", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        variants: Array.from({ length: 8 }, (_, index) => ({
-          id: `variant-${index + 1}`,
-          label: `모습 ${index + 1}`,
-          description: `책을 읽는 캐릭터 모습 ${index + 1}`,
-          mimeType: "image/png",
-          base64: generatedCharacterPng,
-        })),
-      }),
-    });
-  });
+  const generatedCharacterSheet = await sharp({
+    create: {
+      width: 800,
+      height: 400,
+      channels: 4,
+      background: "#f7d978",
+    },
+  })
+    .png()
+    .toBuffer();
   await page.goto(target, { waitUntil: "networkidle" });
 
   const tapCenter = async (locator, label) => {
@@ -151,11 +147,11 @@ try {
     buffer: Buffer.from(generatedCharacterPng, "base64"),
   });
   await page.locator(".character-photo-preview.has-photo").waitFor();
-  await page.getByRole("checkbox").check();
-  await tapCenter(
-    page.getByRole("button", { name: "8가지 캐릭터 만들기" }),
-    "Generate character variations control",
-  );
+  await page.locator(".character-sheet-button input[type=file]").setInputFiles({
+    name: "character-sheet.png",
+    mimeType: "image/png",
+    buffer: generatedCharacterSheet,
+  });
   await page.locator(".character-variant-grid").waitFor();
   assert.equal(
     await page.locator(".character-variant-grid button").count(),
@@ -167,7 +163,7 @@ try {
     "First character variation",
   );
   await tapCenter(
-    page.getByRole("button", { name: /모습 1로 등록하기/ }),
+    page.getByRole("button", { name: /햇살 독서가로 등록하기/ }),
     "Register selected child character",
   );
   await page.getByText("지온이의 책장", { exact: true }).first().waitFor();
