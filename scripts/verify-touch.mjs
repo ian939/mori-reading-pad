@@ -23,7 +23,12 @@ if (!executablePath) {
   throw new Error("Touch verification requires Chrome. Set CHROME_PATH and retry.");
 }
 
-const browser = await chromium.launch({ headless: true, executablePath });
+const target = process.env.TOUCH_TEST_URL || "http://localhost:5173/mori-reading-pad/";
+const browser = await chromium.launch({
+  headless: true,
+  executablePath,
+  args: ["--use-fake-device-for-media-stream", "--use-fake-ui-for-media-stream"],
+});
 try {
   const context = await browser.newContext({
     viewport: { width: 820, height: 720 },
@@ -33,8 +38,10 @@ try {
     userAgent:
       "Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1",
   });
+  await context.grantPermissions(["microphone"], {
+    origin: new URL(target).origin,
+  });
   const page = await context.newPage();
-  const target = process.env.TOUCH_TEST_URL || "http://localhost:5173/mori-reading-pad/";
   await page.goto(target, { waitUntil: "networkidle" });
 
   const tapCenter = async (locator, label) => {
@@ -53,8 +60,38 @@ try {
   };
 
   await tapCenter(
+    page.getByRole("button", { name: "내 모리" }),
+    "Profile navigation control",
+  );
+  await page.getByRole("heading", { name: "읽기 모험 난이도" }).waitFor();
+  const levelOne = page.getByRole("radio", { name: /Lv\.1/ });
+  const levelTwo = page.getByRole("radio", { name: /Lv\.2/ });
+  assert.equal(await levelOne.getAttribute("aria-checked"), "true");
+  assert.equal(await page.getByRole("radio").count(), 2);
+  await tapCenter(levelTwo, "Level two selection card");
+  assert.equal(await levelTwo.getAttribute("aria-checked"), "true");
+  assert.equal(
+    await page.evaluate(() => localStorage.getItem("mori-quiz-level")),
+    "lv2",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: "오늘" }),
+    "Home navigation control",
+  );
+
+  await tapCenter(
     page.getByRole("button", { name: /모험 시작하기/ }),
     "Quiz start control",
+  );
+  await page.getByRole("heading", { name: /그림을 보며/ }).waitFor();
+  assert.equal(
+    await page.locator(".story-sentences button").count(),
+    8,
+    "The story introduction must match eight sentences to the eight comic panels",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: /줄거리를 읽었어요/ }),
+    "Story introduction continue control",
   );
   await page.getByText("Completion", { exact: true }).waitFor();
   await tapCenter(
@@ -123,6 +160,64 @@ try {
   );
   await page.getByText("3 / 4", { exact: true }).waitFor();
   await page.getByText("생각 말하기 6 / 6", { exact: true }).waitFor();
+  await tapCenter(
+    page.getByRole("button", { name: /줄거리 소리 내어 읽기/ }),
+    "Open recording activity control",
+  );
+  await page.getByRole("heading", { name: /줄거리를 천천히/ }).waitFor();
+  await tapCenter(
+    page.getByRole("button", { name: "녹음 시작하기" }),
+    "Start recording control",
+  );
+  await page.getByText("목소리를 듣고 있어요…", { exact: true }).waitFor();
+  await page.waitForTimeout(800);
+  await tapCenter(
+    page.getByRole("button", { name: "녹음 멈추기" }),
+    "Stop recording control",
+  );
+  await page.locator(".recorder-panel audio").waitFor();
+  await tapCenter(
+    page.getByRole("button", { name: /녹음 저장하고 책장에 꽂기/ }),
+    "Save recording control",
+  );
+  await page.getByRole("heading", { name: "나의 이야기 도감" }).waitFor();
+  assert.equal(await page.getByRole("combobox").count(), 2);
+  await page.getByText(/읽은 날/).waitFor();
+  await tapCenter(
+    page.locator(".catalog-book").first(),
+    "Story catalog book control",
+  );
+  await page.getByRole("heading", { name: "돈이 뭐야?" }).waitFor();
+  assert.equal(await page.locator(".archive-page .story-sentences button").count(), 8);
+  await page.getByText("저장된 목소리가 있어요", { exact: true }).waitFor();
+  await page.locator(".saved-voice audio").waitFor();
+  await tapCenter(
+    page.getByRole("button", { name: /도감으로/ }),
+    "Return to catalog control",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: "내 모리" }),
+    "Profile navigation after catalog",
+  );
+  await tapCenter(
+    page.getByRole("radio", { name: /Lv\.1/ }),
+    "Level one selection card",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: "오늘" }),
+    "Home navigation after level change",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: /모험 시작하기/ }),
+    "Level one quiz start control",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: /줄거리를 읽었어요/ }),
+    "Level one story continue control",
+  );
+  await page.getByText("Lv.1", { exact: true }).waitFor();
+  await page.getByText("내용 찾기", { exact: true }).first().waitFor();
+  await page.getByRole("heading", { name: /오영이의 방에/ }).waitFor();
 
   await page.goto(target, { waitUntil: "networkidle" });
 
