@@ -1095,6 +1095,13 @@ button {
 .feedback.wrong {
   background: #fff0e6;
 }
+.feedback.retry {
+  background: linear-gradient(180deg, #fff4cc 0%, #fffaf0 100%);
+}
+.feedback.retry .feedback-icon {
+  background: #d7832e;
+  box-shadow: 0 9px 0 #f0c961;
+}
 .feedback.reflection {
   background: linear-gradient(#e9f4ee, #fff8df);
 }
@@ -1125,6 +1132,33 @@ button {
 }
 .feedback h1 {
   font-size: 35px;
+}
+.final-answer-callout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  margin: 24px 0 0;
+  padding: 18px;
+  border: 3px solid #e18c68;
+  border-radius: 22px;
+  background: #fff;
+  color: #6f3b2d;
+  box-shadow: 0 8px 0 #f1c7b6;
+  font-size: 20px;
+  font-weight: 900;
+}
+.final-answer-callout strong {
+  color: #b7472a;
+  font-size: clamp(22px, 7vw, 30px);
+  line-height: 1.35;
+}
+.retry-guide {
+  border: 2px solid #f0cc67;
+}
+.retry-guide strong {
+  color: #9b641e;
 }
 .explain {
   background: #fff;

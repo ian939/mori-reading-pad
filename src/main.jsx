@@ -839,6 +839,9 @@ function App() {
   const [quizIndex, setQuizIndex] = useState(0);
   const [choice, setChoice] = useState(null);
   const [answers, setAnswers] = useState([]);
+  const [questionAttempts, setQuestionAttempts] = useState({});
+  const [eliminatedOptions, setEliminatedOptions] = useState({});
+  const [feedbackMode, setFeedbackMode] = useState("final");
   const [draftPages, setDraftPages] = useState([]);
   const [scanState, setScanState] = useState("idle");
   const [registeredBook, setRegisteredBook] = useState(null);
@@ -932,6 +935,9 @@ function App() {
     setQuizIndex(0);
     setChoice(null);
     setAnswers([]);
+    setQuestionAttempts({});
+    setEliminatedOptions({});
+    setFeedbackMode("final");
     go("story-intro", book);
   };
   const beginQuestions = () => setView("quiz");
@@ -947,19 +953,48 @@ function App() {
   const answer = () => {
     const question = selected.questions[quizIndex];
     if (!isQuestionComplete(question, choice)) return;
+    const correct = isQuestionCorrect(question, choice);
+    const attempts = questionAttempts[quizIndex] || 0;
+
+    if (quizLevel === "lv1" && !correct && attempts === 0) {
+      setQuestionAttempts((current) => ({
+        ...current,
+        [quizIndex]: 1,
+      }));
+      if (Number.isInteger(choice)) {
+        setEliminatedOptions((current) => ({
+          ...current,
+          [quizIndex]: [...new Set([...(current[quizIndex] || []), choice])],
+        }));
+      }
+      setFeedbackMode("retry");
+      setView("feedback");
+      return;
+    }
+
+    setQuestionAttempts((current) => ({
+      ...current,
+      [quizIndex]: attempts + 1,
+    }));
+    setFeedbackMode("final");
     setAnswers((current) => [
       ...current,
       {
-        correct: isQuestionCorrect(question, choice),
+        correct,
         reflective: isReflectiveQuestion(question),
       },
     ]);
     setView("feedback");
   };
+  const retryQuestion = () => {
+    setChoice(null);
+    setView("quiz");
+  };
   const next = () => {
     if (quizIndex < selected.questions.length - 1) {
       setQuizIndex((i) => i + 1);
       setChoice(null);
+      setFeedbackMode("final");
       setView("quiz");
     } else {
       const correct = answers.filter(
@@ -1205,6 +1240,7 @@ function App() {
             index={quizIndex}
             choice={choice}
             setChoice={setChoice}
+            eliminatedOptions={eliminatedOptions[quizIndex] || []}
             submit={answer}
             close={() => go("detail")}
           />
@@ -1213,6 +1249,9 @@ function App() {
           <Feedback
             q={selected.questions[quizIndex]}
             choice={choice}
+            level={quizLevel}
+            mode={feedbackMode}
+            retry={retryQuestion}
             next={next}
             last={quizIndex === selected.questions.length - 1}
           />
@@ -1597,7 +1636,15 @@ function StoryComic({ book, interactive = false }) {
   );
 }
 
-function Quiz({ book, index, choice, setChoice, submit, close }) {
+function Quiz({
+  book,
+  index,
+  choice,
+  setChoice,
+  eliminatedOptions,
+  submit,
+  close,
+}) {
   const q = book.questions[index];
   const complete = isQuestionComplete(q, choice);
   const speak = () => {
@@ -1650,10 +1697,20 @@ function Quiz({ book, index, choice, setChoice, submit, close }) {
         )}
         {(questionKind(q) === "choice" ||
           questionKind(q) === "image-choice") && (
-          <ChoiceQuestion q={q} choice={choice} setChoice={setChoice} />
+          <ChoiceQuestion
+            q={q}
+            choice={choice}
+            setChoice={setChoice}
+            eliminatedOptions={eliminatedOptions}
+          />
         )}
         {questionKind(q) === "completion" && (
-          <CompletionQuestion q={q} choice={choice} setChoice={setChoice} />
+          <CompletionQuestion
+            q={q}
+            choice={choice}
+            setChoice={setChoice}
+            eliminatedOptions={eliminatedOptions}
+          />
         )}
         {isReflectiveQuestion(q) && (
           <ReflectionQuestion q={q} choice={choice} setChoice={setChoice} />
@@ -1678,7 +1735,12 @@ function Quiz({ book, index, choice, setChoice, submit, close }) {
   );
 }
 
-function CompletionQuestion({ q, choice, setChoice }) {
+function CompletionQuestion({
+  q,
+  choice,
+  setChoice,
+  eliminatedOptions = [],
+}) {
   const [beforeBlank, afterBlank = ""] = q.sentence.split("____");
   const selectedWord = Number.isInteger(choice) ? q.options[choice] : "?";
   return (
@@ -1694,7 +1756,12 @@ function CompletionQuestion({ q, choice, setChoice }) {
         </strong>
         {afterBlank}
       </p>
-      <ChoiceQuestion q={q} choice={choice} setChoice={setChoice} />
+      <ChoiceQuestion
+        q={q}
+        choice={choice}
+        setChoice={setChoice}
+        eliminatedOptions={eliminatedOptions}
+      />
     </div>
   );
 }
@@ -1742,21 +1809,23 @@ function ReflectionQuestion({ q, choice, setChoice }) {
   );
 }
 
-function ChoiceQuestion({ q, choice, setChoice }) {
+function ChoiceQuestion({ q, choice, setChoice, eliminatedOptions = [] }) {
   return (
     <div className="options">
-      {q.options.map((option, optionIndex) => (
-        <button
-          key={option}
-          className={choice === optionIndex ? "selected" : ""}
-          aria-pressed={choice === optionIndex}
-          onClick={() => setChoice(optionIndex)}
-        >
-          <span>{String.fromCharCode(65 + optionIndex)}</span>
-          {option}
-          {choice === optionIndex && <Check size={20} />}
-        </button>
-      ))}
+      {q.options.map((option, optionIndex) =>
+        eliminatedOptions.includes(optionIndex) ? null : (
+          <button
+            key={option}
+            className={choice === optionIndex ? "selected" : ""}
+            aria-pressed={choice === optionIndex}
+            onClick={() => setChoice(optionIndex)}
+          >
+            <span>{String.fromCharCode(65 + optionIndex)}</span>
+            {option}
+            {choice === optionIndex && <Check size={20} />}
+          </button>
+        ),
+      )}
     </div>
   );
 }
@@ -1882,7 +1951,34 @@ function MatchQuestion({ q, choice, setChoice }) {
   );
 }
 
-function Feedback({ q, choice, next, last }) {
+function Feedback({ q, choice, level, mode, retry, next, last }) {
+  if (mode === "retry") {
+    const resetWholeAnswer = ["match", "sequence"].includes(questionKind(q));
+    return (
+      <div className="feedback retry" role="status" aria-live="polite">
+        <div className="confetti">⌁</div>
+        <div className="feedback-icon"><RotateCcw /></div>
+        <span className="eyebrow">한 번 더 기회!</span>
+        <h1>다시 한번 생각해 볼까?</h1>
+        <div className="explain retry-guide">
+          <strong>
+            {resetWholeAnswer
+              ? "처음부터 다시 맞춰 봐요"
+              : "오답 하나를 지웠어요"}
+          </strong>
+          <p>
+            {resetWholeAnswer
+              ? "방금 만든 답을 초기화했어요. 책 속 장면을 천천히 떠올리며 다시 이어 봐요."
+              : "방금 고른 답은 이제 보이지 않아요. 책 속 장면을 떠올리고 남은 답에서 골라 봐요."}
+          </p>
+        </div>
+        <button className="primary wide" onClick={retry}>
+          다시 골라보기 <RotateCcw />
+        </button>
+      </div>
+    );
+  }
+
   if (isReflectiveQuestion(q)) {
     return (
       <div className="feedback reflection">
@@ -1904,18 +2000,44 @@ function Feedback({ q, choice, next, last }) {
     );
   }
   const ok = isQuestionCorrect(q, choice);
+  const showLv1Answer = level === "lv1" && !ok;
   return (
     <div className={`feedback ${ok ? "correct" : "wrong"}`}>
       <div className="confetti">{ok ? "✦  ·  ✦" : "⌁"}</div>
       <div className="feedback-icon">{ok ? <Check /> : <RotateCcw />}</div>
       <span className="eyebrow">
-        {ok ? "멋진 발견!" : "한 번 더 생각했구나!"}
+        {ok
+          ? "멋진 발견!"
+          : showLv1Answer
+            ? "정답을 함께 확인해요"
+            : "한 번 더 생각했구나!"}
       </span>
-      <h1>{ok ? "정답이에요!" : "괜찮아요, 단서를 찾았어요."}</h1>
+      <h1>
+        {ok
+          ? "정답이에요!"
+          : showLv1Answer
+            ? "정답을 알려 줄게요."
+            : "괜찮아요, 단서를 찾았어요."}
+      </h1>
+      {showLv1Answer && (
+        <div className="final-answer-callout">
+          <span>정답은</span>
+          <strong>{answerLabel(q)}</strong>
+          <span>이야.</span>
+        </div>
+      )}
       <div className="explain">
-        <strong>{ok ? "왜 그럴까요?" : "책 속 단서"}</strong>
+        <strong>
+          {ok
+            ? "왜 그럴까요?"
+            : showLv1Answer
+              ? "왜 이 답일까요?"
+              : "책 속 단서"}
+        </strong>
         <p>{q.why}</p>
-        {!ok && <small className="answer-reveal">정답: {answerLabel(q)}</small>}
+        {!ok && !showLv1Answer && (
+          <small className="answer-reveal">정답: {answerLabel(q)}</small>
+        )}
       </div>
       <button className="primary wide" onClick={next}>
         {last ? "모험 마치기" : "다음 문제"} <ChevronRight />

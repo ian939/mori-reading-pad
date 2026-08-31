@@ -219,6 +219,60 @@ try {
   await page.getByText("내용 찾기", { exact: true }).first().waitFor();
   await page.getByRole("heading", { name: /오영이의 방에/ }).waitFor();
 
+  await tapCenter(
+    page.getByRole("button", { name: /노래하는 라디오/ }),
+    "Level one first wrong answer",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: "정답 확인하기" }),
+    "Level one first attempt submit control",
+  );
+  await page
+    .getByRole("heading", { name: "다시 한번 생각해 볼까?" })
+    .waitFor();
+  await page.getByText("오답 하나를 지웠어요", { exact: true }).waitFor();
+  assert.equal(
+    await page.getByText("말하는 저금통 또보", { exact: true }).count(),
+    0,
+    "The first retry screen must not reveal the correct answer",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: /다시 골라보기/ }),
+    "Level one retry control",
+  );
+  assert.equal(
+    await page.getByRole("button", { name: /노래하는 라디오/ }).count(),
+    0,
+    "The selected wrong option must be removed on the second attempt",
+  );
+  assert.equal(
+    await page.locator(".options button").count(),
+    3,
+    "Exactly one wrong option must be removed",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: /커다란 공룡/ }),
+    "Level one second wrong answer",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: "정답 확인하기" }),
+    "Level one second attempt submit control",
+  );
+  await page
+    .getByRole("heading", { name: "정답을 알려 줄게요." })
+    .waitFor();
+  await page
+    .locator(".final-answer-callout")
+    .getByText("말하는 저금통 또보", { exact: true })
+    .waitFor();
+  await page
+    .getByText(
+      "이야기의 시작에서 저금통 또보가 오영이 방에 찾아왔어요.",
+      { exact: true },
+    )
+    .waitFor();
+  await page.getByRole("button", { name: /다음 문제/ }).waitFor();
+
   await page.goto(target, { waitUntil: "networkidle" });
 
   const bookCapture = page.getByRole("button", { name: "책 찍기" });
