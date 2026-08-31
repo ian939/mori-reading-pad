@@ -69,6 +69,16 @@ button {
   position: relative;
   padding-bottom: 92px;
   overflow: hidden;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-break: strict;
+}
+.app :where(h1, h2, h3, p, button, strong, small, span, figcaption, li, dt, dd) {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+.app :where(h1, h2, h3, p, figcaption) {
+  text-wrap: pretty;
 }
 .topbar {
   height: 72px;
@@ -1743,7 +1753,7 @@ button {
 }
 .registration-result dd {
   margin: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   font-size: 12px;
   font-weight: 800;
 }

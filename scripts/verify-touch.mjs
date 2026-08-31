@@ -260,6 +260,24 @@ try {
   await page.getByText("Lv.1", { exact: true }).waitFor();
   await page.getByText("내용 찾기", { exact: true }).first().waitFor();
   await page.getByRole("heading", { name: /오영이의 방에/ }).waitFor();
+  const quizWrappingRules = await page.evaluate(() => {
+    const selectors = [".quiz-body h1", ".options button"];
+    return selectors.map((selector) => {
+      const style = getComputedStyle(document.querySelector(selector));
+      return {
+        selector,
+        wordBreak: style.wordBreak,
+        overflowWrap: style.overflowWrap,
+      };
+    });
+  });
+  assert.ok(
+    quizWrappingRules.every(
+      ({ wordBreak, overflowWrap }) =>
+        wordBreak === "keep-all" && overflowWrap === "break-word",
+    ),
+    `Child-facing text must wrap by word: ${JSON.stringify(quizWrappingRules)}`,
+  );
 
   await tapCenter(
     page.getByRole("button", { name: /노래하는 라디오/ }),
