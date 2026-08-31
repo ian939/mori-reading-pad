@@ -42,6 +42,7 @@ try {
     origin: new URL(target).origin,
   });
   const page = await context.newPage();
+  const touchCdp = await context.newCDPSession(page);
   await page.goto(target, { waitUntil: "networkidle" });
 
   const tapCenter = async (locator, label) => {
@@ -56,6 +57,47 @@ try {
       box.x + box.width / 2,
       box.y + box.height / 2,
     );
+    await page.waitForTimeout(400);
+  };
+
+  const dragTouch = async (from, to, label) => {
+    await from.scrollIntoViewIfNeeded();
+    await to.scrollIntoViewIfNeeded();
+    const fromBox = await from.boundingBox();
+    const toBox = await to.boundingBox();
+    assert.ok(fromBox && toBox, `${label} must have two touchable endpoints`);
+    const start = {
+      x: fromBox.x + fromBox.width - 8,
+      y: fromBox.y + fromBox.height / 2,
+    };
+    const end = {
+      x: toBox.x + toBox.width / 2,
+      y: toBox.y + toBox.height / 2,
+    };
+    const touchPoint = (point) => ({
+      ...point,
+      radiusX: 8,
+      radiusY: 8,
+      force: 1,
+    });
+    await touchCdp.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [touchPoint(start)],
+    });
+    for (let step = 1; step <= 6; step += 1) {
+      const point = {
+        x: start.x + ((end.x - start.x) * step) / 6,
+        y: start.y + ((end.y - start.y) * step) / 6,
+      };
+      await touchCdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [touchPoint(point)],
+      });
+    }
+    await touchCdp.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
     await page.waitForTimeout(400);
   };
 
@@ -230,7 +272,18 @@ try {
   await page
     .getByRole("heading", { name: "다시 한번 생각해 볼까?" })
     .waitFor();
-  await page.getByText("오답 하나를 지웠어요", { exact: true }).waitFor();
+  await page
+    .getByRole("heading", {
+      name: "오영이의 방에 불쑥 들어온 친구는 누구였나요?",
+    })
+    .waitFor();
+  await page.getByText("노래하는 라디오", { exact: true }).waitFor();
+  await page
+    .getByText(
+      "노래하는 라디오는 이야기 속에 등장하지 않았어요. 방에 들어온 친구의 생김새와 말을 떠올려 봐요.",
+      { exact: true },
+    )
+    .waitFor();
   assert.equal(
     await page.getByText("말하는 저금통 또보", { exact: true }).count(),
     0,
@@ -272,6 +325,90 @@ try {
     )
     .waitFor();
   await page.getByRole("button", { name: /다음 문제/ }).waitFor();
+
+  await tapCenter(
+    page.getByRole("button", { name: /다음 문제/ }),
+    "Next control after level one answer feedback",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: /동전은 둥글고 단단하며/ }),
+    "Level one second question answer",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: "정답 확인하기" }),
+    "Level one second question submit",
+  );
+  await page.getByRole("heading", { name: "정답이에요!" }).waitFor();
+  await tapCenter(
+    page.getByRole("button", { name: /다음 문제/ }),
+    "Next control before vocabulary question",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: /물건을 살 때 필요한 돈/ }),
+    "Level one vocabulary answer",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: "정답 확인하기" }),
+    "Level one vocabulary submit",
+  );
+  await page.getByRole("heading", { name: "정답이에요!" }).waitFor();
+  await tapCenter(
+    page.getByRole("button", { name: /다음 문제/ }),
+    "Next control before touch matching",
+  );
+  await page
+    .getByRole("heading", { name: /이야기 속 행동과 돈의 쓰임/ })
+    .waitFor();
+  const matchBoard = page.locator(".match-board");
+  await matchBoard.scrollIntoViewIfNeeded();
+  await dragTouch(
+    page.getByRole("button", { name: /사탕을 산다/ }),
+    page.getByRole("button", { name: "서비스를 이용해요" }),
+    "Candy to incorrect service touch connection",
+  );
+  await dragTouch(
+    page.getByRole("button", { name: /놀이기구를 탄다/ }),
+    page.getByRole("button", { name: "물건을 사요" }),
+    "Ride to incorrect goods touch connection",
+  );
+  await dragTouch(
+    page.getByRole("button", { name: /집안일을 돕고 용돈을 받는다/ }),
+    page.getByRole("button", { name: "일을 하고 돈을 벌어요" }),
+    "Chores to earning touch connection",
+  );
+  assert.equal(
+    await page.locator(".match-line.complete").count(),
+    3,
+    "Three visible lines must connect the completed matching answer",
+  );
+  assert.equal(
+    await page.getByRole("button", { name: "정답 확인하기" }).isEnabled(),
+    true,
+    "Completing all touch-drawn lines must enable answer submission",
+  );
+  await page.getByRole("button", { name: "정답 확인하기" }).click();
+  await page.locator(".feedback h1").waitFor();
+  assert.equal(
+    await page.locator(".feedback h1").textContent(),
+    "다시 한번 생각해 볼까?",
+    "An incorrect touch match must open the level one retry feedback",
+  );
+  await page
+    .getByText("사탕을 산다 → 서비스를 이용해요", { exact: true })
+    .waitFor();
+  await page
+    .getByText(
+      "사탕은 손에 들고 먹을 수 있는 물건이에요. 그래서 “물건을 사요”와 이어져요.",
+      { exact: true },
+    )
+    .waitFor();
+  await tapCenter(
+    page.getByRole("button", { name: /다시 골라보기/ }),
+    "Touch matching retry control",
+  );
+  await page.waitForFunction(
+    () => document.querySelectorAll(".match-line.complete").length === 0,
+  );
 
   await page.goto(target, { waitUntil: "networkidle" });
 

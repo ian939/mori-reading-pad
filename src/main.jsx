@@ -63,6 +63,11 @@ const LEVEL_1_QUESTIONS = {
       options: ["말하는 저금통 또보", "노래하는 라디오", "커다란 공룡", "사탕 가게 주인"],
       answer: 0,
       why: "이야기의 시작에서 저금통 또보가 오영이 방에 찾아왔어요.",
+      wrongWhy: {
+        1: "노래하는 라디오는 이야기 속에 등장하지 않았어요. 방에 들어온 친구의 생김새와 말을 떠올려 봐요.",
+        2: "커다란 공룡은 오영이의 방에 찾아오지 않았어요. 돈을 모을 수 있는 물건처럼 생긴 친구였어요.",
+        3: "사탕 가게 주인은 오영이의 방에 들어오지 않았어요. 오영이에게 돈 이야기를 들려준 친구를 떠올려 봐요.",
+      },
     },
     {
       kind: "choice",
@@ -77,6 +82,11 @@ const LEVEL_1_QUESTIONS = {
       ],
       answer: 0,
       why: "또보는 둥글고 단단한 동전과 네모난 지폐를 보여 주었어요.",
+      wrongWhy: {
+        1: "동전과 지폐는 똑같은 세모 모양이 아니에요. 두 돈의 서로 다른 모양을 떠올려 봐요.",
+        2: "동전과 지폐의 재료를 서로 바꾸어 말했어요. 손으로 만졌을 때 단단한 돈이 무엇인지 생각해 봐요.",
+        3: "동전과 지폐에는 돈의 가치를 알려 주는 숫자가 적혀 있어요.",
+      },
     },
     {
       kind: "choice",
@@ -86,6 +96,11 @@ const LEVEL_1_QUESTIONS = {
       options: ["물건의 무게", "물건을 살 때 필요한 돈", "만든 사람의 나이", "가게 문 닫는 시간"],
       answer: 1,
       why: "가격은 그 물건을 사려면 돈이 얼마나 필요한지 알려 줘요.",
+      wrongWhy: {
+        0: "무게는 물건이 얼마나 무거운지를 알려 주지만, 살 때 필요한 돈을 알려 주지는 않아요.",
+        2: "만든 사람의 나이는 물건을 사는 데 필요한 돈의 양과 관계가 없어요.",
+        3: "가게 문 닫는 시간은 영업시간이고, 물건에 붙은 가격의 뜻은 아니에요.",
+      },
     },
     {
       kind: "match",
@@ -104,6 +119,11 @@ const LEVEL_1_QUESTIONS = {
       ],
       answer: { candy: "goods", ride: "service", chores: "earn" },
       why: "돈으로 물건을 사거나 서비스를 이용할 수 있고, 일을 한 대가로 돈을 벌기도 해요.",
+      matchWhy: {
+        candy: "사탕은 손에 들고 먹을 수 있는 물건이에요.",
+        ride: "놀이기구를 타는 것은 시설이 주는 서비스를 이용하는 일이에요.",
+        chores: "집안일을 돕고 용돈을 받는 것은 일을 한 대가로 돈을 버는 일이에요.",
+      },
     },
     {
       kind: "choice",
@@ -118,6 +138,11 @@ const LEVEL_1_QUESTIONS = {
       ],
       answer: 1,
       why: "친구들이 마음대로 그린 가짜 돈은 사용할 수 없고, 진짜 돈은 일을 한 대가로 얻어요.",
+      wrongWhy: {
+        0: "색연필의 길이는 그린 돈을 사용할 수 없는 까닭과 관계가 없어요.",
+        2: "종이의 크기가 커도 마음대로 그린 돈은 진짜 돈이 되지 않아요.",
+        3: "친구들이 숫자를 아는지는 그린 돈이 가짜라는 사실과 관계가 없어요.",
+      },
     },
     {
       kind: "sequence",
@@ -143,6 +168,11 @@ const LEVEL_1_QUESTIONS = {
       options: ["사탕의 가격과 내가 가진 돈", "강아지의 꼬리 길이", "가게 지붕의 색깔", "구름이 움직이는 방향"],
       answer: 0,
       why: "물건을 사기 전에는 가격을 보고 내가 가진 돈으로 살 수 있는지 확인해야 해요.",
+      wrongWhy: {
+        1: "강아지의 꼬리 길이는 사탕을 살 수 있는지 판단하는 데 필요한 정보가 아니에요.",
+        2: "가게 지붕의 색깔을 알아도 사탕을 살 돈이 충분한지는 알 수 없어요.",
+        3: "구름의 움직임은 사탕의 값이나 아이가 가진 돈과 관계가 없어요.",
+      },
     },
     {
       kind: "choice",
@@ -152,6 +182,11 @@ const LEVEL_1_QUESTIONS = {
       options: ["1개", "5개", "10개", "100개"],
       answer: 2,
       why: "100원이 10번 모이면 1,000원이므로 사탕 10개를 살 수 있어요.",
+      wrongWhy: {
+        0: "사탕 1개에는 100원만 필요해서 1,000원 중 많은 돈이 남아요.",
+        1: "사탕 5개는 500원이에요. 1,000원으로는 그보다 더 살 수 있어요.",
+        3: "사탕 100개에는 10,000원이 필요해서 1,000원으로는 살 수 없어요.",
+      },
     },
     {
       kind: "choice",
@@ -161,6 +196,11 @@ const LEVEL_1_QUESTIONS = {
       options: ["몰래 가져온다", "필요한 만큼 차근차근 모은다", "아무 물건이나 산다", "가격표를 떼어 낸다"],
       answer: 1,
       why: "이야기처럼 목표를 정하고 저축하면 기다림과 선택을 배울 수 있어요.",
+      wrongWhy: {
+        0: "돈을 내지 않고 몰래 가져오는 것은 다른 사람의 물건을 훔치는 행동이에요.",
+        2: "아무 물건이나 사면 원하는 장난감을 살 돈을 모으기 더 어려워져요.",
+        3: "가격표를 떼어도 장난감의 가격이나 필요한 돈은 달라지지 않아요.",
+      },
     },
     {
       kind: "choice",
@@ -175,6 +215,11 @@ const LEVEL_1_QUESTIONS = {
       ],
       answer: 1,
       why: "이 책은 돈을 버는 방법과 돈의 쓰임, 그리고 저축을 함께 알려 줘요.",
+      wrongWhy: {
+        0: "책에서는 마음대로 그린 돈은 가짜라서 사용할 수 없다고 했어요.",
+        2: "돈은 장난감 친구뿐 아니라 물건과 서비스를 이용하는 사람 모두에게 필요해요.",
+        3: "돈의 가치는 크기가 아니라 돈에 적힌 금액으로 정해져요.",
+      },
     },
   ],
   origin: [
@@ -186,6 +231,11 @@ const LEVEL_1_QUESTIONS = {
       options: ["음식이 어디서 왔는지", "자동차가 빠른 이유", "별이 빛나는 이유", "집을 짓는 방법"],
       answer: 0,
       why: "친구들은 마트의 맛있는 음식이 어디에서 왔는지 궁금해했어요.",
+      wrongWhy: {
+        1: "친구들이 처음 궁금해한 것은 자동차의 속도가 아니었어요. 마트에서 본 것들을 떠올려 봐요.",
+        2: "별은 우주 친구들에게 익숙하지만, 지구에서 처음 궁금해한 대상은 아니었어요.",
+        3: "친구들은 집을 짓는 방법보다 마트에 놓인 것들의 출발점을 궁금해했어요.",
+      },
     },
     {
       kind: "choice",
@@ -195,6 +245,11 @@ const LEVEL_1_QUESTIONS = {
       options: ["흙에 심은 작은 씨앗", "마트의 계산대", "식탁 위 접시", "냉장고 안"],
       answer: 0,
       why: "배추는 밭의 흙에 심은 작은 씨앗에서 여행을 시작해요.",
+      wrongWhy: {
+        1: "마트 계산대는 배추 여행의 마지막에 가까운 곳이지 시작점이 아니에요.",
+        2: "식탁 위 접시는 배추가 여러 과정을 거친 뒤 도착하는 곳이에요.",
+        3: "냉장고는 다 자란 배추를 보관하는 곳이라 여행이 시작되는 곳이 아니에요.",
+      },
     },
     {
       kind: "choice",
@@ -204,6 +259,11 @@ const LEVEL_1_QUESTIONS = {
       options: ["음식을 만드는 데 쓰는 것", "음식을 파는 사람", "음식을 담는 방", "음식을 먹는 시간"],
       answer: 0,
       why: "재료는 다른 물건이나 음식을 만들 때 바탕으로 쓰는 것이에요.",
+      wrongWhy: {
+        1: "음식을 파는 사람은 사람을 가리키고, ‘재료’는 음식을 만드는 데 들어가는 것을 가리켜요.",
+        2: "음식을 담는 방은 장소이고, ‘재료’는 만들 때 사용하는 것을 뜻해요.",
+        3: "음식을 먹는 시간은 때를 나타내므로 ‘재료’의 뜻과 달라요.",
+      },
     },
     {
       kind: "match",
@@ -222,6 +282,11 @@ const LEVEL_1_QUESTIONS = {
       ],
       answer: { cabbage: "field", egg: "chicken", milk: "cow" },
       why: "배추는 밭에서, 달걀은 닭을 기르는 양계장에서, 우유는 젖소 농장에서 출발해요.",
+      matchWhy: {
+        cabbage: "배추는 흙에 심은 씨앗에서 자라는 채소예요.",
+        egg: "달걀은 닭이 낳기 때문에 닭을 기르는 곳에서 출발해요.",
+        milk: "우유는 젖소에게서 얻어요.",
+      },
     },
     {
       kind: "choice",
@@ -231,6 +296,11 @@ const LEVEL_1_QUESTIONS = {
       options: ["우유로 치즈를 만들기 위해서", "트럭의 색을 바꾸기 위해서", "젖소에게 우유를 돌려주기 위해서", "밭에 우유를 뿌리기 위해서"],
       answer: 0,
       why: "젖소에게서 얻은 우유는 공장에서 치즈를 만드는 중요한 재료가 돼요.",
+      wrongWhy: {
+        1: "우유를 공장으로 보내는 목적은 트럭의 색을 바꾸는 일이 아니에요.",
+        2: "젖소에게 돌려주려는 것이 아니라, 모은 우유로 새로운 음식을 만들려고 옮겨요.",
+        3: "우유는 밭에 뿌리는 물이 아니라 치즈를 만드는 재료로 사용돼요.",
+      },
     },
     {
       kind: "sequence",
@@ -261,6 +331,11 @@ const LEVEL_1_QUESTIONS = {
       ],
       answer: 0,
       why: "농장에서 모은 우유는 상하지 않도록 차갑게 운반되어 치즈 같은 음식의 재료가 돼요.",
+      wrongWhy: {
+        1: "농부는 모은 우유를 버리지 않고 음식의 재료로 쓰기 위해 옮겨요.",
+        2: "젖소가 아니라 젖소에게서 얻은 우유가 냉장 트럭에 실려 이동해요.",
+        3: "우유통은 배추를 심는 도구가 아니며, 그림에서는 트럭에 실리고 있어요.",
+      },
     },
     {
       kind: "choice",
@@ -275,6 +350,11 @@ const LEVEL_1_QUESTIONS = {
       ],
       answer: 0,
       why: "서로 다른 곳에서 온 재료들이 모여 하나의 샌드위치가 돼요.",
+      wrongWhy: {
+        1: "재료들은 농장으로 돌아가려는 것이 아니라 한곳에 모여 음식이 돼요.",
+        2: "재료들이 모인 까닭은 무게를 겨루기 위해서가 아니에요.",
+        3: "마트 문을 닫는 일은 여러 재료가 한곳에 모인 까닭과 관계가 없어요.",
+      },
     },
     {
       kind: "choice",
@@ -284,6 +364,11 @@ const LEVEL_1_QUESTIONS = {
       options: ["사과는 어디에서 자랐나요?", "병은 무슨 색인가요?", "누가 먼저 마실까요?", "냉장고는 얼마나 큰가요?"],
       answer: 0,
       why: "재료의 출발점을 물으면 음식이 우리에게 오는 과정을 추적할 수 있어요.",
+      wrongWhy: {
+        1: "병의 색깔을 알아도 주스의 재료인 사과가 어디서 왔는지는 알 수 없어요.",
+        2: "마시는 순서는 정할 수 있지만 사과 주스의 출발점을 찾는 질문은 아니에요.",
+        3: "냉장고의 크기는 주스를 보관하는 곳에 대한 정보이지 사과의 고향에 대한 정보가 아니에요.",
+      },
     },
     {
       kind: "choice",
@@ -298,6 +383,11 @@ const LEVEL_1_QUESTIONS = {
       ],
       answer: 1,
       why: "책은 여러 음식이 어디서 시작해 어떤 과정을 거쳐 식탁에 오는지 보여 줘요.",
+      wrongWhy: {
+        0: "책에서는 음식이 마트에서 생기는 것이 아니라 농장과 공장에서 온다고 알려 줘요.",
+        2: "색깔이 같은 음식도 재료와 출발점은 서로 다를 수 있어요.",
+        3: "트럭은 밭에서 자라는 것이 아니라 다 자란 재료와 완성된 음식을 옮겨요.",
+      },
     },
   ],
 };
@@ -332,7 +422,7 @@ const DEFAULT_BOOKS = [
       name: "저금통 또보",
       fact: "동전을 차곡차곡 모으는 든든한 저금통 친구",
     },
-    quizVersion: 3,
+    quizVersion: 4,
     questions: [
       {
         kind: "completion",
@@ -472,7 +562,7 @@ const DEFAULT_BOOKS = [
   },
   {
     id: "origin",
-    quizVersion: 3,
+    quizVersion: 4,
     title: "우리가 어디서 왔게?",
     tag: "자연 · 음식",
     cover: asset("assets/origin-cover-v2.png"),
@@ -705,6 +795,50 @@ const answerLabel = (question) => {
   return question.options[question.answer];
 };
 
+const wrongAnswerDetails = (question, response) => {
+  const kind = questionKind(question);
+
+  if (kind === "sequence") {
+    const wrongIndex = question.answer.findIndex(
+      (itemId, index) => response?.[index] !== itemId,
+    );
+    const selectedItem = question.items.find(
+      (item) => item.id === response?.[wrongIndex],
+    );
+    const expectedItem = question.items.find(
+      (item) => item.id === question.answer[wrongIndex],
+    );
+    return {
+      selected: `${wrongIndex + 1}번째: ${selectedItem?.label || "고른 장면"}`,
+      reason: `이 장면은 ${wrongIndex + 1}번째보다 뒤에 일어나요. ${expectedItem?.label || "그보다 먼저 일어난 장면"}을 먼저 찾아볼까요?`,
+    };
+  }
+
+  if (kind === "match") {
+    const wrongLeft = question.leftItems.find(
+      (item) => response?.pairs?.[item.id] !== question.answer[item.id],
+    );
+    const selectedRight = question.rightItems.find(
+      (item) => item.id === response?.pairs?.[wrongLeft?.id],
+    );
+    const expectedRight = question.rightItems.find(
+      (item) => item.id === question.answer[wrongLeft?.id],
+    );
+    return {
+      selected: `${wrongLeft?.label || "고른 카드"} → ${selectedRight?.label || "고른 짝"}`,
+      reason: `${question.matchWhy?.[wrongLeft?.id] || "두 카드가 나타내는 뜻이 서로 달라요."} 그래서 “${expectedRight?.label || "다른 뜻 카드"}”와 이어져요.`,
+    };
+  }
+
+  const selected = question.options?.[response] || "고른 답";
+  return {
+    selected,
+    reason:
+      question.wrongWhy?.[response] ||
+      `“${selected}”은 문제에서 묻는 내용과 맞지 않아요. 문제의 핵심 낱말과 책 속 장면을 다시 비교해 봐요.`,
+  };
+};
+
 const spokenPrompt = (question) => {
   const kind = questionKind(question);
   if (isReflectiveQuestion(question)) {
@@ -751,7 +885,7 @@ const loadBooks = () => {
       const validLevel2 =
         Array.isArray(reviewed?.questions) &&
         reviewed.questions.length === book.questions.length &&
-        [2, 3].includes(reviewed.quizVersion);
+        [2, 3, 4].includes(reviewed.quizVersion);
       const defaultLevel1 = LEVEL_1_QUESTIONS[book.id];
       const validLevel1 =
         Array.isArray(reviewed?.level1Questions) &&
@@ -1879,22 +2013,113 @@ function SequenceQuestion({ q, choice, setChoice }) {
 
 function MatchQuestion({ q, choice, setChoice }) {
   const response = choice?.pairs ? choice : { active: null, pairs: {} };
+  const boardRef = useRef(null);
+  const leftRefs = useRef(new Map());
+  const rightRefs = useRef(new Map());
+  const [dragLine, setDragLine] = useState(null);
+  const [connectionLines, setConnectionLines] = useState([]);
+
+  const updateConnectionLines = () => {
+    const board = boardRef.current;
+    if (!board) return;
+    const boardRect = board.getBoundingClientRect();
+    const lines = Object.entries(response.pairs)
+      .map(([leftId, rightId]) => {
+        const leftRect = leftRefs.current.get(leftId)?.getBoundingClientRect();
+        const rightRect = rightRefs.current.get(rightId)?.getBoundingClientRect();
+        if (!leftRect || !rightRect) return null;
+        return {
+          id: leftId,
+          start: {
+            x: leftRect.right - boardRect.left,
+            y: leftRect.top + leftRect.height / 2 - boardRect.top,
+          },
+          end: {
+            x: rightRect.left - boardRect.left,
+            y: rightRect.top + rightRect.height / 2 - boardRect.top,
+          },
+        };
+      })
+      .filter(Boolean);
+    setConnectionLines(lines);
+  };
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(updateConnectionLines);
+    const resizeObserver = new ResizeObserver(updateConnectionLines);
+    if (boardRef.current) resizeObserver.observe(boardRef.current);
+    window.addEventListener("resize", updateConnectionLines);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateConnectionLines);
+    };
+  }, [choice?.pairs, q]);
+
   const selectLeft = (leftId) => {
     setChoice((current) => ({
       active: leftId,
       pairs: current?.pairs || {},
     }));
   };
-  const selectRight = (rightId) => {
-    if (!response.active) return;
+  const connectPair = (leftId, rightId) => {
+    if (!leftId || !rightId) return;
     setChoice((current) => {
       const pairs = { ...(current?.pairs || {}) };
       Object.keys(pairs).forEach((leftId) => {
         if (pairs[leftId] === rightId) delete pairs[leftId];
       });
-      pairs[current.active] = rightId;
+      pairs[leftId] = rightId;
       return { active: null, pairs };
     });
+  };
+  const selectRight = (rightId) => connectPair(response.active, rightId);
+  const pointInBoard = (clientX, clientY) => {
+    const boardRect = boardRef.current?.getBoundingClientRect();
+    if (!boardRect) return { x: 0, y: 0 };
+    return {
+      x: clientX - boardRect.left,
+      y: clientY - boardRect.top,
+    };
+  };
+  const startConnection = (event, leftId) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    event.preventDefault();
+    const leftRect = event.currentTarget.getBoundingClientRect();
+    const boardRect = boardRef.current?.getBoundingClientRect();
+    if (!boardRect) return;
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    selectLeft(leftId);
+    setDragLine({
+      pointerId: event.pointerId,
+      leftId,
+      start: {
+        x: leftRect.right - boardRect.left,
+        y: leftRect.top + leftRect.height / 2 - boardRect.top,
+      },
+      end: pointInBoard(event.clientX, event.clientY),
+    });
+  };
+  const moveConnection = (event) => {
+    setDragLine((current) =>
+      current?.pointerId === event.pointerId
+        ? { ...current, end: pointInBoard(event.clientX, event.clientY) }
+        : current,
+    );
+  };
+  const finishConnection = (event) => {
+    if (!dragLine || dragLine.pointerId !== event.pointerId) return;
+    const dropTarget = document
+      .elementFromPoint(event.clientX, event.clientY)
+      ?.closest("[data-match-right-id]");
+    if (dropTarget && boardRef.current?.contains(dropTarget)) {
+      connectPair(dragLine.leftId, dropTarget.dataset.matchRightId);
+    }
+    setDragLine(null);
+  };
+  const connectionPath = (start, end) => {
+    const middleX = start.x + (end.x - start.x) / 2;
+    return `M ${start.x} ${start.y} C ${middleX} ${start.y}, ${middleX} ${end.y}, ${end.x} ${end.y}`;
   };
   const usedRightIds = Object.values(response.pairs);
 
@@ -1902,9 +2127,30 @@ function MatchQuestion({ q, choice, setChoice }) {
     <div className="match-question">
       <div className="interaction-help">
         <span>1</span>
-        왼쪽 카드를 누른 뒤 어울리는 오른쪽 카드를 눌러 주세요.
+        왼쪽 카드의 점에서 알맞은 오른쪽 카드까지 손가락으로 선을 그어 주세요.
       </div>
-      <div className="match-board">
+      <div
+        className={`match-board ${dragLine ? "drawing" : ""}`}
+        ref={boardRef}
+        onPointerMove={moveConnection}
+        onPointerUp={finishConnection}
+        onPointerCancel={() => setDragLine(null)}
+      >
+        <svg className="match-lines" aria-hidden="true">
+          {connectionLines.map((line) => (
+            <path
+              key={line.id}
+              className="match-line complete"
+              d={connectionPath(line.start, line.end)}
+            />
+          ))}
+          {dragLine && (
+            <path
+              className="match-line preview"
+              d={connectionPath(dragLine.start, dragLine.end)}
+            />
+          )}
+        </svg>
         <div className="match-column" aria-label="연결할 이야기 카드">
           {q.leftItems.map((item) => {
             const paired = q.rightItems.find(
@@ -1913,27 +2159,42 @@ function MatchQuestion({ q, choice, setChoice }) {
             return (
               <button
                 key={item.id}
-                className={response.active === item.id ? "active" : ""}
+                ref={(element) => {
+                  if (element) leftRefs.current.set(item.id, element);
+                  else leftRefs.current.delete(item.id);
+                }}
+                className={`${response.active === item.id ? "active" : ""} ${paired ? "paired" : ""}`}
                 aria-pressed={response.active === item.id}
-                onClick={() => selectLeft(item.id)}
+                aria-label={`${item.label}, 오른쪽 카드로 선 긋기`}
+                onPointerDown={(event) => startConnection(event, item.id)}
+                onClick={(event) => {
+                  if (event.detail === 0) selectLeft(item.id);
+                }}
               >
                 <span aria-hidden="true">{item.emoji}</span>
                 <strong>{item.label}</strong>
-                <small>{paired ? `→ ${paired.label}` : "짝을 골라요"}</small>
+                <small>{paired ? `연결됨 · ${paired.label}` : "점에서 선을 시작해요"}</small>
               </button>
             );
           })}
         </div>
-        <div className="match-arrow" aria-hidden="true">→</div>
+        <div className="match-draw-lane" aria-hidden="true" />
         <div className="match-column answers" aria-label="연결할 뜻 카드">
           {q.rightItems.map((item) => {
             const used = usedRightIds.includes(item.id);
             return (
               <button
                 key={item.id}
+                ref={(element) => {
+                  if (element) rightRefs.current.set(item.id, element);
+                  else rightRefs.current.delete(item.id);
+                }}
+                data-match-right-id={item.id}
                 className={used ? "used" : ""}
                 aria-pressed={used}
-                onClick={() => selectRight(item.id)}
+                onClick={(event) => {
+                  if (event.detail === 0) selectRight(item.id);
+                }}
               >
                 {item.label}
                 {used && <Check size={17} />}
@@ -1953,25 +2214,22 @@ function MatchQuestion({ q, choice, setChoice }) {
 
 function Feedback({ q, choice, level, mode, retry, next, last }) {
   if (mode === "retry") {
-    const resetWholeAnswer = ["match", "sequence"].includes(questionKind(q));
+    const wrongAnswer = wrongAnswerDetails(q, choice);
     return (
       <div className="feedback retry" role="status" aria-live="polite">
         <div className="confetti">⌁</div>
         <div className="feedback-icon"><RotateCcw /></div>
         <span className="eyebrow">한 번 더 기회!</span>
         <h1>다시 한번 생각해 볼까?</h1>
-        <div className="explain retry-guide">
-          <strong>
-            {resetWholeAnswer
-              ? "처음부터 다시 맞춰 봐요"
-              : "오답 하나를 지웠어요"}
-          </strong>
-          <p>
-            {resetWholeAnswer
-              ? "방금 만든 답을 초기화했어요. 책 속 장면을 천천히 떠올리며 다시 이어 봐요."
-              : "방금 고른 답은 이제 보이지 않아요. 책 속 장면을 떠올리고 남은 답에서 골라 봐요."}
-          </p>
-        </div>
+        <section className="retry-question-card" aria-label="문제 다시 보기">
+          <span>문제 다시 보기</span>
+          <h2>{q.q}</h2>
+        </section>
+        <section className="retry-answer-card" aria-label="고른 답 설명">
+          <span>내가 고른 답</span>
+          <strong>{wrongAnswer.selected}</strong>
+          <p>{wrongAnswer.reason}</p>
+        </section>
         <button className="primary wide" onClick={retry}>
           다시 골라보기 <RotateCcw />
         </button>
