@@ -29,10 +29,36 @@ import {
   saveRecording,
 } from "./audioStore";
 import { getRegisteredBook, registerBook } from "./bookApi";
+import { generateCharacterVariations } from "./characterApi";
 import { enableKidSafeInteractions } from "./kidSafeInteractions";
+import {
+  clearCharacterVariants,
+  loadCharacterVariants,
+  loadProfilePhoto,
+  saveCharacterVariants,
+  saveProfilePhoto,
+} from "./profileMediaStore";
+import {
+  getCurrentUser,
+  loadChildProfile,
+  readUserJson,
+  readUserText,
+  saveChildProfile,
+  writeUserJson,
+  writeUserText,
+} from "./userDataStore";
 import "./styles.css";
 
 const asset = (path) => `${import.meta.env.BASE_URL}${path}`;
+const CURRENT_USER = getCurrentUser();
+const childShelfTitle = (name) => {
+  const cleanName = name?.trim();
+  if (!cleanName) return "모리의 책숲";
+  const lastCode = cleanName.charCodeAt(cleanName.length - 1);
+  const hasBatchim =
+    lastCode >= 0xac00 && lastCode <= 0xd7a3 && (lastCode - 0xac00) % 28 !== 0;
+  return `${cleanName}${hasBatchim ? "이" : ""}의 책장`;
+};
 
 const QUIZ_LEVELS = {
   lv1: {
@@ -732,7 +758,11 @@ const questionsForLevel = (book, level) =>
     : book.questions;
 const bookProgressKey = (bookId, level) => `${bookId}:${level}`;
 const loadQuizLevel = () => {
-  const saved = localStorage.getItem("mori-quiz-level");
+  const saved = readUserText(
+    CURRENT_USER.id,
+    "quiz-level",
+    "mori-quiz-level",
+  );
   return QUIZ_LEVELS[saved] ? saved : "lv1";
 };
 
@@ -878,7 +908,12 @@ const quizStage = (index, level) => {
 
 const loadBooks = () => {
   try {
-    const saved = JSON.parse(localStorage.getItem("mori-reviewed-books"));
+    const saved = readUserJson(
+      CURRENT_USER.id,
+      "reviewed-books",
+      null,
+      "mori-reviewed-books",
+    );
     if (!Array.isArray(saved)) return DEFAULT_BOOKS;
     return DEFAULT_BOOKS.map((book) => {
       const reviewed = saved.find((item) => item.id === book.id);
@@ -906,7 +941,12 @@ const loadBooks = () => {
 
 const loadProgress = () => {
   try {
-    const saved = JSON.parse(localStorage.getItem("mori-progress"));
+    const saved = readUserJson(
+      CURRENT_USER.id,
+      "progress",
+      null,
+      "mori-progress",
+    );
     const migrateKey = (key) =>
       key.includes(":") ? key : bookProgressKey(key, "lv2");
     const migrateRecord = (record) =>
@@ -980,13 +1020,22 @@ function App() {
   const [scanState, setScanState] = useState("idle");
   const [registeredBook, setRegisteredBook] = useState(null);
   const [scanError, setScanError] = useState("");
-  const [childPhoto, setChildPhoto] = useState("");
+  const [childProfile, setChildProfile] = useState(() =>
+    loadChildProfile(CURRENT_USER.id),
+  );
+  const [profileMedia, setProfileMedia] = useState({
+    photoUrl: "",
+    variants: [],
+  });
+  const [characterState, setCharacterState] = useState("idle");
+  const [characterError, setCharacterError] = useState("");
   const [recordings, setRecordings] = useState({});
   const [reviewOrigin, setReviewOrigin] = useState("detail");
   const topRef = useRef(null);
   const bookPollTimerRef = useRef(null);
   const previewUrlsRef = useRef(new Set());
   const recordingUrlsRef = useRef(new Set());
+  const profileUrlsRef = useRef(new Set());
   const activeBooks = useMemo(
     () =>
       books.map((book) => ({
@@ -998,29 +1047,54 @@ function App() {
   );
   const selected =
     activeBooks.find((book) => book.id === selectedId) || activeBooks[0];
+  const selectedCharacter = profileMedia.variants.find(
+    (variant) => variant.id === childProfile.selectedVariantId,
+  );
 
   useEffect(() => {
-    localStorage.setItem("mori-progress", JSON.stringify(progress));
+    writeUserJson(CURRENT_USER.id, "progress", progress);
   }, [progress]);
   useEffect(() => {
-    localStorage.setItem("mori-quiz-level", quizLevel);
+    writeUserText(CURRENT_USER.id, "quiz-level", quizLevel);
   }, [quizLevel]);
   useEffect(() => {
-    localStorage.setItem(
-      "mori-reviewed-books",
-      JSON.stringify(
-        books.map((book) => ({
-          id: book.id,
-          quizVersion: book.quizVersion,
-          questions: book.questions,
-          level1Questions: questionsForLevel(book, "lv1"),
-        })),
-      ),
+    writeUserJson(
+      CURRENT_USER.id,
+      "reviewed-books",
+      books.map((book) => ({
+        id: book.id,
+        quizVersion: book.quizVersion,
+        questions: book.questions,
+        level1Questions: questionsForLevel(book, "lv1"),
+      })),
     );
   }, [books]);
   useEffect(() => {
     let cancelled = false;
-    loadRecordings()
+    Promise.all([
+      loadProfilePhoto(CURRENT_USER.id),
+      loadCharacterVariants(CURRENT_USER.id, childProfile.variantOptions),
+    ])
+      .then(([photo, variants]) => {
+        if (cancelled) return;
+        const photoUrl = photo?.blob ? URL.createObjectURL(photo.blob) : "";
+        const withUrls = variants.map((variant) => ({
+          ...variant,
+          url: URL.createObjectURL(variant.blob),
+        }));
+        if (photoUrl) profileUrlsRef.current.add(photoUrl);
+        withUrls.forEach((variant) => profileUrlsRef.current.add(variant.url));
+        setProfileMedia({ photoUrl, variants: withUrls });
+        if (withUrls.length === 8) setCharacterState("ready");
+      })
+      .catch(() => setCharacterError("저장된 캐릭터를 불러오지 못했어요."));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  useEffect(() => {
+    let cancelled = false;
+    loadRecordings(CURRENT_USER.id)
       .then((stored) => {
         if (cancelled) return;
         const withUrls = Object.fromEntries(
@@ -1050,6 +1124,7 @@ function App() {
       clearTimeout(bookPollTimerRef.current);
       previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
       recordingUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      profileUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
     },
     [],
   );
@@ -1058,6 +1133,11 @@ function App() {
     if (!url) return;
     URL.revokeObjectURL(url);
     previewUrlsRef.current.delete(url);
+  };
+  const releaseProfileUrl = (url) => {
+    if (!url) return;
+    URL.revokeObjectURL(url);
+    profileUrlsRef.current.delete(url);
   };
   const go = (next, book) => {
     if (book) setSelectedId(book.id);
@@ -1175,14 +1255,109 @@ function App() {
       setView("result");
     }
   };
-  const upload = (event) => {
+  const uploadChildPhoto = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    previewUrlsRef.current.add(url);
-    releasePreview(childPhoto);
-    setChildPhoto(url);
     event.target.value = "";
+    if (!file.type.startsWith("image/")) {
+      setCharacterError("사진 파일을 골라 주세요.");
+      return;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      setCharacterError("아이 사진은 12MB 이하로 골라 주세요.");
+      return;
+    }
+
+    try {
+      await saveProfilePhoto(CURRENT_USER.id, file);
+      await clearCharacterVariants(
+        CURRENT_USER.id,
+        childProfile.variantOptions,
+      );
+      releaseProfileUrl(profileMedia.photoUrl);
+      profileMedia.variants.forEach((variant) => releaseProfileUrl(variant.url));
+      const photoUrl = URL.createObjectURL(file);
+      profileUrlsRef.current.add(photoUrl);
+      setProfileMedia({ photoUrl, variants: [] });
+      setChildProfile((current) => {
+        const next = saveChildProfile({
+          ...current,
+          selectedVariantId: null,
+          variantOptions: [],
+          completed: false,
+        });
+        return next;
+      });
+      setCharacterState("photo-ready");
+      setCharacterError("");
+    } catch {
+      setCharacterError("사진을 이 기기에 저장하지 못했어요.");
+    }
+  };
+
+  const generateChildCharacters = async () => {
+    setCharacterState("generating");
+    setCharacterError("");
+    try {
+      const photo = await loadProfilePhoto(CURRENT_USER.id);
+      if (!photo?.blob) throw new Error("먼저 아이 사진을 등록해 주세요.");
+      const generated = await generateCharacterVariations(photo.blob, {
+        userId: CURRENT_USER.id,
+      });
+      if (generated.length !== 8) {
+        throw new Error("캐릭터 8개를 모두 만들지 못했어요. 다시 시도해 주세요.");
+      }
+      await clearCharacterVariants(
+        CURRENT_USER.id,
+        childProfile.variantOptions,
+      );
+      await saveCharacterVariants(CURRENT_USER.id, generated);
+      profileMedia.variants.forEach((variant) => releaseProfileUrl(variant.url));
+      const withUrls = generated.map((variant) => {
+        const url = URL.createObjectURL(variant.blob);
+        profileUrlsRef.current.add(url);
+        return { ...variant, url };
+      });
+      const variantOptions = generated.map(
+        ({ id, label, description, mimeType }) => ({
+          id,
+          label,
+          description,
+          mimeType,
+        }),
+      );
+      setProfileMedia((current) => ({ ...current, variants: withUrls }));
+      setChildProfile((current) =>
+        saveChildProfile({
+          ...current,
+          selectedVariantId: null,
+          variantOptions,
+          completed: false,
+        }),
+      );
+      setCharacterState("ready");
+    } catch (error) {
+      setCharacterState("error");
+      setCharacterError(error.message || "캐릭터를 만들지 못했어요.");
+    }
+  };
+
+  const registerChildCharacter = ({ name, variantId }) => {
+    const cleanName = name.trim().slice(0, 12);
+    if (!cleanName || !profileMedia.variants.some((item) => item.id === variantId)) {
+      setCharacterError("이름과 사용할 캐릭터를 골라 주세요.");
+      return;
+    }
+    const next = saveChildProfile({
+      ...childProfile,
+      name: cleanName,
+      selectedVariantId: variantId,
+      completed: true,
+    });
+    setChildProfile(next);
+    setCharacterError("");
+    setView("home");
+    setToast(`${childShelfTitle(cleanName)}이 준비됐어요!`);
   };
 
   const addBookImages = (event) => {
@@ -1267,7 +1442,7 @@ function App() {
 
   const storeBookRecording = async (blob) => {
     const recordingKey = bookProgressKey(selected.id, quizLevel);
-    const record = await saveRecording(recordingKey, blob);
+    const record = await saveRecording(CURRENT_USER.id, recordingKey, blob);
     const url = URL.createObjectURL(blob);
     recordingUrlsRef.current.add(url);
     setRecordings((current) => {
@@ -1282,7 +1457,7 @@ function App() {
 
   const deleteBookRecording = async (book) => {
     const recordingKey = bookProgressKey(book.id, book.quizLevel);
-    await removeRecording(recordingKey);
+    await removeRecording(CURRENT_USER.id, recordingKey);
     setRecordings((current) => {
       const previousUrl = current[recordingKey]?.url;
       if (previousUrl) {
@@ -1321,7 +1496,11 @@ function App() {
           aria-label="홈으로"
         >
           <span className="brand-mark">m</span>
-          <span>모리의 책숲</span>
+          <span>
+            {childProfile.completed
+              ? childShelfTitle(childProfile.name)
+              : "모리의 책숲"}
+          </span>
         </button>
         <div className="top-actions">
           <span className="star-pill">
@@ -1332,8 +1511,11 @@ function App() {
             onClick={() => go("profile")}
             aria-label="내 캐릭터"
           >
-            {childPhoto ? (
-              <img src={childPhoto} alt="아이 사진 미리보기" />
+            {selectedCharacter?.url ? (
+              <img
+                src={selectedCharacter.url}
+                alt={`${childProfile.name} 캐릭터`}
+              />
             ) : (
               <UserRound size={20} />
             )}
@@ -1348,6 +1530,8 @@ function App() {
             quizLevel={quizLevel}
             go={go}
             startQuiz={startQuiz}
+            childProfile={childProfile}
+            character={selectedCharacter}
           />
         )}
         {view === "detail" && (
@@ -1453,8 +1637,14 @@ function App() {
         )}
         {view === "profile" && (
           <Profile
-            childPhoto={childPhoto}
-            upload={upload}
+            profile={childProfile}
+            photoUrl={profileMedia.photoUrl}
+            variants={profileMedia.variants}
+            characterState={characterState}
+            characterError={characterError}
+            uploadPhoto={uploadChildPhoto}
+            generateCharacters={generateChildCharacters}
+            registerCharacter={registerChildCharacter}
             quizLevel={quizLevel}
             selectQuizLevel={selectQuizLevel}
           />
@@ -1490,7 +1680,7 @@ function App() {
           <NavButton
             active={view === "profile"}
             icon={UserRound}
-            label="내 모리"
+            label="내 캐릭터"
             onClick={() => go("profile")}
           />
         </nav>
@@ -1513,8 +1703,17 @@ function NavButton({ active, icon: Icon, label, onClick }) {
     </button>
   );
 }
-function HomeView({ books, progress, quizLevel, go, startQuiz }) {
+function HomeView({
+  books,
+  progress,
+  quizLevel,
+  go,
+  startQuiz,
+  childProfile,
+  character,
+}) {
   const level = QUIZ_LEVELS[quizLevel];
+  const childName = childProfile.completed ? childProfile.name : "";
   const completedCount = books.filter((book) =>
     progress.completed.includes(bookProgressKey(book.id, quizLevel)),
   ).length;
@@ -1522,7 +1721,9 @@ function HomeView({ books, progress, quizLevel, go, startQuiz }) {
     <>
       <section className="hero">
         <div>
-          <span className="eyebrow">오늘의 책 모험</span>
+          <span className="eyebrow">
+            {childName ? `${childName}의 오늘` : "오늘의 책 모험"}
+          </span>
           <h1>
             책 한 권이
             <br />
@@ -1554,7 +1755,15 @@ function HomeView({ books, progress, quizLevel, go, startQuiz }) {
             모험 시작하기 <ChevronRight size={18} />
           </button>
         </div>
-        <img src={asset("assets/mori-mascot.png")} alt="책을 든 모리" />
+        <img
+          className={character?.url ? "hero-reader-character" : ""}
+          src={character?.url || asset("assets/mori-mascot.png")}
+          alt={
+            character?.url
+              ? `책을 읽는 ${childName} 캐릭터`
+              : "책을 든 모리"
+          }
+        />
       </section>
       <section className="daily">
         <div className="ring">
@@ -1562,7 +1771,9 @@ function HomeView({ books, progress, quizLevel, go, startQuiz }) {
           <span>/ {books.length}권</span>
         </div>
         <div>
-          <span className="overline">나의 책숲</span>
+          <span className="overline">
+            {childName ? childShelfTitle(childName) : "나의 책숲"}
+          </span>
           <h2>
             {completedCount === books.length
               ? "작은 책숲이 완성됐어요!"
@@ -2708,7 +2919,7 @@ function AddBook({
   reset,
 }) {
   const isWorking = ["uploading", "queued", "processing"].includes(scanState);
-  const textLength = registeredBook?.fullText?.length || 0;
+  const textLength = registeredBook?.textLength || 0;
 
   return (
     <div className="page add-page" data-allow-native-editing="true">
@@ -2721,7 +2932,7 @@ function AddBook({
       <p>
         표지를 먼저, 이야기 페이지를 읽는 순서대로 올려 주세요.
         <br />
-        제목·저자·출판사·ISBN과 페이지별 본문을 서버 DB에 보관합니다.
+        제목·저자·출판사·ISBN만 저장하고, 본문은 문제를 만드는 데만 쓰고 저장하지 않아요.
       </p>
 
       {!draftPages.length && (
@@ -2803,7 +3014,7 @@ function AddBook({
           <div>
             <Check />
             <span>
-              <strong>{registeredBook.title || "책"}을 DB에 저장했어요</strong>
+              <strong>{registeredBook.title || "책"}의 책 정보를 저장했어요</strong>
               <small>
                 {registeredBook.publisher || "출판사 확인 필요"} · 사진 {registeredBook.pageCount}장
               </small>
@@ -2828,7 +3039,7 @@ function AddBook({
             </div>
             <div>
               <dt>본문</dt>
-              <dd>{textLength.toLocaleString()}자 저장</dd>
+              <dd>{textLength.toLocaleString()}자 분석 · 원문 미저장</dd>
             </div>
           </dl>
           <button type="button" className="secondary wide" onClick={reset}>
@@ -3298,19 +3509,215 @@ function ReviewDraft({ book, back, publish }) {
   );
 }
 
-function Profile({ childPhoto, upload, quizLevel, selectQuizLevel }) {
+function Profile({
+  profile,
+  photoUrl,
+  variants,
+  characterState,
+  characterError,
+  uploadPhoto,
+  generateCharacters,
+  registerCharacter,
+  quizLevel,
+  selectQuizLevel,
+}) {
+  const [name, setName] = useState(profile.name);
+  const [selectedVariantId, setSelectedVariantId] = useState(
+    profile.selectedVariantId,
+  );
+  const [guardianConsent, setGuardianConsent] = useState(false);
+  const selectedVariant = variants.find(
+    (variant) => variant.id === selectedVariantId,
+  );
+  const generating = characterState === "generating";
+
+  useEffect(() => {
+    if (!variants.length) {
+      setSelectedVariantId(null);
+      return;
+    }
+    if (
+      profile.selectedVariantId &&
+      variants.some((variant) => variant.id === profile.selectedVariantId)
+    ) {
+      setSelectedVariantId(profile.selectedVariantId);
+    } else if (!variants.some((variant) => variant.id === selectedVariantId)) {
+      setSelectedVariantId(null);
+    }
+  }, [profile.selectedVariantId, variants]);
+
   return (
     <div className="page profile">
       <span className="eyebrow">내가 이야기 속으로</span>
       <h1>
-        나만의 모리를
+        나만의 책 친구를
         <br />
         만들어 봐요
       </h1>
       <p>
-        사진은 캐릭터를 꾸미는 데만 사용하고 이 기기 밖으로 보내지 않는 MVP
-        미리보기예요.
+        아이 사진을 따뜻한 그림책 캐릭터로 바꾸고, 마음에 드는 모습을 골라
+        나만의 책장을 만들어요.
       </p>
+
+      {profile.completed && selectedVariant && (
+        <section className="registered-character" aria-label="등록된 캐릭터">
+          <img
+            src={selectedVariant.url}
+            alt={`책을 읽는 ${profile.name} 캐릭터`}
+            draggable="false"
+          />
+          <div>
+            <span className="overline">현재 나의 책 친구</span>
+            <h2>{childShelfTitle(profile.name)}</h2>
+            <p>{selectedVariant.label} 캐릭터로 책 모험을 하고 있어요.</p>
+          </div>
+        </section>
+      )}
+
+      <section
+        className="profile-character-maker"
+        aria-labelledby="character-maker-title"
+        data-allow-native-editing="true"
+      >
+        <div className="character-maker-heading">
+          <div>
+            <span className="overline">프로필 만들기</span>
+            <h2 id="character-maker-title">사진으로 캐릭터 만들기</h2>
+          </div>
+          <span>1 · 2 · 3</span>
+        </div>
+
+        <label className="child-name-field">
+          <span><b>1</b> 아이 이름</span>
+          <input
+            type="text"
+            value={name}
+            maxLength={12}
+            placeholder="예: 지온"
+            aria-label="아이 이름"
+            onChange={(event) => setName(event.target.value)}
+          />
+        </label>
+
+        <div className="character-photo-step">
+          <div>
+            <span><b>2</b> 아이 사진</span>
+            <small>얼굴과 머리 모양이 잘 보이는 정면 사진이 좋아요.</small>
+          </div>
+          <div className={`character-photo-preview ${photoUrl ? "has-photo" : ""}`}>
+            {photoUrl ? (
+              <img src={photoUrl} alt="캐릭터로 만들 아이 사진" draggable="false" />
+            ) : (
+              <UserRound aria-hidden="true" />
+            )}
+          </div>
+          <label className="character-photo-button">
+            <Camera /> {photoUrl ? "다른 사진 고르기" : "아이 사진 등록하기"}
+            <input type="file" accept="image/*" onChange={uploadPhoto} />
+          </label>
+        </div>
+
+        <label className="guardian-consent">
+          <input
+            type="checkbox"
+            checked={guardianConsent}
+            onChange={(event) => setGuardianConsent(event.target.checked)}
+          />
+          <span>
+            <strong>보호자가 이미지 생성에 동의했어요.</strong>
+            <small>
+              사진은 캐릭터 생성 시 설정된 AI 이미지 서버로 전송됩니다. 모리
+              서버는 원본 사진과 생성 결과를 보관하지 않아요.
+            </small>
+          </span>
+        </label>
+
+        <button
+          className="primary wide generate-character-button"
+          type="button"
+          disabled={!name.trim() || !photoUrl || !guardianConsent || generating}
+          onClick={generateCharacters}
+        >
+          <Sparkles />
+          {generating
+            ? "8가지 모습을 그리고 있어요…"
+            : variants.length
+              ? "8가지 모습 다시 만들기"
+              : "8가지 캐릭터 만들기"}
+        </button>
+
+        {generating && (
+          <div className="character-generating" role="status" aria-live="polite">
+            <div className="character-skeleton-grid" aria-hidden="true">
+              {Array.from({ length: 8 }, (_, index) => (
+                <i key={index} style={{ "--delay": `${index * 90}ms` }} />
+              ))}
+            </div>
+            <strong>크레파스와 색연필로 캐릭터를 그리고 있어요.</strong>
+            <p>한 장의 캐릭터 시트를 만든 뒤 여덟 모습으로 나누고 있어요.</p>
+          </div>
+        )}
+
+        {characterError && (
+          <div className="character-error" role="alert">
+            <RotateCcw aria-hidden="true" />
+            <span>{characterError}</span>
+          </div>
+        )}
+
+        {variants.length === 8 && !generating && (
+          <div className="character-choice-step">
+            <div>
+              <span><b>3</b> 나의 캐릭터 고르기</span>
+              <small>마음에 드는 모습을 하나 눌러 주세요.</small>
+            </div>
+            <div className="character-variant-grid" role="radiogroup" aria-label="캐릭터 선택">
+              {variants.map((variant) => {
+                const active = selectedVariantId === variant.id;
+                return (
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    className={active ? "selected" : ""}
+                    key={variant.id}
+                    onClick={() => setSelectedVariantId(variant.id)}
+                  >
+                    <img src={variant.url} alt={variant.description} draggable="false" />
+                    <span>
+                      <strong>{variant.label}</strong>
+                      <small>{variant.description}</small>
+                    </span>
+                    {active && <Check aria-hidden="true" />}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              className="primary wide register-character-button"
+              disabled={!name.trim() || !selectedVariantId}
+              onClick={() =>
+                registerCharacter({ name, variantId: selectedVariantId })
+              }
+            >
+              {selectedVariant
+                ? `${selectedVariant.label}로 등록하기`
+                : "캐릭터를 골라 주세요"}
+              <ChevronRight />
+            </button>
+          </div>
+        )}
+
+        <div className="local-profile-note">
+          <LockKeyhole aria-hidden="true" />
+          <p>
+            지금은 이 기기의 익명 사용자 ID에 저장돼요. 로그인 도입 뒤에는 같은
+            데이터가 Supabase 사용자 계정에 연결됩니다.
+          </p>
+        </div>
+      </section>
+
       <section className="level-setting" aria-labelledby="level-setting-title">
         <div className="level-setting-heading">
           <div>
@@ -3356,45 +3763,6 @@ function Profile({ childPhoto, upload, quizLevel, selectQuizLevel }) {
           })}
         </div>
       </section>
-      <div className="story-preview">
-        <div className="cloud one" />
-        <div className="cloud two" />
-        <div className="photo-character">
-          {childPhoto ? (
-            <img src={childPhoto} alt="아이 사진 미리보기" />
-          ) : (
-            <UserRound />
-          )}
-          <span>탐험가</span>
-        </div>
-        <img
-          className="mori-small"
-          src={asset("assets/mori-mascot.png")}
-          alt="모리"
-        />
-        <div className="speech">
-          우리 같이 책 속<br />
-          단서를 찾자!
-        </div>
-      </div>
-      <label className="upload-btn">
-        <Camera /> {childPhoto ? "다른 사진 고르기" : "아이 사진으로 시작하기"}
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => upload(e, "child")}
-        />
-      </label>
-      <div className="coming">
-        <Sparkles />
-        <div>
-          <strong>다음 버전에서</strong>
-          <p>
-            아이 얼굴 특징을 바탕으로 안전한 일러스트 캐릭터를 만들고, 책의 핵심
-            장면을 새롭게 구성한 참여형 이야기로 확장해요.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

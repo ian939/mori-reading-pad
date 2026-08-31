@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { mkdir, readFile, rm } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm } from "node:fs/promises";
 import { basename, join, relative, resolve, sep } from "node:path";
 import sharp from "sharp";
 
@@ -64,4 +64,26 @@ export async function removeBookImages({ bookId, uploadsDirectory }) {
     recursive: true,
     force: true,
   });
+}
+
+// Deletes every stored page image for a book except the ones named in
+// keepFilenames. Used after analysis to keep only the cover, so a full
+// reproduction of the book never lingers on disk.
+export async function pruneBookImages({ bookId, uploadsDirectory, keepFilenames = [] }) {
+  const bookDirectory = safeBookDirectory(uploadsDirectory, bookId);
+  const keep = new Set(keepFilenames.filter(Boolean).map((name) => basename(name)));
+
+  let entries;
+  try {
+    entries = await readdir(bookDirectory);
+  } catch (error) {
+    if (error.code === "ENOENT") return;
+    throw error;
+  }
+
+  await Promise.all(
+    entries
+      .filter((entry) => !keep.has(entry))
+      .map((entry) => rm(join(bookDirectory, entry), { force: true })),
+  );
 }

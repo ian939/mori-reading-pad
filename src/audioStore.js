@@ -31,17 +31,38 @@ const runTransaction = async (mode, action) => {
   }
 };
 
-export const loadRecordings = async () => {
+const scopedId = (userId, id) => `${userId}::${id}`;
+
+export const loadRecordings = async (userId) => {
   const records = await runTransaction("readonly", (store) => store.getAll());
-  return Object.fromEntries(records.map((record) => [record.id, record]));
+  const prefix = `${userId}::`;
+  const scoped = records
+    .filter((record) => record.id.startsWith(prefix))
+    .map((record) => [record.id.slice(prefix.length), record]);
+  if (scoped.length) return Object.fromEntries(scoped);
+
+  // Preserve recordings made before user-scoped storage was introduced.
+  return Object.fromEntries(
+    records
+      .filter((record) => !record.id.includes("::"))
+      .map((record) => [record.id, record]),
+  );
 };
 
-export const saveRecording = async (id, blob) => {
-  const record = { id, blob, updatedAt: new Date().toISOString() };
+export const saveRecording = async (userId, id, blob) => {
+  const record = {
+    id: scopedId(userId, id),
+    userId,
+    recordingId: id,
+    blob,
+    updatedAt: new Date().toISOString(),
+  };
   await runTransaction("readwrite", (store) => store.put(record));
   return record;
 };
 
-export const removeRecording = async (id) => {
-  await runTransaction("readwrite", (store) => store.delete(id));
+export const removeRecording = async (userId, id) => {
+  await runTransaction("readwrite", (store) =>
+    store.delete(scopedId(userId, id)),
+  );
 };

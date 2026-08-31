@@ -43,6 +43,23 @@ try {
   });
   const page = await context.newPage();
   const touchCdp = await context.newCDPSession(page);
+  const generatedCharacterPng =
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
+  await page.route("**/api/characters/generate", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        variants: Array.from({ length: 8 }, (_, index) => ({
+          id: `variant-${index + 1}`,
+          label: `모습 ${index + 1}`,
+          description: `책을 읽는 캐릭터 모습 ${index + 1}`,
+          mimeType: "image/png",
+          base64: generatedCharacterPng,
+        })),
+      }),
+    });
+  });
   await page.goto(target, { waitUntil: "networkidle" });
 
   const tapCenter = async (locator, label) => {
@@ -102,18 +119,85 @@ try {
   };
 
   await tapCenter(
-    page.getByRole("button", { name: "내 모리" }),
+    page.getByRole("navigation").getByRole("button", { name: "내 캐릭터" }),
     "Profile navigation control",
   );
+  await page
+    .getByRole("heading", { name: "나만의 책 친구를 만들어 봐요" })
+    .waitFor();
+  const childNameInput = page.getByRole("textbox", { name: "아이 이름" });
+  await childNameInput.fill("지온");
+  const adultEditingEvents = await childNameInput.evaluate((input) => {
+    const selectEvent = new Event("selectstart", {
+      bubbles: true,
+      cancelable: true,
+    });
+    const pasteEvent = new Event("paste", { bubbles: true, cancelable: true });
+    input.dispatchEvent(selectEvent);
+    input.dispatchEvent(pasteEvent);
+    return {
+      selectPrevented: selectEvent.defaultPrevented,
+      pastePrevented: pasteEvent.defaultPrevented,
+    };
+  });
+  assert.deepEqual(
+    adultEditingEvents,
+    { selectPrevented: false, pastePrevented: false },
+    "Guardian profile editing must preserve native selection and clipboard behavior",
+  );
+  await page.locator(".character-photo-button input[type=file]").setInputFiles({
+    name: "child.png",
+    mimeType: "image/png",
+    buffer: Buffer.from(generatedCharacterPng, "base64"),
+  });
+  await page.locator(".character-photo-preview.has-photo").waitFor();
+  await page.getByRole("checkbox").check();
+  await tapCenter(
+    page.getByRole("button", { name: "8가지 캐릭터 만들기" }),
+    "Generate character variations control",
+  );
+  await page.locator(".character-variant-grid").waitFor();
+  assert.equal(
+    await page.locator(".character-variant-grid button").count(),
+    8,
+    "The character maker must offer eight variations",
+  );
+  await tapCenter(
+    page.locator(".character-variant-grid button").first(),
+    "First character variation",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: /모습 1로 등록하기/ }),
+    "Register selected child character",
+  );
+  await page.getByText("지온이의 책장", { exact: true }).first().waitFor();
+  await page.getByAltText("책을 읽는 지온 캐릭터").waitFor();
+  assert.equal(
+    await page.evaluate(() => {
+      const session = JSON.parse(localStorage.getItem("mori-session-v1"));
+      const profile = JSON.parse(
+        localStorage.getItem(`mori-user:${session.id}:child-profile`),
+      );
+      return profile.name;
+    }),
+    "지온",
+  );
+  await tapCenter(
+    page.getByRole("navigation").getByRole("button", { name: "내 캐릭터" }),
+    "Profile navigation after character registration",
+  );
   await page.getByRole("heading", { name: "읽기 모험 난이도" }).waitFor();
-  const levelOne = page.getByRole("radio", { name: /Lv\.1/ });
-  const levelTwo = page.getByRole("radio", { name: /Lv\.2/ });
+  const levelOne = page.locator(".level-options").getByRole("radio", { name: /Lv\.1/ });
+  const levelTwo = page.locator(".level-options").getByRole("radio", { name: /Lv\.2/ });
   assert.equal(await levelOne.getAttribute("aria-checked"), "true");
-  assert.equal(await page.getByRole("radio").count(), 2);
+  assert.equal(await page.locator(".level-options").getByRole("radio").count(), 2);
   await tapCenter(levelTwo, "Level two selection card");
   assert.equal(await levelTwo.getAttribute("aria-checked"), "true");
   assert.equal(
-    await page.evaluate(() => localStorage.getItem("mori-quiz-level")),
+    await page.evaluate(() => {
+      const session = JSON.parse(localStorage.getItem("mori-session-v1"));
+      return localStorage.getItem(`mori-user:${session.id}:quiz-level`);
+    }),
     "lv2",
   );
   await tapCenter(
@@ -238,7 +322,7 @@ try {
     "Return to catalog control",
   );
   await tapCenter(
-    page.getByRole("button", { name: "내 모리" }),
+    page.getByRole("navigation").getByRole("button", { name: "내 캐릭터" }),
     "Profile navigation after catalog",
   );
   await tapCenter(

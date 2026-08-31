@@ -3,6 +3,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createApp } from "./app.js";
 import { createBookAnalyzer } from "./bookAnalyzer.js";
+import { createCharacterGenerator } from "./characterGenerator.js";
 import { createDatabase } from "./database.js";
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -17,9 +18,11 @@ mkdirSync(incomingDirectory, { recursive: true });
 
 const database = createDatabase(databasePath);
 const analyzer = createBookAnalyzer();
+const characterGenerator = createCharacterGenerator();
 const { app, resumePending } = createApp({
   database,
   analyzer,
+  characterGenerator,
   incomingDirectory,
   uploadsDirectory,
   apiToken: process.env.MORI_API_TOKEN,
@@ -31,6 +34,11 @@ const server = app.listen(port, () => {
     analyzer.configured
       ? `Image analysis ready (${analyzer.model})`
       : "Image analysis is waiting for OPENAI_API_KEY",
+  );
+  console.log(
+    characterGenerator.configured
+      ? `Character generation ready (${characterGenerator.model})`
+      : "Character generation is waiting for OPENAI_API_KEY",
   );
   resumePending();
 });

@@ -7,7 +7,7 @@ const now = () => new Date().toISOString();
 const BOOK_COLUMNS = `
   id, title, subtitle, authors, illustrators, translators, publisher, isbn,
   publication_date, language, description, status, analysis_provider,
-  analysis_model, error_message, page_count, full_text, created_at,
+  analysis_model, error_message, page_count, text_length, created_at,
   updated_at, processed_at
 `;
 
@@ -30,7 +30,7 @@ const toBook = (row) =>
         analysisModel: row.analysis_model,
         errorMessage: row.error_message,
         pageCount: row.page_count,
-        fullText: row.full_text,
+        textLength: row.text_length,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         processedAt: row.processed_at,
@@ -48,7 +48,6 @@ const toPage = (row) => ({
   mimeType: row.mime_type,
   byteSize: row.byte_size,
   sha256: row.sha256,
-  extractedText: row.extracted_text,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 });
@@ -81,7 +80,7 @@ export function createDatabase(databasePath) {
       analysis_model TEXT,
       error_message TEXT,
       page_count INTEGER NOT NULL DEFAULT 0,
-      full_text TEXT,
+      text_length INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       processed_at TEXT
@@ -94,11 +93,10 @@ export function createDatabase(databasePath) {
       printed_page TEXT,
       page_kind TEXT NOT NULL DEFAULT 'unknown',
       original_filename TEXT NOT NULL,
-      stored_filename TEXT NOT NULL,
+      stored_filename TEXT,
       mime_type TEXT NOT NULL,
       byte_size INTEGER NOT NULL,
       sha256 TEXT NOT NULL,
-      extracted_text TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       UNIQUE(book_id, upload_index)
@@ -135,14 +133,19 @@ export function createDatabase(databasePath) {
   `);
   const updatePage = sqlite.prepare(`
     UPDATE book_pages
-    SET printed_page = ?, page_kind = ?, extracted_text = ?, updated_at = ?
+    SET printed_page = ?, page_kind = ?, updated_at = ?
+    WHERE book_id = ? AND upload_index = ?
+  `);
+  const clearPageImage = sqlite.prepare(`
+    UPDATE book_pages
+    SET stored_filename = NULL, updated_at = ?
     WHERE book_id = ? AND upload_index = ?
   `);
   const finishBook = sqlite.prepare(`
     UPDATE books
     SET title = ?, subtitle = ?, authors = ?, illustrators = ?, translators = ?,
         publisher = ?, isbn = ?, publication_date = ?, language = ?, description = ?,
-        status = 'complete', full_text = ?, error_message = NULL,
+        status = 'complete', text_length = ?, error_message = NULL,
         updated_at = ?, processed_at = ?
     WHERE id = ?
   `);
@@ -198,19 +201,26 @@ export function createDatabase(databasePath) {
       return this.getBook(id);
     },
 
-    completeBook(id, analysis) {
+    completeBook(id, analysis, { retainedUploadIndexes = [] } = {}) {
+      const retained = new Set(retainedUploadIndexes);
       const timestamp = now();
       sqlite.exec("BEGIN IMMEDIATE");
       try {
         for (const page of analysis.pages) {
+          // Persist only structural, non-expressive page facts (kind, printed
+          // page number). The transcribed text itself is never written to disk.
           updatePage.run(
             page.printedPage,
             page.pageKind,
-            page.text,
             timestamp,
             id,
             page.uploadIndex,
           );
+          // Drop the DB reference to any page image we are about to delete, so
+          // only the retained cover keeps a stored_filename.
+          if (!retained.has(page.uploadIndex)) {
+            clearPageImage.run(timestamp, id, page.uploadIndex);
+          }
         }
         finishBook.run(
           analysis.title,
@@ -223,7 +233,7 @@ export function createDatabase(databasePath) {
           analysis.publicationDate,
           analysis.language || "ko",
           analysis.description,
-          analysis.fullText,
+          analysis.fullText ? analysis.fullText.length : 0,
           timestamp,
           timestamp,
           id,

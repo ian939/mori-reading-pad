@@ -94,11 +94,130 @@ test("uploaded book images are analyzed and stored page-by-page", async (context
   assert.equal(completed.title, "테스트 책");
   assert.equal(completed.publisher, "모리출판");
   assert.equal(completed.pages.length, 2);
-  assert.equal(completed.pages[1].extractedText, "테스트 본문");
-  assert.match(completed.fullText, /테스트 본문/);
+  // The transcribed text is never persisted or returned — only an aggregate
+  // character count survives so the UI can show how much was analyzed.
+  assert.equal(completed.fullText, undefined);
+  assert.equal(completed.pages[1].extractedText, undefined);
+  assert.equal(completed.textLength, "[업로드 1]\n테스트 본문".length);
 
   const persisted = database.getBook(completed.id);
   assert.equal(persisted.publisher, "모리출판");
+
+  // Only the cover image (first upload) is kept on disk; every other page image
+  // is deleted and its DB reference cleared.
   assert.equal(persisted.pages[0].storedFilename, `${completed.id}/page-001.jpg`);
-  await access(join(uploadsDirectory, persisted.pages[0].storedFilename));
+  assert.equal(persisted.pages[1].storedFilename, null);
+  await access(join(uploadsDirectory, `${completed.id}/page-001.jpg`));
+  await assert.rejects(access(join(uploadsDirectory, `${completed.id}/page-002.jpg`)));
+});
+
+test("reads require the bearer token when one is configured", async (context) => {
+  const root = await mkdtemp(join(tmpdir(), "mori-book-auth-"));
+  const incomingDirectory = join(root, "incoming");
+  const uploadsDirectory = join(root, "uploads");
+  await mkdir(incomingDirectory, { recursive: true });
+  await mkdir(uploadsDirectory, { recursive: true });
+
+  const database = createDatabase(join(root, "test.sqlite"));
+  const analyzer = { configured: false, provider: "test", model: "fixture", async analyze() {} };
+  const { app } = createApp({
+    database,
+    analyzer,
+    incomingDirectory,
+    uploadsDirectory,
+    apiToken: "secret-token",
+  });
+  const server = app.listen(0);
+
+  context.after(async () => {
+    await new Promise((resolve) => server.close(resolve));
+    database.close();
+    await rm(root, { recursive: true, force: true });
+  });
+
+  const { port } = server.address();
+
+  const unauthorized = await fetch(`http://127.0.0.1:${port}/api/books`);
+  assert.equal(unauthorized.status, 401);
+
+  const authorized = await fetch(`http://127.0.0.1:${port}/api/books`, {
+    headers: { authorization: "Bearer secret-token" },
+  });
+  assert.equal(authorized.status, 200);
+
+  // Health stays open so uptime checks work without the token.
+  const health = await fetch(`http://127.0.0.1:${port}/api/health`);
+  assert.equal(health.status, 200);
+});
+
+test("child photo generation returns eight variants without retaining the upload", async (context) => {
+  const root = await mkdtemp(join(tmpdir(), "mori-character-api-"));
+  const incomingDirectory = join(root, "incoming");
+  const uploadsDirectory = join(root, "uploads");
+  await mkdir(incomingDirectory, { recursive: true });
+  await mkdir(uploadsDirectory, { recursive: true });
+
+  const database = createDatabase(join(root, "test.sqlite"));
+  const analyzer = {
+    configured: false,
+    provider: "test",
+    model: "fixture",
+    async analyze() {},
+  };
+  let receivedPhotoPath = null;
+  let receivedUserId = null;
+  const characterGenerator = {
+    configured: true,
+    provider: "test",
+    model: "fixture-image",
+    async generate(photo, { userId }) {
+      receivedPhotoPath = photo.path;
+      receivedUserId = userId;
+      await access(photo.path);
+      return Array.from({ length: 8 }, (_, index) => ({
+        id: `variant-${index + 1}`,
+        label: `캐릭터 ${index + 1}`,
+        description: `옷 ${index + 1}`,
+        mimeType: "image/webp",
+        base64: Buffer.from(`image-${index + 1}`).toString("base64"),
+      }));
+    },
+  };
+  const { app } = createApp({
+    database,
+    analyzer,
+    characterGenerator,
+    incomingDirectory,
+    uploadsDirectory,
+  });
+  const server = app.listen(0);
+
+  context.after(async () => {
+    await new Promise((resolve) => server.close(resolve));
+    database.close();
+    await rm(root, { recursive: true, force: true });
+  });
+
+  const image = await sharp({
+    create: { width: 80, height: 80, channels: 3, background: "#e5c2a5" },
+  })
+    .png()
+    .toBuffer();
+  const form = new FormData();
+  form.append("photo", new Blob([image], { type: "image/png" }), "child.png");
+
+  const { port } = server.address();
+  const response = await fetch(
+    `http://127.0.0.1:${port}/api/characters/generate`,
+    {
+      method: "POST",
+      headers: { "X-Mori-User-Id": "local-child-123" },
+      body: form,
+    },
+  );
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.variants.length, 8);
+  assert.equal(receivedUserId, "local-child-123");
+  await assert.rejects(access(receivedPhotoPath));
 });
