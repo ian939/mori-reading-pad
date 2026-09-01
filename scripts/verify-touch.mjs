@@ -122,7 +122,6 @@ try {
     .getByRole("heading", { name: "나만의 책 친구를 만들어 봐요" })
     .waitFor();
   const childNameInput = page.getByRole("textbox", { name: "아이 이름" });
-  await childNameInput.fill("지온");
   const adultEditingEvents = await childNameInput.evaluate((input) => {
     const selectEvent = new Event("selectstart", {
       bubbles: true,
@@ -147,7 +146,15 @@ try {
     buffer: Buffer.from(generatedCharacterPng, "base64"),
   });
   await page.locator(".character-photo-preview.has-photo").waitFor();
-  await page.locator(".character-sheet-button input[type=file]").setInputFiles({
+  const characterSheetInput = page.locator(
+    ".character-sheet-button input[type=file]",
+  );
+  assert.equal(
+    await characterSheetInput.isEnabled(),
+    true,
+    "A saved child photo must enable sheet import before the name is entered",
+  );
+  await characterSheetInput.setInputFiles({
     name: "character-sheet.png",
     mimeType: "image/png",
     buffer: generatedCharacterSheet,
@@ -158,6 +165,7 @@ try {
     8,
     "The character maker must offer eight variations",
   );
+  await childNameInput.fill("지온");
   await tapCenter(
     page.locator(".character-variant-grid button").first(),
     "First character variation",

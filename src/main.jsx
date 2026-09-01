@@ -3690,14 +3690,14 @@ function Profile({
               <li>완성된 2×4 이미지 한 장을 내려받아 아래에서 불러오세요.</li>
             </ol>
             <label
-              className={`character-sheet-button ${!name.trim() || !photoUrl ? "disabled" : ""}`}
+              className={`character-sheet-button ${!photoUrl ? "disabled" : ""}`}
             >
               <Plus /> 완성된 캐릭터 시트 불러오기
               <input
                 type="file"
                 accept="image/*"
                 multiple
-                disabled={!name.trim() || !photoUrl || generating}
+                disabled={!photoUrl || generating}
                 onChange={importCharacterSheet}
               />
             </label>
