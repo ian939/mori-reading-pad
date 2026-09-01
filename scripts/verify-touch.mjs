@@ -165,6 +165,23 @@ try {
     8,
     "The character maker must offer eight variations",
   );
+  const importedCornerAlpha = await page
+    .locator(".character-variant-grid img")
+    .first()
+    .evaluate(async (image) => {
+      if (!image.complete) await new Promise((resolve) => image.addEventListener("load", resolve));
+      const canvas = document.createElement("canvas");
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      const context = canvas.getContext("2d");
+      context.drawImage(image, 0, 0);
+      return context.getImageData(0, 0, 1, 1).data[3];
+    });
+  assert.equal(
+    importedCornerAlpha,
+    0,
+    "The locally imported character must have a transparent outer background",
+  );
   await childNameInput.fill("지온");
   await tapCenter(
     page.locator(".character-variant-grid button").first(),
@@ -176,6 +193,7 @@ try {
   );
   await page.getByText("지온이의 책장", { exact: true }).first().waitFor();
   await page.getByAltText("책을 읽는 지온 캐릭터").waitFor();
+  await page.getByLabel("완독한 책 0권").waitFor();
   assert.equal(
     await page.evaluate(() => {
       const session = JSON.parse(localStorage.getItem("mori-session-v1"));
@@ -310,20 +328,21 @@ try {
     page.getByRole("button", { name: /녹음 저장하고 책장에 꽂기/ }),
     "Save recording control",
   );
-  await page.getByRole("heading", { name: "나의 이야기 도감" }).waitFor();
-  assert.equal(await page.getByRole("combobox").count(), 2);
-  await page.getByText(/읽은 날/).waitFor();
+  await page
+    .getByRole("heading", { name: /한 권씩 자라는 나만의 책장/ })
+    .waitFor();
+  assert.equal(await page.getByRole("combobox").count(), 0);
   await tapCenter(
-    page.locator(".catalog-book").first(),
-    "Story catalog book control",
+    page.locator(".shelf-book").first(),
+    "Completed shelf book control",
   );
   await page.getByRole("heading", { name: "돈이 뭐야?" }).waitFor();
   assert.equal(await page.locator(".archive-page .story-sentences button").count(), 8);
   await page.getByText("저장된 목소리가 있어요", { exact: true }).waitFor();
   await page.locator(".saved-voice audio").waitFor();
   await tapCenter(
-    page.getByRole("button", { name: /도감으로/ }),
-    "Return to catalog control",
+    page.getByRole("button", { name: /책장으로/ }),
+    "Return to bookshelf control",
   );
   await tapCenter(
     page.getByRole("navigation").getByRole("button", { name: "내 캐릭터" }),
@@ -347,7 +366,7 @@ try {
   );
   await page.getByText("Lv.1", { exact: true }).waitFor();
   await page.getByText("내용 찾기", { exact: true }).first().waitFor();
-  await page.getByRole("heading", { name: /오영이의 방에/ }).waitFor();
+  await page.getByRole("heading", { name: /저금통에 넣어/ }).waitFor();
   const quizWrappingRules = await page.evaluate(() => {
     const selectors = [".quiz-body h1", ".options button"];
     return selectors.map((selector) => {
@@ -368,7 +387,7 @@ try {
   );
 
   await tapCenter(
-    page.getByRole("button", { name: /노래하는 라디오/ }),
+    page.getByRole("button", { name: /돌멩이/ }),
     "Level one first wrong answer",
   );
   await tapCenter(
@@ -380,18 +399,18 @@ try {
     .waitFor();
   await page
     .getByRole("heading", {
-      name: "오영이의 방에 불쑥 들어온 친구는 누구였나요?",
+      name: "저금통에 넣어 차곡차곡 모을 수 있는 것은 무엇일까요?",
     })
     .waitFor();
-  await page.getByText("노래하는 라디오", { exact: true }).waitFor();
+  await page.getByText("돌멩이", { exact: true }).waitFor();
   await page
     .getByText(
-      "노래하는 라디오는 이야기 속에 등장하지 않았어요. 방에 들어온 친구의 생김새와 말을 떠올려 봐요.",
+      "돌멩이는 저금통에 넣어도 돈이 되지 않아요. 가게에서 쓸 수 있는 것을 떠올려 봐요.",
       { exact: true },
     )
     .waitFor();
   assert.equal(
-    await page.getByText("말하는 저금통 또보", { exact: true }).count(),
+    await page.getByText("동전", { exact: true }).count(),
     0,
     "The first retry screen must not reveal the correct answer",
   );
@@ -400,7 +419,7 @@ try {
     "Level one retry control",
   );
   assert.equal(
-    await page.getByRole("button", { name: /노래하는 라디오/ }).count(),
+    await page.getByRole("button", { name: /돌멩이/ }).count(),
     0,
     "The selected wrong option must be removed on the second attempt",
   );
@@ -410,7 +429,7 @@ try {
     "Exactly one wrong option must be removed",
   );
   await tapCenter(
-    page.getByRole("button", { name: /커다란 공룡/ }),
+    page.getByRole("button", { name: /나뭇잎/ }),
     "Level one second wrong answer",
   );
   await tapCenter(
@@ -422,11 +441,11 @@ try {
     .waitFor();
   await page
     .locator(".final-answer-callout")
-    .getByText("말하는 저금통 또보", { exact: true })
+    .getByText("동전", { exact: true })
     .waitFor();
   await page
     .getByText(
-      "이야기의 시작에서 저금통 또보가 오영이 방에 찾아왔어요.",
+      "저금통에는 동전이나 지폐 같은 돈을 넣어 모아요.",
       { exact: true },
     )
     .waitFor();

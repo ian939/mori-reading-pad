@@ -1847,6 +1847,16 @@ function HomeView({
               : "책을 든 모리"
           }
         />
+        {character?.url && (
+          <div
+            className="hero-book-count"
+            aria-label={`완독한 책 ${completedCount}권`}
+          >
+            <BookOpen aria-hidden="true" />
+            <span>책</span>
+            <strong>× {completedCount}</strong>
+          </div>
+        )}
       </section>
       <section className="daily">
         <div className="ring">

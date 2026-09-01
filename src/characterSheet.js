@@ -41,6 +41,72 @@ const canvasBlob = (canvas) =>
     );
   });
 
+const colorDistanceSquared = (data, offset, background) => {
+  const red = data[offset] - background[0];
+  const green = data[offset + 1] - background[1];
+  const blue = data[offset + 2] - background[2];
+  return red * red + green * green + blue * blue;
+};
+
+// Codex MVP sheets use a plain light backdrop. Remove only backdrop-colored
+// pixels connected to the outside edge, so similar light colors enclosed by
+// the child's book or clothing remain intact.
+const removeConnectedBackground = (context, width, height) => {
+  const image = context.getImageData(0, 0, width, height);
+  const { data } = image;
+  const cornerIndexes = [
+    0,
+    (width - 1) * 4,
+    (height - 1) * width * 4,
+    (height * width - 1) * 4,
+  ];
+  if (cornerIndexes.some((offset) => data[offset + 3] < 245)) return;
+  const background = [0, 1, 2].map((channel) =>
+    Math.round(
+      cornerIndexes.reduce((sum, offset) => sum + data[offset + channel], 0) /
+        cornerIndexes.length,
+    ),
+  );
+  const thresholdSquared = 18 * 18;
+  const visited = new Uint8Array(width * height);
+  const queue = new Int32Array(width * height);
+  let queueStart = 0;
+  let queueEnd = 0;
+
+  const enqueue = (pixelIndex) => {
+    if (visited[pixelIndex]) return;
+    const offset = pixelIndex * 4;
+    if (colorDistanceSquared(data, offset, background) > thresholdSquared) return;
+    visited[pixelIndex] = 1;
+    queue[queueEnd] = pixelIndex;
+    queueEnd += 1;
+  };
+  for (let x = 0; x < width; x += 1) {
+    enqueue(x);
+    enqueue((height - 1) * width + x);
+  }
+  for (let y = 1; y < height - 1; y += 1) {
+    enqueue(y * width);
+    enqueue(y * width + width - 1);
+  }
+
+  while (queueStart < queueEnd) {
+    const pixelIndex = queue[queueStart];
+    queueStart += 1;
+    const x = pixelIndex % width;
+    const y = Math.floor(pixelIndex / width);
+    if (x > 0) enqueue(pixelIndex - 1);
+    if (x + 1 < width) enqueue(pixelIndex + 1);
+    if (y > 0) enqueue(pixelIndex - width);
+    if (y + 1 < height) enqueue(pixelIndex + width);
+  }
+
+  for (let pixelIndex = 0; pixelIndex < visited.length; pixelIndex += 1) {
+    if (visited[pixelIndex]) data[pixelIndex * 4 + 3] = 0;
+  }
+  context.putImageData(image, 0, 0);
+};
+
 const withMetadata = (blob, index) => ({
   ...CHARACTER_VARIANT_OPTIONS[index],
   mimeType: blob.type || "image/png",
@@ -82,6 +148,7 @@ export async function importCharacterImages(fileList) {
           canvas.width,
           canvas.height,
         );
+        removeConnectedBackground(context, canvas.width, canvas.height);
         return withMetadata(await canvasBlob(canvas), index);
       }),
     );
