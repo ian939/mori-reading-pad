@@ -2033,7 +2033,12 @@ function HomeView({
         />
       </section>
       <section className="daily">
-        <div className="ring">
+        <div
+          className="ring"
+          style={{
+            "--pct": `${books.length ? Math.round((completedCount / books.length) * 100) : 0}%`,
+          }}
+        >
           <strong>{completedCount}</strong>
           <span>/ {books.length}권</span>
         </div>
@@ -3952,13 +3957,13 @@ function Profile({
                   className="difficulty-meter"
                   aria-label={`난이도 ${levelIndex + 1}단계`}
                 >
-                  {[0, 1, 2].map((meterIndex) => (
+                  {[0, 1].map((meterIndex) => (
                     <i
                       className={meterIndex <= levelIndex ? "on" : ""}
                       key={meterIndex}
                     />
                   ))}
-                  난이도 {["기본", "중간", "높음"][levelIndex]}
+                  난이도 {["기본", "심화"][levelIndex]}
                 </span>
               </button>
             );
