@@ -8,11 +8,11 @@ import {
 } from "./quizCurriculum.js";
 
 const expectedCounts = {
-  money: { lv1: 6, lv2: 8, lv3: 8 },
-  origin: { lv1: 6, lv2: 8, lv3: 8 },
-  cold: { lv1: 6, lv2: 8, lv3: 8 },
-  bicycle: { lv1: 6, lv2: 8, lv3: 8 },
-  transport: { lv1: 6, lv2: 8, lv3: 8 },
+  money: { lv1: 6, lv2: 9 },
+  origin: { lv1: 6, lv2: 9 },
+  cold: { lv1: 6, lv2: 9 },
+  bicycle: { lv1: 6, lv2: 9 },
+  transport: { lv1: 6, lv2: 9 },
 };
 const supportedKinds = new Set([
   "choice",
@@ -25,12 +25,12 @@ const supportedKinds = new Set([
   "distancing",
 ]);
 
-test("curriculum defines the intended age bands and 110 question records", () => {
+test("curriculum defines the intended age bands and 75 question records", () => {
   assert.deepEqual(
     Object.fromEntries(
       Object.values(QUIZ_LEVELS).map((level) => [level.id, level.age]),
     ),
-    { lv1: "4–5세", lv2: "6–7세", lv3: "8–9세" },
+    { lv1: "4–5세", lv2: "6–7세" },
   );
 
   let total = 0;
@@ -40,7 +40,7 @@ test("curriculum defines the intended age bands and 110 question records", () =>
       total += count;
     }
   }
-  assert.equal(total, 110);
+  assert.equal(total, 75);
 });
 
 test("every question has traceable evidence and a supported interaction", () => {
@@ -75,11 +75,11 @@ test("unverified tomato-to-ketchup and cold-chain explanations are not asserted"
   const serialized = JSON.stringify(CURRICULUM_QUESTIONS);
   assert.equal(serialized.includes("케첩"), false);
   assert.equal(serialized.includes("상하지 않"), false);
+});
 
-  const coldChainQuestion = CURRICULUM_QUESTIONS.origin.lv3.find(
-    (question) => question.id === "origin-lv3-07",
-  );
-  assert.equal(coldChainQuestion.sourceRelation, "direct");
-  assert.match(coldChainQuestion.q, /추가 자료/);
-  assert.match(coldChainQuestion.options[coldChainQuestion.answer], /과학적 이유/);
+test("only Lv1 and Lv2 exist (Lv3 removed per the generation guide)", () => {
+  assert.deepEqual(Object.keys(QUIZ_LEVELS), ["lv1", "lv2"]);
+  for (const levels of Object.values(CURRICULUM_QUESTIONS)) {
+    assert.deepEqual(Object.keys(levels), ["lv1", "lv2"]);
+  }
 });
