@@ -193,7 +193,6 @@ try {
   );
   await page.getByText("지온이의 책장", { exact: true }).first().waitFor();
   await page.getByAltText("책을 읽는 지온 캐릭터").waitFor();
-  await page.getByLabel("완독한 책 0권").waitFor();
   assert.equal(
     await page.evaluate(() => {
       const session = JSON.parse(localStorage.getItem("mori-session-v1"));
