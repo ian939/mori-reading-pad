@@ -4243,3 +4243,14 @@ button {
 }
 .stats-stage.on { background: #4a3a9e; color: #fff; }
 .stats-stage-range { font-size: 12px; opacity: 0.8; }
+
+/* ---- Lv1 → Lv2 invitation (Result) ---- */
+.lv2-invite {
+  background: #eef4ec;
+  border-radius: 18px;
+  padding: 14px 18px;
+  margin: 6px 0 2px;
+  text-align: center;
+}
+.lv2-invite strong { display: block; font-size: 16px; color: #2f7d4a; }
+.lv2-invite span { display: block; margin-top: 4px; font-size: 13px; color: #5a7a68; }

@@ -1826,6 +1826,10 @@ function App() {
             }
             reflectionCount={answers.filter((item) => item.reflective).length}
             go={go}
+            onChallengeLv2={() => {
+              setQuizLevel("lv2");
+              startQuiz(selected);
+            }}
           />
         )}
         {view === "recording" && (
@@ -2767,9 +2771,10 @@ function Feedback({ q, choice, level, mode, retry, next, last }) {
     </div>
   );
 }
-function Result({ book, correct, reflectionCount, go }) {
+function Result({ book, correct, reflectionCount, go, onChallengeLv2 }) {
   const score = correct;
   const level = QUIZ_LEVELS[book.quizLevel];
+  const isLv1 = book.quizLevel === "lv1";
   const scoredTotal = book.questions.filter(isScoredQuestion).length;
   const reflectionTotal = book.questions.filter(isReflectiveQuestion).length;
   const genre = book.genre ?? 0;
@@ -2817,9 +2822,24 @@ function Result({ book, correct, reflectionCount, go }) {
       {plantLv === 2 && (
         <p className="plant-note">이 나무는 일주일 뒤 큰 나무로 자라요.</p>
       )}
-      <button className="primary wide" onClick={() => go("forest")}>
-        내 숲 보기 <Trees size={18} />
-      </button>
+      {isLv1 ? (
+        <>
+          <div className="lv2-invite">
+            <strong>혼자 힘으로 Lv.1을 끝냈어요!</strong>
+            <span>이제 책 속 내용을 떠올려 말해 보는 Lv.2에 도전할까요?</span>
+          </div>
+          <button className="primary wide" onClick={onChallengeLv2}>
+            Lv.2 도전하기 <ChevronRight />
+          </button>
+          <button className="text-btn" onClick={() => go("forest")}>
+            오늘은 여기까지 · 내 숲 보기
+          </button>
+        </>
+      ) : (
+        <button className="primary wide" onClick={() => go("forest")}>
+          내 숲 보기 <Trees size={18} />
+        </button>
+      )}
     </div>
   );
 }
