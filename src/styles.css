@@ -483,6 +483,10 @@ button {
 .question-tags .level-tag.lv2 {
   background: #d36b52;
 }
+.book-level-badge.lv3,
+.question-tags .level-tag.lv3 {
+  background: #6b5bb5;
+}
 .chips .level-chip {
   background: #173f3f;
   color: #fff;
@@ -2112,6 +2116,10 @@ button {
   border-color: #df765d;
   background: #fff1eb;
 }
+.level-options > button.selected.lv3 {
+  border-color: #7567bd;
+  background: #f2efff;
+}
 .level-option-top {
   width: 100%;
   display: flex;
@@ -2127,6 +2135,9 @@ button {
 }
 .level-options .lv2 .level-option-top strong {
   background: #c85f48;
+}
+.level-options .lv3 .level-option-top strong {
+  background: #6556aa;
 }
 .level-option-top em {
   color: #6b807a;
@@ -2998,6 +3009,28 @@ button {
   padding: 16px;
   background: #fdfcf7;
 }
+.review-source {
+  display: grid;
+  gap: 6px;
+  border: 1px solid #d8e5de;
+  border-radius: 14px;
+  background: #eef7f1;
+  padding: 12px;
+  color: #315d52;
+}
+.review-source span {
+  font-size: 10px;
+  font-weight: 900;
+}
+.review-source strong {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.review-source small {
+  color: #688078;
+  font-size: 10px;
+  line-height: 1.4;
+}
 .review-fields > label > span,
 .review-fields legend {
   display: block;
@@ -3719,7 +3752,7 @@ button {
     font-size: 14px;
   }
   .level-options {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 15px;
   }
   .level-options > button {

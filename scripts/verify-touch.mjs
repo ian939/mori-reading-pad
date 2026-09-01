@@ -58,6 +58,61 @@ try {
     .toBuffer();
   await page.goto(target, { waitUntil: "networkidle" });
 
+  const catalogBooks = [
+    ["돈이 뭐야?", "돈은 왜 필요하고, 어떻게 모을까요?"],
+    ["우리가 어디서 왔게?", "내가 먹는 음식은 어디에서 올까요?"],
+    ["막아라! 감기", "감기 바이러스의 이동을 어떻게 막을까요?"],
+    ["자전거 사 주세요", "갖고 싶은 것을 위해 어떻게 돈을 모을까요?"],
+    ["타고, 타고, 타고!", "먼 길을 갈 때 어떤 교통수단을 어떻게 이용할까요?"],
+  ];
+  assert.equal(
+    await page.locator(".book-card").count(),
+    catalogBooks.length,
+    "The home catalog must expose all five registered books",
+  );
+  for (const [title] of catalogBooks) {
+    const card = page.locator(".book-card").filter({ hasText: title });
+    assert.equal(await card.count(), 1, `${title} must appear once in the catalog`);
+    assert.equal(
+      await card.locator(".book-cover > img").evaluate((image) =>
+        image.complete && image.naturalWidth > 0 && image.naturalHeight > 0
+      ),
+      true,
+      `${title} cover must load`,
+    );
+  }
+
+  for (const [title, mission] of catalogBooks.slice(2)) {
+    await page.locator(".book-card").filter({ hasText: title }).click();
+    await page.getByRole("heading", { name: title, exact: true }).waitFor();
+    await page.getByRole("heading", { name: mission, exact: true }).waitFor();
+    await page.getByRole("button", { name: /Lv\.1 퀴즈 시작하기/ }).click();
+    assert.equal(
+      await page.locator(".story-sentences button").count(),
+      8,
+      `${title} story must match eight sentences to eight comic panels`,
+    );
+    assert.equal(
+      await page.locator(".story-comic img").evaluate(async (image) => {
+        if (!image.complete) await image.decode();
+        return image.naturalWidth > 0 && image.naturalHeight > 0;
+      }),
+      true,
+      `${title} story comic must load`,
+    );
+    await page.getByRole("button", { name: /줄거리를 읽었어요/ }).click();
+    await page.getByText("그림 상황 이해", { exact: true }).waitFor();
+    assert.equal(
+      await page.locator(".question-visual img").evaluate(async (image) => {
+        if (!image.complete) await image.decode();
+        return image.naturalWidth > 0 && image.naturalHeight > 0;
+      }),
+      true,
+      `${title} situation illustration must load`,
+    );
+    await page.goto(target, { waitUntil: "networkidle" });
+  }
+
   const tapCenter = async (locator, label) => {
     await locator.scrollIntoViewIfNeeded();
     const box = await locator.boundingBox();
@@ -210,8 +265,49 @@ try {
   await page.getByRole("heading", { name: "읽기 모험 난이도" }).waitFor();
   const levelOne = page.locator(".level-options").getByRole("radio", { name: /Lv\.1/ });
   const levelTwo = page.locator(".level-options").getByRole("radio", { name: /Lv\.2/ });
+  const levelThree = page.locator(".level-options").getByRole("radio", { name: /Lv\.3/ });
   assert.equal(await levelOne.getAttribute("aria-checked"), "true");
-  assert.equal(await page.locator(".level-options").getByRole("radio").count(), 2);
+  assert.equal(await page.locator(".level-options").getByRole("radio").count(), 3);
+  await tapCenter(levelThree, "Level three selection card");
+  assert.equal(await levelThree.getAttribute("aria-checked"), "true");
+  assert.equal(
+    await page.evaluate(() => {
+      const session = JSON.parse(localStorage.getItem("mori-session-v1"));
+      return localStorage.getItem(`mori-user:${session.id}:quiz-level`);
+    }),
+    "lv3",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: "오늘" }),
+    "Home navigation for level three smoke test",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: /모험 시작하기/ }),
+    "Level three quiz start control",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: /줄거리를 읽었어요/ }),
+    "Level three story continue control",
+  );
+  await page.getByText("Lv.3", { exact: true }).waitFor();
+  await page.getByText("중심 생각", { exact: true }).waitFor();
+  assert.equal(
+    await page.locator(".progress").getAttribute("aria-label"),
+    "문제 1/8",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: "퀴즈 닫기" }),
+    "Close level three smoke test",
+  );
+  await tapCenter(
+    page.getByRole("button", { name: /돌아가기/ }),
+    "Return home after level three smoke test",
+  );
+  await tapCenter(
+    page.getByRole("navigation").getByRole("button", { name: "내 캐릭터" }),
+    "Return to profile after level three smoke test",
+  );
+  await page.getByRole("heading", { name: "읽기 모험 난이도" }).waitFor();
   await tapCenter(levelTwo, "Level two selection card");
   assert.equal(await levelTwo.getAttribute("aria-checked"), "true");
   assert.equal(
@@ -240,9 +336,9 @@ try {
     page.getByRole("button", { name: /줄거리를 읽었어요/ }),
     "Story introduction continue control",
   );
-  await page.getByText("Completion", { exact: true }).waitFor();
+  await page.getByText("빈칸 완성", { exact: true }).waitFor();
   await tapCenter(
-    page.getByRole("button", { name: /가격/ }),
+    page.getByRole("button", { name: /벌 수 있어요/ }),
     "Completion word card",
   );
   await tapCenter(
@@ -254,95 +350,114 @@ try {
     page.getByRole("button", { name: /다음 문제/ }),
     "Next question control",
   );
-  await page.getByText("Recall", { exact: true }).waitFor();
-  assert.equal(
-    await page.getByText("힌트가 필요해요", { exact: true }).isVisible(),
-    true,
-    "Recall must offer an optional hint",
+  await page.getByText("비교하기", { exact: true }).waitFor();
+  await tapCenter(
+    page.getByRole("button", { name: /가격과 가진 돈/ }),
+    "Comparison answer card",
   );
   await tapCenter(
-    page.getByRole("button", { name: /두 가지 모두 기억했어요/ }),
-    "Recall reflection card",
+    page.getByRole("button", { name: "정답 확인하기" }),
+    "Comparison submit control",
   );
-  await tapCenter(
-    page.getByRole("button", { name: "내 생각 남기기" }),
-    "Reflection submit control",
-  );
-  await page.getByRole("heading", { name: "내 생각을 잘 꺼냈어요!" }).waitFor();
+  await page.getByRole("heading", { name: "정답이에요!" }).waitFor();
 
-  const remainingMethods = [
-    "Wh-question",
-    "Completion",
-    "Wh-question",
-    "Recall",
-    "Open-ended",
-    "Open-ended",
-    "Distancing",
-    "Distancing",
-  ];
-  for (const [remainingIndex, method] of remainingMethods.entries()) {
-    await tapCenter(
-      page.getByRole("button", { name: /다음 문제/ }),
-      `Next control before ${method}`,
-    );
-    await page.getByText(method, { exact: true }).waitFor();
-    const reflective = ["Recall", "Open-ended", "Distancing"].includes(method);
-    await tapCenter(
-      reflective
-        ? page.locator(".reflection-prompts button").first()
-        : page.locator(".options button").first(),
-      `${method} response control ${remainingIndex + 3}`,
-    );
-    await tapCenter(
-      page.getByRole("button", {
-        name: reflective ? "내 생각 남기기" : "정답 확인하기",
-      }),
-      `${method} submit control ${remainingIndex + 3}`,
-    );
-    await page.locator(".feedback h1").waitFor();
+  await tapCenter(
+    page.getByRole("button", { name: /다음 문제/ }),
+    "Next control before level two matching",
+  );
+  await page.getByText("범주 연결", { exact: true }).waitFor();
+  await dragTouch(
+    page.getByRole("button", { name: /일하고 대가를 받아요/ }),
+    page.getByRole("button", { name: "벌기" }),
+    "Work to earning touch connection",
+  );
+  await dragTouch(
+    page.getByRole("button", { name: /필요한 물건을 사요/ }),
+    page.getByRole("button", { name: "쓰기" }),
+    "Buying to spending touch connection",
+  );
+  await dragTouch(
+    page.getByRole("button", { name: /쓰지 않은 동전을 넣어요/ }),
+    page.getByRole("button", { name: "모으기" }),
+    "Saving to collecting touch connection",
+  );
+  assert.equal(
+    await page.locator(".match-line.complete").count(),
+    3,
+    "Three visible lines must connect the completed matching answer",
+  );
+  assert.equal(
+    await page.getByRole("button", { name: "정답 확인하기" }).isEnabled(),
+    true,
+    "Completing all touch-drawn lines must enable answer submission",
+  );
+  await page.getByRole("button", { name: "정답 확인하기" }).click();
+  await page.locator(".feedback h1").waitFor();
+  assert.equal(
+    await page.locator(".feedback h1").textContent(),
+    "정답이에요!",
+    "The three level two match connections must be correct",
+  );
+
+  await page.getByRole("button", { name: /다음 문제/ }).click();
+  await page.waitForTimeout(400);
+  await page.getByText("근거 확인", { exact: true }).waitFor();
+  await page.locator(".options button").first().click();
+  await page.getByRole("button", { name: "정답 확인하기" }).click();
+  await page.getByRole("heading", { name: "정답이에요!" }).waitFor();
+
+  await page.getByRole("button", { name: /다음 문제/ }).click();
+  await page.getByText("순서 놓기", { exact: true }).waitFor();
+  for (const label of [
+    "저금통 친구가 찾아왔어요",
+    "동전과 지폐를 보여 주었어요",
+    "일의 대가로 돈을 벌 수 있음을 알았어요",
+    "쓰지 않은 동전을 모았어요",
+  ]) {
+    await page.getByRole("button", { name: new RegExp(label) }).click();
   }
-  await tapCenter(
-    page.getByRole("button", { name: /모험 마치기/ }),
-    "Finish adventure control",
-  );
-  await page.getByText("3 / 4", { exact: true }).waitFor();
-  await page.getByText("생각 말하기 6 / 6", { exact: true }).waitFor();
-  await tapCenter(
-    page.getByRole("button", { name: /줄거리 소리 내어 읽기/ }),
-    "Open recording activity control",
-  );
+  await page.getByRole("button", { name: "정답 확인하기" }).click();
+  await page.getByRole("heading", { name: "정답이에요!" }).waitFor();
+
+  await page.getByRole("button", { name: /다음 문제/ }).click();
+  await page.getByText("중심 생각", { exact: true }).waitFor();
+  await page.locator(".options button").first().click();
+  await page.getByRole("button", { name: "정답 확인하기" }).click();
+  await page.getByRole("heading", { name: "정답이에요!" }).waitFor();
+
+  for (const [index, prompt] of [
+    "두 가지를 말했어요",
+    "세 부분을 모두 말했어요",
+  ].entries()) {
+    await page.getByRole("button", { name: /다음 문제/ }).click();
+    await page.getByText("말하기", { exact: true }).waitFor();
+    await page.getByText("힌트가 필요해요", { exact: true }).waitFor();
+    await page.getByRole("button", { name: new RegExp(prompt) }).click();
+    await page.getByRole("button", { name: "내 생각 남기기" }).click();
+    await page.getByRole("heading", { name: "내 생각을 잘 꺼냈어요!" }).waitFor();
+  }
+  await page.getByRole("button", { name: /모험 마치기/ }).click();
+  await page.getByText("6 / 6", { exact: true }).waitFor();
+  await page.getByText("생각 말하기 2 / 2", { exact: true }).waitFor();
+  await page.getByRole("button", { name: /줄거리 소리 내어 읽기/ }).click();
   await page.getByRole("heading", { name: /줄거리를 천천히/ }).waitFor();
-  await tapCenter(
-    page.getByRole("button", { name: "녹음 시작하기" }),
-    "Start recording control",
-  );
+  await page.getByRole("button", { name: "녹음 시작하기" }).click();
   await page.getByText("목소리를 듣고 있어요…", { exact: true }).waitFor();
   await page.waitForTimeout(800);
-  await tapCenter(
-    page.getByRole("button", { name: "녹음 멈추기" }),
-    "Stop recording control",
-  );
+  await page.getByRole("button", { name: "녹음 멈추기" }).click();
   await page.locator(".recorder-panel audio").waitFor();
-  await tapCenter(
-    page.getByRole("button", { name: /녹음 저장하고 책장에 꽂기/ }),
-    "Save recording control",
-  );
+  await page.getByRole("button", { name: /녹음 저장하고 책장에 꽂기/ }).click();
   await page
     .getByRole("heading", { name: /한 권씩 자라는 나만의 책장/ })
     .waitFor();
   assert.equal(await page.getByRole("combobox").count(), 0);
-  await tapCenter(
-    page.locator(".shelf-book").first(),
-    "Completed shelf book control",
-  );
+  await page.locator(".shelf-book").first().click();
   await page.getByRole("heading", { name: "돈이 뭐야?" }).waitFor();
   assert.equal(await page.locator(".archive-page .story-sentences button").count(), 8);
   await page.getByText("저장된 목소리가 있어요", { exact: true }).waitFor();
   await page.locator(".saved-voice audio").waitFor();
-  await tapCenter(
-    page.getByRole("button", { name: /책장으로/ }),
-    "Return to bookshelf control",
-  );
+  await page.getByRole("button", { name: /책장으로/ }).click();
+  await page.goto(target, { waitUntil: "networkidle" });
   await tapCenter(
     page.getByRole("navigation").getByRole("button", { name: "내 캐릭터" }),
     "Profile navigation after catalog",
@@ -365,7 +480,7 @@ try {
   );
   await page.getByText("Lv.1", { exact: true }).waitFor();
   await page.getByText("내용 찾기", { exact: true }).first().waitFor();
-  await page.getByRole("heading", { name: /저금통에 넣어/ }).waitFor();
+  await page.getByRole("heading", { name: /보여 준 두 가지 돈/ }).waitFor();
   const quizWrappingRules = await page.evaluate(() => {
     const selectors = [".quiz-body h1", ".options button"];
     return selectors.map((selector) => {
@@ -386,7 +501,7 @@ try {
   );
 
   await tapCenter(
-    page.getByRole("button", { name: /돌멩이/ }),
+    page.getByRole("button", { name: /돌멩이와 나뭇잎/ }),
     "Level one first wrong answer",
   );
   await tapCenter(
@@ -398,18 +513,12 @@ try {
     .waitFor();
   await page
     .getByRole("heading", {
-      name: "저금통에 넣어 차곡차곡 모을 수 있는 것은 무엇일까요?",
+      name: "저금통 친구가 보여 준 두 가지 돈은 무엇인가요?",
     })
     .waitFor();
-  await page.getByText("돌멩이", { exact: true }).waitFor();
-  await page
-    .getByText(
-      "돌멩이는 저금통에 넣어도 돈이 되지 않아요. 가게에서 쓸 수 있는 것을 떠올려 봐요.",
-      { exact: true },
-    )
-    .waitFor();
+  await page.getByText("돌멩이와 나뭇잎", { exact: true }).waitFor();
   assert.equal(
-    await page.getByText("동전", { exact: true }).count(),
+    await page.getByText("동전과 지폐", { exact: true }).count(),
     0,
     "The first retry screen must not reveal the correct answer",
   );
@@ -418,17 +527,17 @@ try {
     "Level one retry control",
   );
   assert.equal(
-    await page.getByRole("button", { name: /돌멩이/ }).count(),
+    await page.getByRole("button", { name: /돌멩이와 나뭇잎/ }).count(),
     0,
     "The selected wrong option must be removed on the second attempt",
   );
   assert.equal(
     await page.locator(".options button").count(),
-    3,
+    2,
     "Exactly one wrong option must be removed",
   );
   await tapCenter(
-    page.getByRole("button", { name: /나뭇잎/ }),
+    page.getByRole("button", { name: /연필과 공책/ }),
     "Level one second wrong answer",
   );
   await tapCenter(
@@ -440,11 +549,11 @@ try {
     .waitFor();
   await page
     .locator(".final-answer-callout")
-    .getByText("동전", { exact: true })
+    .getByText("동전과 지폐", { exact: true })
     .waitFor();
   await page
     .getByText(
-      "저금통에는 동전이나 지폐 같은 돈을 넣어 모아요.",
+      "저금통 친구는 둥근 동전과 네모난 지폐를 보여 주었어요.",
       { exact: true },
     )
     .waitFor();
@@ -455,7 +564,7 @@ try {
     "Next control after level one answer feedback",
   );
   await tapCenter(
-    page.getByRole("button", { name: /동전은 둥글고 단단하며/ }),
+    page.getByRole("button", { name: /가격과 가진 돈/ }),
     "Level one second question answer",
   );
   await tapCenter(
@@ -465,74 +574,42 @@ try {
   await page.getByRole("heading", { name: "정답이에요!" }).waitFor();
   await tapCenter(
     page.getByRole("button", { name: /다음 문제/ }),
-    "Next control before vocabulary question",
+    "Next control before source fact question",
   );
   await tapCenter(
-    page.getByRole("button", { name: /물건을 살 때 필요한 돈/ }),
-    "Level one vocabulary answer",
+    page.getByRole("button", { name: /마음대로 그린 돈/ }),
+    "Level one source fact answer",
   );
   await tapCenter(
     page.getByRole("button", { name: "정답 확인하기" }),
-    "Level one vocabulary submit",
+    "Level one source fact submit",
   );
   await page.getByRole("heading", { name: "정답이에요!" }).waitFor();
   await tapCenter(
     page.getByRole("button", { name: /다음 문제/ }),
-    "Next control before touch matching",
+    "Next control before level one sequence",
   );
-  await page
-    .getByRole("heading", { name: /이야기 속 행동과 돈의 쓰임/ })
-    .waitFor();
-  const matchBoard = page.locator(".match-board");
-  await matchBoard.scrollIntoViewIfNeeded();
-  await dragTouch(
-    page.getByRole("button", { name: /사탕을 산다/ }),
-    page.getByRole("button", { name: "서비스를 이용해요" }),
-    "Candy to incorrect service touch connection",
-  );
-  await dragTouch(
-    page.getByRole("button", { name: /놀이기구를 탄다/ }),
-    page.getByRole("button", { name: "물건을 사요" }),
-    "Ride to incorrect goods touch connection",
-  );
-  await dragTouch(
-    page.getByRole("button", { name: /집안일을 돕고 용돈을 받는다/ }),
-    page.getByRole("button", { name: "일을 하고 돈을 벌어요" }),
-    "Chores to earning touch connection",
-  );
-  assert.equal(
-    await page.locator(".match-line.complete").count(),
-    3,
-    "Three visible lines must connect the completed matching answer",
-  );
+  await page.getByText("순서 놓기", { exact: true }).waitFor();
+  for (const label of [
+    "저금통 친구가 찾아왔어요",
+    "동전과 지폐를 보여 주었어요",
+    "쓰지 않은 동전을 모았어요",
+  ]) {
+    await tapCenter(
+      page.getByRole("button", { name: new RegExp(label) }),
+      `Level one sequence card: ${label}`,
+    );
+  }
   assert.equal(
     await page.getByRole("button", { name: "정답 확인하기" }).isEnabled(),
     true,
-    "Completing all touch-drawn lines must enable answer submission",
+    "Completing the level one sequence must enable answer submission",
   );
-  await page.getByRole("button", { name: "정답 확인하기" }).click();
-  await page.locator(".feedback h1").waitFor();
-  assert.equal(
-    await page.locator(".feedback h1").textContent(),
-    "다시 한번 생각해 볼까?",
-    "An incorrect touch match must open the level one retry feedback",
-  );
-  await page
-    .getByText("사탕을 산다 → 서비스를 이용해요", { exact: true })
-    .waitFor();
-  await page
-    .getByText(
-      "사탕은 손에 들고 먹을 수 있는 물건이에요. 그래서 “물건을 사요”와 이어져요.",
-      { exact: true },
-    )
-    .waitFor();
   await tapCenter(
-    page.getByRole("button", { name: /다시 골라보기/ }),
-    "Touch matching retry control",
+    page.getByRole("button", { name: "정답 확인하기" }),
+    "Level one sequence submit",
   );
-  await page.waitForFunction(
-    () => document.querySelectorAll(".match-line.complete").length === 0,
-  );
+  await page.getByRole("heading", { name: "정답이에요!" }).waitFor();
 
   await page.goto(target, { waitUntil: "networkidle" });
 

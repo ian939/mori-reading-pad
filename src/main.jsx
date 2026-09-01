@@ -30,6 +30,7 @@ import { getRegisteredBook, registerBook } from "./bookApi";
 import { generateCharacterVariations } from "./characterApi";
 import { importCharacterImages } from "./characterSheet";
 import { enableKidSafeInteractions } from "./kidSafeInteractions";
+import { CURRICULUM_QUESTIONS, QUIZ_LEVELS } from "./quizCurriculum";
 import {
   clearCharacterVariants,
   loadCharacterVariants,
@@ -59,25 +60,6 @@ const childShelfTitle = (name) => {
   const hasBatchim =
     lastCode >= 0xac00 && lastCode <= 0xd7a3 && (lastCode - 0xac00) % 28 !== 0;
   return `${cleanName}${hasBatchim ? "이" : ""}의 책장`;
-};
-
-const QUIZ_LEVELS = {
-  lv1: {
-    id: "lv1",
-    label: "Lv.1",
-    name: "차근차근 단서 찾기",
-    summary: "책 속에서 답을 찾으며 이야기의 기본 흐름을 익혀요.",
-    detail: "선택·연결·순서·그림 단서 중심 · 10문항 모두 바로 확인",
-    stages: ["내용 찾기", "생각 잇기", "생활 적용"],
-  },
-  lv2: {
-    id: "lv2",
-    label: "Lv.2",
-    name: "깊이 생각하고 말하기",
-    summary: "기억을 꺼내 설명하고 책을 나의 경험과 연결해요.",
-    detail: "빈칸·회상·Wh·개방형·경험 연결 · 단서 4 + 말하기 6",
-    stages: ["기억 깨우기", "생각 넓히기", "나와 잇기"],
-  },
 };
 
 const LEVEL_1_QUESTIONS = {
@@ -490,6 +472,7 @@ const DEFAULT_BOOKS = [
     age: "6–8세",
     minutes: 12,
     desc: "{hero}의 방에 찾아온 {guide}와 함께 돈의 쓰임, 가격, 저축을 알아봐요.",
+    mission: "돈은 왜 필요하고, 어떻게 모을까요?",
     publisher: "그레이트북스",
     series: "내 친구 사회공룡",
     topics: ["생활 경제", "돈", "저축"],
@@ -504,7 +487,7 @@ const DEFAULT_BOOKS = [
       "{hero:은} 쓰지 않은 동전을 {guide}에게 차곡차곡 모았어요.",
       "돈을 계획해서 쓰고 모으면 원하는 일을 준비할 수 있어요.",
     ],
-    quizVersion: 5,
+    quizVersion: 6,
     questions: [
       {
         kind: "completion",
@@ -644,7 +627,7 @@ const DEFAULT_BOOKS = [
   },
   {
     id: "origin",
-    quizVersion: 4,
+    quizVersion: 5,
     title: "우리가 어디서 왔게?",
     tag: "자연 · 음식",
     cover: asset("assets/origin-cover-v2.png"),
@@ -653,6 +636,7 @@ const DEFAULT_BOOKS = [
     age: "6–8세",
     minutes: 13,
     desc: "우주 친구들과 마트 음식의 고향을 찾아 농장과 공장으로 출발해요.",
+    mission: "내가 먹는 음식은 어디에서 올까요?",
     publisher: "그레이트북스",
     series: "내 친구 사회공룡",
     topics: ["생산과 유통", "음식", "농장"],
@@ -789,6 +773,98 @@ const DEFAULT_BOOKS = [
       },
     ],
   },
+  {
+    id: "cold",
+    quizVersion: 1,
+    title: "막아라! 감기",
+    tag: "건강 · 안전",
+    cover: asset("assets/cold-cover-v1.png"),
+    color: "#4f95b8",
+    light: "#eaf6f7",
+    age: "4–9세",
+    minutes: 12,
+    desc: "빵집에서 시작된 감기 바이러스의 이동을 따라가며 손 씻기와 재채기 예절을 배워요.",
+    mission: "감기 바이러스의 이동을 어떻게 막을까요?",
+    publisher: "그레이트북스",
+    series: "내 친구 사회공룡",
+    author: "함박눈",
+    illustrator: "윤희재",
+    topics: ["건강과 안전", "감기", "위생 습관"],
+    storyComic: asset("assets/cold-story-comic-v1.webp"),
+    storySentences: [
+      "고릴라 아저씨의 빵집에는 달콤하고 고소한 빵 냄새가 가득했어요.",
+      "코가 간지럽던 고릴라 아저씨가 입을 가리지 않고 크게 재채기했어요.",
+      "감기 바이러스는 침방울을 타고 빵과 손 위에 내려앉았어요.",
+      "엄마 곰은 빵을 먹은 뒤 서둘러 집으로 돌아갔어요.",
+      "유치원에서 온 아기 곰을 반갑게 안고 얼굴을 맞댔어요.",
+      "아기 곰은 손을 씻지 않고 놀다가 코를 만지고 밥을 먹었어요.",
+      "늦게까지 놀던 아기 곰은 다음 날 열이 나고 콧물이 났어요.",
+      "아기 곰은 손을 깨끗이 씻고 재채기는 팔꿈치로 가리는 습관을 배웠어요.",
+    ],
+    questions: CURRICULUM_QUESTIONS.cold.lv2,
+  },
+  {
+    id: "bicycle",
+    quizVersion: 1,
+    title: "자전거 사 주세요",
+    tag: "생활 · 경제",
+    cover: asset("assets/bicycle-cover-v1.png"),
+    color: "#8d78b4",
+    light: "#f2eef9",
+    age: "4–9세",
+    minutes: 13,
+    desc: "자전거를 갖고 싶은 토비가 용돈과 저축의 뜻을 알아 가며 기다리는 힘을 길러요.",
+    mission: "갖고 싶은 것을 위해 어떻게 돈을 모을까요?",
+    publisher: "그레이트북스",
+    series: "내 친구 사회공룡",
+    author: "김효미",
+    illustrator: "김이조",
+    advisor: "최연철",
+    topics: ["소비와 저축", "용돈", "선택"],
+    storyComic: asset("assets/bicycle-story-comic-v1.webp"),
+    storySentences: [
+      "토비는 자전거 가게에서 마음에 쏙 드는 자전거를 발견했어요.",
+      "토비는 엄마에게 자전거를 사 달라고 여러 번 졸랐어요.",
+      "엄마는 얼마 전에 산 킥보드와 많은 장난감을 함께 살펴보았어요.",
+      "자전거는 과자보다 훨씬 비싸서 돈을 많이 모아야 살 수 있었어요.",
+      "엄마는 토비에게 용돈을 주며 저축하는 방법을 알려 주었어요.",
+      "토비는 로봇과 사탕과 게임에 용돈을 쓰고 빈 주머니를 발견했어요.",
+      "토비는 사고 싶은 것 앞에서 멈춰 생각하고 동전을 조금씩 모았어요.",
+      "저축은 원하는 것을 위해 돈을 아껴 모으며 기다리는 일이에요.",
+    ],
+    questions: CURRICULUM_QUESTIONS.bicycle.lv2,
+  },
+  {
+    id: "transport",
+    quizVersion: 1,
+    title: "타고, 타고, 타고!",
+    tag: "우리 사회 · 교통",
+    cover: asset("assets/transport-cover-v1.png"),
+    color: "#4f9a63",
+    light: "#ebf6e9",
+    age: "4–9세",
+    minutes: 14,
+    desc: "민수와 엄마를 따라 버스·지하철·기차를 갈아타며 대중교통 이용 방법을 익혀요.",
+    mission: "먼 길을 갈 때 어떤 교통수단을 어떻게 이용할까요?",
+    publisher: "그레이트북스",
+    series: "내 친구 사회공룡",
+    author: "남현희",
+    illustrator: "밤코",
+    advisor: "최연철",
+    topics: ["교통수단", "대중교통", "안전"],
+    storyComic: asset("assets/transport-story-comic-v1.webp"),
+    storySentences: [
+      "민수는 엄마와 함께 시골 할머니 댁으로 떠났어요.",
+      "버스 정류장에는 빨강, 파랑, 초록 버스가 차례로 오갔어요.",
+      "민수와 엄마는 초록 버스를 골라 교통 카드를 찍고 탔어요.",
+      "버스에서는 손잡이를 잡고, 내리기 전에 미리 벨을 눌렀어요.",
+      "길이 막히자 두 사람은 지하철로 갈아타기로 했어요.",
+      "개찰구를 지나 줄을 서고, 사람들이 모두 내린 다음 탔어요.",
+      "지하철은 땅속과 땅 위를 달려 기차역에 도착했어요.",
+      "민수와 엄마는 기차표의 자리를 찾아 빠른 기차에 올랐어요.",
+    ],
+    questions: CURRICULUM_QUESTIONS.transport.lv2,
+  },
 ];
 
 const starsForScore = (score, total = 5) => {
@@ -803,10 +879,14 @@ const questionKind = (question) => question.kind || "choice";
 const REFLECTIVE_KINDS = new Set(["recall", "open-ended", "distancing"]);
 const isReflectiveQuestion = (question) =>
   REFLECTIVE_KINDS.has(questionKind(question));
+const isScoredQuestion = (question) =>
+  question.scoreMode !== "performance" && !isReflectiveQuestion(question);
 const questionsForLevel = (book, level) =>
-  level === "lv1"
+  book.levelQuestions?.[level] ||
+  CURRICULUM_QUESTIONS[book.id]?.[level] ||
+  (level === "lv1"
     ? book.level1Questions || LEVEL_1_QUESTIONS[book.id] || book.questions
-    : book.questions;
+    : book.questions);
 const bookProgressKey = (bookId, level) => `${bookId}:${level}`;
 const loadQuizLevel = () => {
   const saved = readUserText(
@@ -952,8 +1032,12 @@ const formatReadDate = (value) => {
   }).format(new Date(value));
 };
 
-const quizStage = (index, level) => {
-  const stageIndex = index < (level === "lv1" ? 3 : 4) ? 0 : index < 7 ? 1 : 2;
+const quizStage = (index, level, total) => {
+  const stageCount = QUIZ_LEVELS[level].stages.length;
+  const stageIndex = Math.min(
+    stageCount - 1,
+    Math.floor((index * stageCount) / Math.max(total, 1)),
+  );
   return QUIZ_LEVELS[level].stages[stageIndex];
 };
 
@@ -968,21 +1052,26 @@ const loadBooks = () => {
     if (!Array.isArray(saved)) return DEFAULT_BOOKS;
     return DEFAULT_BOOKS.map((book) => {
       const reviewed = saved.find((item) => item.id === book.id);
-      const validLevel2 =
-        Array.isArray(reviewed?.questions) &&
-        reviewed.questions.length === book.questions.length &&
-        [2, 3, 4].includes(reviewed.quizVersion);
-      const defaultLevel1 = LEVEL_1_QUESTIONS[book.id];
-      const validLevel1 =
-        Array.isArray(reviewed?.level1Questions) &&
-        reviewed.level1Questions.length === defaultLevel1.length &&
-        reviewed.quizVersion === book.quizVersion;
+      const reviewedVersionMatches = reviewed?.quizVersion === book.quizVersion;
+      const defaultLevels = CURRICULUM_QUESTIONS[book.id] || {};
+      const levelQuestions = Object.fromEntries(
+        Object.keys(QUIZ_LEVELS).map((level) => {
+          const defaults = defaultLevels[level];
+          const savedLevel = reviewedVersionMatches
+            ? reviewed?.levelQuestions?.[level]
+            : null;
+          const validSavedLevel =
+            Array.isArray(savedLevel) &&
+            (!defaults || savedLevel.length === defaults.length);
+          return [level, validSavedLevel ? savedLevel : defaults];
+        }),
+      );
       return {
         ...book,
-        questions: validLevel2 ? reviewed.questions : book.questions,
-        level1Questions: validLevel1
-          ? reviewed.level1Questions
-          : defaultLevel1,
+        levelQuestions,
+        questions: levelQuestions.lv2 || book.questions,
+        level1Questions:
+          levelQuestions.lv1 || LEVEL_1_QUESTIONS[book.id] || book.questions,
       };
     });
   } catch {
@@ -1121,8 +1210,14 @@ function App() {
       books.map((book) => ({
         id: book.id,
         quizVersion: book.quizVersion,
-        questions: book.questions,
+        questions: questionsForLevel(book, "lv2"),
         level1Questions: questionsForLevel(book, "lv1"),
+        levelQuestions: Object.fromEntries(
+          Object.keys(QUIZ_LEVELS).map((level) => [
+            level,
+            questionsForLevel(book, level),
+          ]),
+        ),
       })),
     );
   }, [books]);
@@ -1253,6 +1348,10 @@ function App() {
       {
         correct,
         reflective: isReflectiveQuestion(question),
+        scored: isScoredQuestion(question),
+        questionId: question.id,
+        response: choice,
+        attempts: attempts + 1,
       },
     ]);
     setView("feedback");
@@ -1269,10 +1368,10 @@ function App() {
       setView("quiz");
     } else {
       const correct = answers.filter(
-        (item) => item.correct && !item.reflective,
+        (item) => item.correct && item.scored,
       ).length;
       const total = selected.questions.filter(
-        (question) => !isReflectiveQuestion(question),
+        isScoredQuestion,
       ).length;
       const earned = starsForScore(correct, total);
       setProgress((p) => {
@@ -1557,9 +1656,20 @@ function App() {
     setBooks((current) =>
       current.map((book) => {
         if (book.id !== reviewedBook.id) return book;
-        return reviewedBook.quizLevel === "lv1"
-          ? { ...book, level1Questions: reviewedBook.questions }
-          : { ...book, questions: reviewedBook.questions };
+        const levelQuestions = {
+          ...(book.levelQuestions || {}),
+          [reviewedBook.quizLevel]: reviewedBook.questions,
+        };
+        return {
+          ...book,
+          levelQuestions,
+          ...(reviewedBook.quizLevel === "lv1"
+            ? { level1Questions: reviewedBook.questions }
+            : {}),
+          ...(reviewedBook.quizLevel === "lv2"
+            ? { questions: reviewedBook.questions }
+            : {}),
+        };
       }),
     );
     setSelectedId(reviewedBook.id);
@@ -1660,7 +1770,7 @@ function App() {
           <Result
             book={selected}
             correct={
-              answers.filter((item) => item.correct && !item.reflective).length
+              answers.filter((item) => item.correct && item.scored).length
             }
             reflectionCount={answers.filter((item) => item.reflective).length}
             go={go}
@@ -1977,11 +2087,7 @@ function Detail({ book, done, back, start, review }) {
         </span>
         <div>
           <span className="overline">이번 모험의 비밀</span>
-          <h2>
-            {book.id === "money"
-              ? "돈은 왜 필요하고, 어떻게 모을까요?"
-              : "내가 먹는 음식은 어디에서 올까요?"}
-          </h2>
+          <h2>{book.mission}</h2>
           <p>
             {level.summary} {book.questions.length}개의 문을 열어 보세요.
           </p>
@@ -2105,7 +2211,9 @@ function Quiz({
             <span className={`level-tag ${book.quizLevel}`}>
               {QUIZ_LEVELS[book.quizLevel].label}
             </span>
-            <span className="stage-tag">{quizStage(index, book.quizLevel)}</span>
+            <span className="stage-tag">
+              {quizStage(index, book.quizLevel, book.questions.length)}
+            </span>
             {q.method && <span className="method-tag">{q.method}</span>}
             <span style={{ background: book.light, color: book.color }}>
               {q.type}
@@ -2601,9 +2709,9 @@ function Result({ book, correct, reflectionCount, go, record }) {
   const score = correct;
   const level = QUIZ_LEVELS[book.quizLevel];
   const scoredTotal = book.questions.filter(
-    (question) => !isReflectiveQuestion(question),
+    isScoredQuestion,
   ).length;
-  const reflectionTotal = book.questions.length - scoredTotal;
+  const reflectionTotal = book.questions.filter(isReflectiveQuestion).length;
   return (
     <div className="result">
       <div className="rays" />
@@ -3296,6 +3404,15 @@ function ReviewDraft({ book, back, publish }) {
               <i>{approved[questionIndex] ? "확인됨" : "확인 필요"}</i>
             </summary>
             <div className="review-fields">
+              {question.sourceAnchors?.length > 0 && (
+                <aside className="review-source" aria-label="문항의 책 속 근거">
+                  <span>
+                    근거 장면 {question.sourceAnchors.join(" · ")} · {question.sourceRelation}
+                  </span>
+                  <strong>{question.sourceEvidence}</strong>
+                  <small>현재 상태: 8장면 각색 요약 기준 · 원문 페이지 대조 전</small>
+                </aside>
+              )}
               <label>
                 <span>질문</span>
                 <textarea
@@ -3776,7 +3893,7 @@ function Profile({
               >
                 <span className="level-option-top">
                   <strong>{level.label}</strong>
-                  {levelIndex === 0 && <em>처음이라면 추천</em>}
+                  <em>{level.age}</em>
                   {selectedLevel && <Check size={20} aria-hidden="true" />}
                 </span>
                 <b>{level.name}</b>
@@ -3786,9 +3903,13 @@ function Profile({
                   className="difficulty-meter"
                   aria-label={`난이도 ${levelIndex + 1}단계`}
                 >
-                  <i className="on" />
-                  <i className={levelIndex > 0 ? "on" : ""} />
-                  난이도 {levelIndex === 0 ? "기본" : "높음"}
+                  {[0, 1, 2].map((meterIndex) => (
+                    <i
+                      className={meterIndex <= levelIndex ? "on" : ""}
+                      key={meterIndex}
+                    />
+                  ))}
+                  난이도 {["기본", "중간", "높음"][levelIndex]}
                 </span>
               </button>
             );
