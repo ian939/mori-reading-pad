@@ -6,18 +6,27 @@ import {
   place,
   stageFor,
   nextStageFor,
+  starField,
   treeParts,
 } from "./forestGeometry";
+
+const TIMES = [
+  { id: "day", label: "낮" },
+  { id: "sunset", label: "노을" },
+  { id: "night", label: "밤" },
+];
 
 // The forest is the main collection view: every completed book is a tree on a
 // growing island. Tree type = book genre, tree size = quiz level (and it grows
 // to a big tree a week after it was read). Visual is kept from the design
 // handoff; text uses the app font to stay offline-friendly.
-export function ForestView({ trees, todayBook, onQuiz, onOpenShelf, onReread }) {
+export function ForestView({ trees, todayBook, onQuiz, onOpenShelf, onOpenStats, onReread }) {
   const [selIdx, setSelIdx] = useState(null);
+  const [time, setTime] = useState("day");
   const n = trees.length;
   const forest = useMemo(() => layoutForest(trees, 1), [trees]);
-  const sky = SKIES.day;
+  const sky = SKIES[time];
+  const stars = sky.stars > 0 ? starField(sky.stars) : [];
   const stage = stageFor(Math.max(1, n));
   const next = nextStageFor(n);
   const progress = next ? (n - stage.min) / (next.min - stage.min) : 1;
@@ -40,6 +49,9 @@ export function ForestView({ trees, todayBook, onQuiz, onOpenShelf, onReread }) 
             </linearGradient>
           </defs>
           <rect x="0" y="0" width="1000" height="776" fill="url(#forestSky)" />
+          {stars.map((s) => (
+            <circle key={s.key} cx={s.cx} cy={s.cy} r={s.r} fill="#FFF3D6" opacity={s.o} />
+          ))}
           <circle cx={sky.sunX} cy={sky.sunY} r="46" fill={sky.sun} opacity="0.9" />
 
           <ellipse cx="500" cy={F.cy} rx={F.R + 42} ry={F.ry + 22} fill={sky.water} />
@@ -125,9 +137,26 @@ export function ForestView({ trees, todayBook, onQuiz, onOpenShelf, onReread }) 
           </button>
         )}
 
-        <button className="forest-shelf-btn" onClick={onOpenShelf}>
-          책장으로 보기
-        </button>
+        <div className="forest-times">
+          {TIMES.map((t) => (
+            <button
+              key={t.id}
+              className={`forest-time-chip ${time === t.id ? "on" : ""}`}
+              onClick={() => setTime(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="forest-corner-btns">
+          <button className="forest-shelf-btn" onClick={onOpenStats}>
+            기록
+          </button>
+          <button className="forest-shelf-btn" onClick={onOpenShelf}>
+            책장으로 보기
+          </button>
+        </div>
 
         <div className="forest-legend">
           책 위에서 자라는 생각의 나무 · LV1 묘목 · LV2 자란나무 · 일주일 뒤 큰나무

@@ -28,6 +28,8 @@ import {
 } from "./audioStore";
 import { getRegisteredBook, registerBook } from "./bookApi";
 import { ForestView } from "./ForestView";
+import { StatsView } from "./StatsView";
+import { GENRES, LV, place, treeParts } from "./forestGeometry";
 import { generateCharacterVariations } from "./characterApi";
 import { importCharacterImages } from "./characterSheet";
 import { enableKidSafeInteractions } from "./kidSafeInteractions";
@@ -1150,6 +1152,7 @@ function App() {
   const [questionAttempts, setQuestionAttempts] = useState({});
   const [eliminatedOptions, setEliminatedOptions] = useState({});
   const [feedbackMode, setFeedbackMode] = useState("final");
+  const [recordingReturn, setRecordingReturn] = useState("forest");
   const [draftPages, setDraftPages] = useState([]);
   const [scanState, setScanState] = useState("idle");
   const [registeredBook, setRegisteredBook] = useState(null);
@@ -1207,7 +1210,9 @@ function App() {
       const daysSince = readIso
         ? (Date.now() - Date.parse(readIso)) / 86400000
         : 0;
-      const grown = daysSince >= 7;
+      // Only Lv2 trees keep growing: a week after reading they become a big
+      // tree. Lv1 trees stay saplings.
+      const grown = qlv === 2 && daysSince >= 7;
       const score = progress.bestScores?.[key];
       const total = progress.bestTotals?.[key] || 5;
       trees.push({
@@ -1215,8 +1220,8 @@ function App() {
         title: book.title,
         genre: book.genre ?? 0,
         qlv,
-        lv: Math.min(3, qlv + (grown ? 1 : 0)),
-        fresh: !grown,
+        lv: grown ? 3 : qlv,
+        fresh: qlv === 2 && !grown,
         dateText: formatReadDate(readIso),
         scoreText: Number.isFinite(score) ? `${score} / ${total}개` : "—",
         levelLabel: qlv === 2 ? "LV2 보통" : "LV1 쉬움",
@@ -1228,6 +1233,23 @@ function App() {
     activeBooks.find(
       (book) => !progress.completed.includes(bookProgressKey(book.id, quizLevel)),
     ) || activeBooks[0];
+  const weekBars = useMemo(() => {
+    const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
+    const counts = {};
+    Object.values(progress.readDates || {}).forEach((iso) => {
+      if (!iso) return;
+      const key = new Date(iso).toDateString();
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    const now = new Date();
+    const days = [];
+    for (let offset = 6; offset >= 0; offset -= 1) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - offset);
+      days.push({ day: dayNames[d.getDay()], n: counts[d.toDateString()] || 0 });
+    }
+    return days;
+  }, [progress.readDates]);
 
   useEffect(() => {
     writeUserJson(CURRENT_USER.id, "progress", progress);
@@ -1338,7 +1360,16 @@ function App() {
     setFeedbackMode("final");
     go("story-intro", book);
   };
-  const beginQuestions = () => setView("quiz");
+  // Lv2 starts with a baseline 줄거리 낭독 recording before the questions
+  // (per the generation guide); Lv1 goes straight to the objective quiz.
+  const beginQuestions = () => {
+    if (quizLevel === "lv2") {
+      setRecordingReturn("quiz");
+      setView("recording");
+    } else {
+      setView("quiz");
+    }
+  };
   const selectQuizLevel = (level) => {
     if (!QUIZ_LEVELS[level] || level === quizLevel) return;
     setQuizLevel(level);
@@ -1795,7 +1826,6 @@ function App() {
             }
             reflectionCount={answers.filter((item) => item.reflective).length}
             go={go}
-            record={() => go("recording")}
           />
         )}
         {view === "recording" && (
@@ -1804,8 +1834,15 @@ function App() {
             existing={
               recordings[bookProgressKey(selected.id, quizLevel)] || null
             }
+            beforeQuiz={recordingReturn === "quiz"}
             save={storeBookRecording}
-            finish={() => go("forest")}
+            finish={() =>
+              recordingReturn === "quiz"
+                ? setView("quiz")
+                : recordingReturn === "archive"
+                  ? setView("archive")
+                  : go("forest")
+            }
           />
         )}
         {view === "archive" && (
@@ -1815,7 +1852,10 @@ function App() {
               recordings[bookProgressKey(selected.id, quizLevel)] || null
             }
             back={() => go("library")}
-            record={() => go("recording")}
+            record={() => {
+              setRecordingReturn("archive");
+              go("recording");
+            }}
             remove={() => deleteBookRecording(selected)}
           />
         )}
@@ -1825,10 +1865,18 @@ function App() {
             todayBook={todayBook?.title}
             onQuiz={() => todayBook && startQuiz(todayBook)}
             onOpenShelf={() => go("library")}
+            onOpenStats={() => go("stats")}
             onReread={(bookId) => {
               const book = activeBooks.find((item) => item.id === bookId);
               if (book) go("detail", book);
             }}
+          />
+        )}
+        {view === "stats" && (
+          <StatsView
+            trees={forestTrees}
+            weekBars={weekBars}
+            onBack={() => go("forest")}
           />
         )}
         {view === "library" && (
@@ -1890,13 +1938,6 @@ function App() {
             label="내 숲"
             onClick={() => go("forest")}
           />
-          <button
-            className="add-nav"
-            onClick={() => go("add")}
-            aria-label="책 추가"
-          >
-            <Plus />
-          </button>
           <NavButton
             active={view === "add"}
             icon={Camera}
@@ -2005,9 +2046,9 @@ function HomeView({
               ? "작은 책숲이 완성됐어요!"
               : "한 권씩 숲을 키워 봐요"}
           </h2>
-          <p>완독한 책은 내 책장에 영원히 남아요.</p>
+          <p>완독한 책은 내 숲에서 나무로 자라요.</p>
         </div>
-        <button onClick={() => go("library")} aria-label="책장 보기">
+        <button onClick={() => go("forest")} aria-label="내 숲 보기">
           <ChevronRight />
         </button>
       </section>
@@ -2030,15 +2071,6 @@ function HomeView({
               onClick={() => go("detail", b)}
             />
           ))}
-        </div>
-      </section>
-      <section className="parent-note">
-        <LockKeyhole size={20} />
-        <div>
-          <strong>보호자 안심 설계</strong>
-          <p>
-            사진은 이 기기에만 미리보기로 남고, 정답보다 생각한 과정을 칭찬해요.
-          </p>
         </div>
       </section>
     </>
@@ -2730,25 +2762,36 @@ function Feedback({ q, choice, level, mode, retry, next, last }) {
     </div>
   );
 }
-function Result({ book, correct, reflectionCount, go, record }) {
+function Result({ book, correct, reflectionCount, go }) {
   const score = correct;
   const level = QUIZ_LEVELS[book.quizLevel];
-  const scoredTotal = book.questions.filter(
-    isScoredQuestion,
-  ).length;
+  const scoredTotal = book.questions.filter(isScoredQuestion).length;
   const reflectionTotal = book.questions.filter(isReflectiveQuestion).length;
+  const genre = book.genre ?? 0;
+  const plantLv = book.quizLevel === "lv2" ? 2 : 1;
   return (
     <div className="result">
       <div className="rays" />
-      <img src={asset("assets/mori-mascot.png")} alt="축하하는 모리" />
       <span className="eyebrow">{level.label} 책 모험 완료</span>
       <h1>
-        새 책이 책장에
+        새 나무를
         <br />
-        도착했어요!
+        심었어요!
       </h1>
+      <div className="planted-hero">
+        <svg viewBox="0 0 200 200" className="planted-tree">
+          <ellipse cx="100" cy="184" rx="46" ry="9" fill="rgba(30,50,30,.14)" />
+          {place(
+            treeParts(genre, plantLv, plantLv === 1 ? 112 : 140, { big: plantLv > 1 }),
+            "translate(100 182)",
+            "pl",
+          ).map((p) => (
+            <path key={p.key} d={p.d} fill={p.fill} transform={p.t} />
+          ))}
+        </svg>
+      </div>
       <p>
-        <strong>{book.title}</strong>의 단서를 끝까지 찾았어요.
+        <strong>{book.title}</strong> 위에 {GENRES[genre].tree} {LV[plantLv].tree}가 자랐어요.
       </p>
       <div className="result-card">
         <div className="result-book" style={{ background: book.light }}>
@@ -2766,17 +2809,17 @@ function Result({ book, correct, reflectionCount, go, record }) {
           )}
         </div>
       </div>
-      <button className="primary wide" onClick={record}>
-        줄거리 소리 내어 읽기 <Mic />
-      </button>
-      <button className="text-btn" onClick={() => go("forest")}>
-        녹음은 나중에 하고 내 숲으로
+      {plantLv === 2 && (
+        <p className="plant-note">이 나무는 일주일 뒤 큰 나무로 자라요.</p>
+      )}
+      <button className="primary wide" onClick={() => go("forest")}>
+        내 숲 보기 <Trees size={18} />
       </button>
     </div>
   );
 }
 
-function StoryRecording({ book, existing, save, finish }) {
+function StoryRecording({ book, existing, save, finish, beforeQuiz = false }) {
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
   const [draft, setDraft] = useState(null);
@@ -2858,13 +2901,17 @@ function StoryRecording({ book, existing, save, finish }) {
 
   return (
     <div className="page recording-page">
-      <span className="eyebrow">마지막 읽기 활동</span>
+      <span className="eyebrow">
+        {beforeQuiz ? "Lv.2 시작 · 줄거리 낭독" : "마지막 읽기 활동"}
+      </span>
       <h1>
         줄거리를 천천히
         <br />소리 내어 읽어 봐요
       </h1>
       <p>
-        여덟 문장을 이어 읽어 보세요. 녹음은 서버가 아닌 이 기기에만 저장돼요.
+        {beforeQuiz
+          ? "여덟 문장을 이어 읽고 녹음한 뒤 Lv.2 문제로 넘어가요. 녹음은 이 기기에만 저장돼요."
+          : "여덟 문장을 이어 읽어 보세요. 녹음은 서버가 아닌 이 기기에만 저장돼요."}
       </p>
       <div className="recording-script">
         <ol>
@@ -2901,12 +2948,16 @@ function StoryRecording({ book, existing, save, finish }) {
           onClick={saveAndFinish}
           disabled={status === "saving"}
         >
-          {status === "saving" ? "저장하는 중…" : "녹음 저장하고 책장에 꽂기"}
-          <Library />
+          {status === "saving"
+            ? "저장하는 중…"
+            : beforeQuiz
+              ? "이 녹음으로 퀴즈 시작하기"
+              : "녹음 저장하고 책장에 꽂기"}
+          {beforeQuiz ? <ChevronRight /> : <Library />}
         </button>
       )}
       <button className="text-btn" onClick={finish}>
-        녹음은 나중에 하기
+        {beforeQuiz ? "녹음 없이 퀴즈 시작" : "녹음은 나중에 하기"}
       </button>
     </div>
   );
@@ -2965,7 +3016,16 @@ function LibraryView({ books, progress, quizLevel, go }) {
     [books, progress.completed, progress.readDates, quizLevel],
   );
   const completedCount = completedBooks.length;
-  const emptySlots = Math.max(0, books.length - completedCount);
+  const [genreFilter, setGenreFilter] = useState(null);
+  const genresPresent = [
+    ...new Set(completedBooks.map((book) => book.genre ?? 0)),
+  ].sort((a, b) => a - b);
+  const shown =
+    genreFilter == null
+      ? completedBooks
+      : completedBooks.filter((book) => (book.genre ?? 0) === genreFilter);
+  const emptySlots =
+    genreFilter == null ? Math.max(0, books.length - completedCount) : 0;
   return (
     <div className="page library-page">
       <button className="shelf-to-forest" onClick={() => go("forest")}>
@@ -2983,9 +3043,36 @@ function LibraryView({ books, progress, quizLevel, go }) {
           <span>완독</span>
         </div>
       </div>
+      {completedCount > 0 && genresPresent.length > 1 && (
+        <div
+          className="shelf-filters"
+          data-allow-native-editing="true"
+          aria-label="장르로 거르기"
+        >
+          <button
+            type="button"
+            className={`shelf-chip ${genreFilter == null ? "on" : ""}`}
+            onClick={() => setGenreFilter(null)}
+          >
+            전체 {completedCount}
+          </button>
+          {genresPresent.map((gi) => (
+            <button
+              type="button"
+              key={gi}
+              className={`shelf-chip ${genreFilter === gi ? "on" : ""}`}
+              style={{ "--chip": GENRES[gi].leaf }}
+              onClick={() => setGenreFilter(gi)}
+            >
+              {GENRES[gi].short}{" "}
+              {completedBooks.filter((book) => (book.genre ?? 0) === gi).length}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="shelf-scene">
         <div className="shelf-books">
-          {completedBooks.map((book) => (
+          {shown.map((book) => (
             <button
               key={book.id}
               className="shelf-book"
@@ -3652,7 +3739,6 @@ function Profile({
   const [selectedVariantId, setSelectedVariantId] = useState(
     profile.selectedVariantId,
   );
-  const [guardianConsent, setGuardianConsent] = useState(false);
   const selectedVariant = variants.find(
     (variant) => variant.id === selectedVariantId,
   );
@@ -3709,7 +3795,7 @@ function Profile({
         <div className="character-maker-heading">
           <div>
             <span className="overline">프로필 만들기</span>
-            <h2 id="character-maker-title">사진으로 캐릭터 만들기</h2>
+            <h2 id="character-maker-title">나의 책 친구 만들기</h2>
           </div>
           <span>1 · 2 · 3</span>
         </div>
@@ -3726,79 +3812,29 @@ function Profile({
           />
         </label>
 
-        <div className="character-photo-step">
-          <div>
-            <span><b>2</b> 아이 사진</span>
-            <small>얼굴과 머리 모양이 잘 보이는 정면 사진이 좋아요.</small>
+        <section className="mvp-character-import" aria-labelledby="mvp-character-title">
+          <div className="character-import-head">
+            <span><b>2</b> 캐릭터 시트 불러오기</span>
+            <small>아이 사진으로 만든 2×4 캐릭터 시트를 골라 주세요.</small>
           </div>
-          <div className={`character-photo-preview ${photoUrl ? "has-photo" : ""}`}>
-            {photoUrl ? (
-              <img src={photoUrl} alt="캐릭터로 만들 아이 사진" draggable="false" />
-            ) : (
-              <UserRound aria-hidden="true" />
-            )}
-          </div>
-          <label className="character-photo-button">
-            <Camera /> {photoUrl ? "다른 사진 고르기" : "아이 사진 등록하기"}
-            <input type="file" accept="image/*" onChange={uploadPhoto} />
+          <span className="mvp-mode-badge"><Sparkles /> Codex로 만드는 캐릭터</span>
+          <ol>
+            <li>아이 사진을 Codex 대화에 첨부해 주세요.</li>
+            <li>“이 사진으로 책 읽는 캐릭터 8종을 만들어 줘”라고 말해 주세요.</li>
+            <li>완성된 2×4 이미지 한 장을 내려받아 아래에서 불러오세요.</li>
+          </ol>
+          <label className="character-sheet-button">
+            <Plus /> 완성된 캐릭터 시트 불러오기
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              disabled={generating}
+              onChange={importCharacterSheet}
+            />
           </label>
-        </div>
-
-        {apiGenerationEnabled ? (
-          <>
-            <label className="guardian-consent">
-              <input
-                type="checkbox"
-                checked={guardianConsent}
-                onChange={(event) => setGuardianConsent(event.target.checked)}
-              />
-              <span>
-                <strong>보호자가 이미지 생성에 동의했어요.</strong>
-                <small>
-                  사진은 캐릭터 생성 시 설정된 AI 이미지 서버로 전송됩니다. 모리
-                  서버는 원본 사진과 생성 결과를 보관하지 않아요.
-                </small>
-              </span>
-            </label>
-
-            <button
-              className="primary wide generate-character-button"
-              type="button"
-              disabled={!name.trim() || !photoUrl || !guardianConsent || generating}
-              onClick={generateCharacters}
-            >
-              <Sparkles />
-              {generating
-                ? "8가지 모습을 그리고 있어요…"
-                : variants.length
-                  ? "8가지 모습 다시 만들기"
-                  : "8가지 캐릭터 만들기"}
-            </button>
-          </>
-        ) : (
-          <section className="mvp-character-import" aria-labelledby="mvp-character-title">
-            <span className="mvp-mode-badge"><Sparkles /> MVP 무료 제작 방식</span>
-            <h3 id="mvp-character-title">Codex에서 캐릭터 시트를 만들어요</h3>
-            <ol>
-              <li>위에서 고른 아이 사진을 이 Codex 대화에도 첨부해 주세요.</li>
-              <li>“이 사진으로 책 읽는 캐릭터 8종을 만들어 줘”라고 말해 주세요.</li>
-              <li>완성된 2×4 이미지 한 장을 내려받아 아래에서 불러오세요.</li>
-            </ol>
-            <label
-              className={`character-sheet-button ${!photoUrl ? "disabled" : ""}`}
-            >
-              <Plus /> 완성된 캐릭터 시트 불러오기
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                disabled={!photoUrl || generating}
-                onChange={importCharacterSheet}
-              />
-            </label>
-            <small>2행 × 4열 시트 한 장 또는 개별 캐릭터 이미지 8장을 지원해요.</small>
-          </section>
-        )}
+          <small>2행 × 4열 시트 한 장 또는 개별 캐릭터 이미지 8장을 지원해요.</small>
+        </section>
 
         {generating && (
           <div className="character-generating" role="status" aria-live="polite">

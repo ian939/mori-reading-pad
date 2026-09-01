@@ -4073,12 +4073,26 @@ button {
 }
 .forest-quiz-btn strong { display: block; font-size: 18px; }
 .forest-quiz-btn small { display: block; font-size: 12px; opacity: 0.92; }
-.forest-shelf-btn {
+.forest-corner-btns {
   position: absolute; right: 16px; bottom: 16px;
+  display: flex; gap: 8px;
+}
+.forest-shelf-btn {
   background: rgba(255, 253, 246, 0.94); color: #4a3a9e; border: 0;
   border-radius: 999px; padding: 11px 18px; font-size: 14px; font-weight: 800;
   cursor: pointer; box-shadow: 0 6px 18px rgba(46, 36, 112, 0.16); min-height: 44px;
 }
+.forest-times {
+  position: absolute; left: 50%; top: 14px; transform: translateX(-50%);
+  display: flex; gap: 6px; background: rgba(255,253,246,0.9);
+  border-radius: 999px; padding: 5px; box-shadow: 0 6px 18px rgba(46,36,112,0.14);
+}
+.forest-time-chip {
+  border: 0; background: transparent; color: #6d64a8;
+  border-radius: 999px; padding: 7px 13px; font-size: 13px; font-weight: 800;
+  cursor: pointer; min-height: 36px;
+}
+.forest-time-chip.on { background: #4a3a9e; color: #fff; }
 .forest-legend {
   position: absolute; left: 16px; bottom: 16px; max-width: 58%;
   background: rgba(255, 253, 246, 0.9); border-radius: 999px;
@@ -4134,3 +4148,98 @@ button {
   padding: 9px 15px; font-size: 13px; font-weight: 800; cursor: pointer;
   margin-bottom: 12px; min-height: 40px;
 }
+
+/* ---- Planting celebration (Result) ---- */
+.planted-hero {
+  margin: 8px auto 4px;
+  width: 220px;
+  height: 210px;
+  border-radius: 32px;
+  background: #e9f5e2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+.planted-tree {
+  width: 200px;
+  height: 200px;
+  animation: plantPop 0.6s ease-out;
+  transform-origin: 50% 92%;
+}
+@keyframes plantPop {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.plant-note {
+  margin-top: 10px;
+  display: inline-block;
+  background: #fff3d6;
+  color: #7a5b12;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+/* ---- Shelf genre filter ---- */
+.shelf-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 4px 0 14px;
+}
+.shelf-chip {
+  border: 1.5px solid #e4dff3;
+  background: #fff;
+  color: #4a3a9e;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  min-height: 40px;
+}
+.shelf-chip.on {
+  background: var(--chip, #4a3a9e);
+  border-color: var(--chip, #4a3a9e);
+  color: #fff;
+}
+
+/* ---- Stats (기록) ---- */
+.stats-card {
+  background: #f4f1fc;
+  border-radius: 22px;
+  padding: 18px 20px;
+  margin-top: 14px;
+}
+.stats-card h2 { font-size: 17px; color: #2e2470; margin: 0 0 12px; }
+.stats-week { display: flex; align-items: flex-end; gap: 10px; height: 160px; }
+.stats-week-col {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 6px; justify-content: flex-end; height: 100%;
+}
+.stats-week-col strong { font-size: 14px; color: #4a3a9e; }
+.stats-week-col span { font-size: 12px; color: #7a72ae; }
+.stats-bar {
+  width: 100%; max-width: 42px; background: #4a3a9e; border-radius: 10px;
+}
+.stats-week-col:last-child .stats-bar { background: #ff8a4c; }
+.stats-rows { display: flex; flex-direction: column; gap: 12px; }
+.stats-row-top { display: flex; justify-content: space-between; font-size: 13px; color: #5a5290; margin-bottom: 5px; }
+.stats-track { height: 14px; border-radius: 999px; background: #e7e2f6; overflow: hidden; }
+.stats-track > div { height: 100%; border-radius: 999px; transition: width 0.4s; }
+.stats-hint { margin-top: 12px; font-size: 12.5px; line-height: 1.6; color: #7a72ae; }
+.stats-genres { display: flex; flex-direction: column; gap: 10px; }
+.stats-genre { display: flex; align-items: center; gap: 11px; }
+.stats-genre-icon { width: 32px; height: 32px; flex: none; }
+.stats-genre-body { flex: 1; min-width: 0; }
+.stats-genre-name { font-size: 13px; color: #2e2470; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stats-genre > strong { font-size: 16px; color: #4a3a9e; width: 32px; text-align: right; }
+.stats-stages { display: flex; flex-direction: column; gap: 8px; }
+.stats-stage {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 11px 15px; border-radius: 13px; font-size: 14px; background: #fff; color: #5a5290;
+}
+.stats-stage.on { background: #4a3a9e; color: #fff; }
+.stats-stage-range { font-size: 12px; opacity: 0.8; }
