@@ -15,7 +15,6 @@ import {
   RotateCcw,
   Sparkles,
   Square,
-  Star,
   Trash2,
   UserRound,
   Volume2,
@@ -867,13 +866,6 @@ const DEFAULT_BOOKS = [
   },
 ];
 
-const starsForScore = (score, total = 5) => {
-  if (!total) return 0;
-  const ratio = score / total;
-  if (ratio >= 0.85) return 3;
-  if (ratio >= 0.55) return 2;
-  return 1;
-};
 
 const questionKind = (question) => question.kind || "choice";
 const REFLECTIVE_KINDS = new Set(["recall", "open-ended", "distancing"]);
@@ -1108,16 +1100,6 @@ const loadProgress = () => {
             Object.keys(bestScores).map((bookId) => [bookId, 5]),
           ),
     );
-    const bookStars = migrateRecord(
-      saved?.bookStars && typeof saved.bookStars === "object"
-        ? saved.bookStars
-        : Object.fromEntries(
-            completed.map((bookId) => [
-              bookId,
-              starsForScore(bestScores[bookId] || 0, bestTotals[bookId] || 5),
-            ]),
-      ),
-    );
     const readDates = migrateRecord(
       saved?.readDates && typeof saved.readDates === "object"
         ? saved.readDates
@@ -1125,19 +1107,15 @@ const loadProgress = () => {
     );
     return {
       completed,
-      stars: Number.isFinite(saved?.stars) ? saved.stars : 0,
       bestScores,
       bestTotals,
-      bookStars,
       readDates,
     };
   } catch {
     return {
       completed: [],
-      stars: 0,
       bestScores: {},
       bestTotals: {},
-      bookStars: {},
       readDates: {},
     };
   }
@@ -1373,7 +1351,6 @@ function App() {
       const total = selected.questions.filter(
         isScoredQuestion,
       ).length;
-      const earned = starsForScore(correct, total);
       setProgress((p) => {
         const progressKey = bookProgressKey(selected.id, quizLevel);
         const hasPreviousScore = Number.isFinite(p.bestScores?.[progressKey]);
@@ -1385,11 +1362,8 @@ function App() {
           ? previousBest / previousTotal
           : -1;
         const isNewBest = correct / total >= previousRatio;
-        const previousStars = p.bookStars?.[progressKey] || 0;
-        const bestStars = Math.max(previousStars, earned);
         return {
           completed: [...new Set([...p.completed, progressKey])],
-          stars: p.stars + Math.max(0, bestStars - previousStars),
           bestScores: {
             ...p.bestScores,
             [progressKey]: isNewBest ? correct : previousBest,
@@ -1397,10 +1371,6 @@ function App() {
           bestTotals: {
             ...p.bestTotals,
             [progressKey]: isNewBest ? total : previousTotal,
-          },
-          bookStars: {
-            ...p.bookStars,
-            [progressKey]: bestStars,
           },
           readDates: {
             ...p.readDates,
@@ -1695,9 +1665,6 @@ function App() {
           </span>
         </button>
         <div className="top-actions">
-          <span className="star-pill">
-            <Star size={16} fill="currentColor" /> {progress.stars}
-          </span>
           <button
             className="avatar-mini"
             onClick={() => go("profile")}
@@ -1923,7 +1890,7 @@ function HomeView({
             <em>나만의 숲</em>이 돼요
           </h1>
           <p>
-            읽고, 생각하고, 별을 모아
+            한 권씩 읽고 생각하며
             <br />
             책장을 채워 보세요.
           </p>
@@ -2129,7 +2096,7 @@ function StoryIntro({ book, back, begin }) {
         왼쪽 위부터 오른쪽 아래까지 살펴보세요. 문장 카드를 누르면 모리가
         천천히 읽어 줘요.
       </p>
-      <StoryComic book={book} interactive />
+      <StoryComic book={book} />
       <button className="primary wide story-begin" onClick={begin}>
         줄거리를 읽었어요 · 퀴즈 시작 <ChevronRight />
       </button>
@@ -2137,7 +2104,7 @@ function StoryIntro({ book, back, begin }) {
   );
 }
 
-function StoryComic({ book, interactive = false }) {
+function StoryComic({ book }) {
   return (
     <section className="story-comic" aria-label={`${book.title} 8컷 줄거리`}>
       <figure>
@@ -2151,18 +2118,10 @@ function StoryComic({ book, interactive = false }) {
       <ol className="story-sentences">
         {book.storySentences.map((sentence, sentenceIndex) => (
           <li key={sentence}>
-            {interactive ? (
-              <button onClick={() => speakKorean(sentence)}>
-                <span>{sentenceIndex + 1}</span>
-                <strong>{sentence}</strong>
-                <Volume2 size={18} aria-hidden="true" />
-              </button>
-            ) : (
-              <div>
-                <span>{sentenceIndex + 1}</span>
-                <strong>{sentence}</strong>
-              </div>
-            )}
+            <div>
+              <span>{sentenceIndex + 1}</span>
+              <strong>{sentence}</strong>
+            </div>
           </li>
         ))}
       </ol>
@@ -2739,15 +2698,6 @@ function Result({ book, correct, reflectionCount, go, record }) {
               생각 말하기 {reflectionCount} / {reflectionTotal}
             </small>
           )}
-          <div className="stars">
-            {[0, 1, 2].map((i) => (
-              <Star
-                key={i}
-                fill="currentColor"
-                className={i < starsForScore(score, scoredTotal) ? "on" : ""}
-              />
-            ))}
-          </div>
         </div>
       </div>
       <button className="primary wide" onClick={record}>
@@ -2851,12 +2801,6 @@ function StoryRecording({ book, existing, save, finish }) {
         여덟 문장을 이어 읽어 보세요. 녹음은 서버가 아닌 이 기기에만 저장돼요.
       </p>
       <div className="recording-script">
-        <button
-          className="listen-script"
-          onClick={() => speakKorean(book.storySentences.join(" "))}
-        >
-          <Volume2 /> 전체 문장 먼저 들어보기
-        </button>
         <ol>
           {book.storySentences.map((sentence) => (
             <li key={sentence}>{sentence}</li>
@@ -2913,7 +2857,7 @@ function StoryArchive({ book, recording, back, record, remove }) {
         <span>{book.series}</span>
         <span>{book.topics.join(" · ")}</span>
       </div>
-      <StoryComic book={book} interactive />
+      <StoryComic book={book} />
       <section className="saved-voice">
         <div>
           <span className="recording-icon"><Headphones /></span>
