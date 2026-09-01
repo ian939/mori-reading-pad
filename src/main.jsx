@@ -3,7 +3,6 @@ import { createRoot } from "react-dom/client";
 import {
   ArrowLeft,
   BookOpen,
-  CalendarDays,
   Camera,
   Check,
   ChevronRight,
@@ -14,7 +13,6 @@ import {
   Mic,
   Plus,
   RotateCcw,
-  SlidersHorizontal,
   Sparkles,
   Square,
   Star,
@@ -88,21 +86,21 @@ const LEVEL_1_QUESTIONS = {
       kind: "choice",
       skill: "retrieve",
       type: "내용 찾기",
-      q: "오영이의 방에 불쑥 들어온 친구는 누구였나요?",
-      options: ["말하는 저금통 또보", "노래하는 라디오", "커다란 공룡", "사탕 가게 주인"],
+      q: "저금통에 넣어 차곡차곡 모을 수 있는 것은 무엇일까요?",
+      options: ["동전", "돌멩이", "나뭇잎", "지우개"],
       answer: 0,
-      why: "이야기의 시작에서 저금통 또보가 오영이 방에 찾아왔어요.",
+      why: "저금통에는 동전이나 지폐 같은 돈을 넣어 모아요.",
       wrongWhy: {
-        1: "노래하는 라디오는 이야기 속에 등장하지 않았어요. 방에 들어온 친구의 생김새와 말을 떠올려 봐요.",
-        2: "커다란 공룡은 오영이의 방에 찾아오지 않았어요. 돈을 모을 수 있는 물건처럼 생긴 친구였어요.",
-        3: "사탕 가게 주인은 오영이의 방에 들어오지 않았어요. 오영이에게 돈 이야기를 들려준 친구를 떠올려 봐요.",
+        1: "돌멩이는 저금통에 넣어도 돈이 되지 않아요. 가게에서 쓸 수 있는 것을 떠올려 봐요.",
+        2: "나뭇잎은 저금통에 모아도 물건을 살 수 없어요. 둥글고 단단한 돈을 떠올려 봐요.",
+        3: "지우개는 쓰는 물건이지 저금통에 모으는 돈이 아니에요.",
       },
     },
     {
       kind: "choice",
       skill: "retrieve",
       type: "내용 찾기",
-      q: "또보가 보여 준 동전과 지폐의 모습으로 알맞은 것은?",
+      q: "{guide}가 보여 준 동전과 지폐의 모습으로 알맞은 것은?",
       options: [
         "동전은 둥글고 단단하며, 지폐는 네모난 종이 모양이에요.",
         "동전과 지폐는 모두 똑같은 크기의 세모 모양이에요.",
@@ -110,7 +108,7 @@ const LEVEL_1_QUESTIONS = {
         "동전과 지폐에는 아무 숫자도 없어요.",
       ],
       answer: 0,
-      why: "또보는 둥글고 단단한 동전과 네모난 지폐를 보여 주었어요.",
+      why: "{guide}가 둥글고 단단한 동전과 네모난 지폐를 보여 주었어요.",
       wrongWhy: {
         1: "동전과 지폐는 똑같은 세모 모양이 아니에요. 두 돈의 서로 다른 모양을 떠올려 봐요.",
         2: "동전과 지폐의 재료를 서로 바꾸어 말했어요. 손으로 만졌을 때 단단한 돈이 무엇인지 생각해 봐요.",
@@ -158,7 +156,7 @@ const LEVEL_1_QUESTIONS = {
       kind: "choice",
       skill: "infer",
       type: "까닭 추론",
-      q: "또보가 친구들이 그린 돈을 쓸 수 없다고 말한 까닭은?",
+      q: "{guide}가, 친구들이 그린 돈을 쓸 수 없다고 말한 까닭은?",
       options: [
         "색연필이 너무 짧아서",
         "진짜 돈은 일을 해서 벌어야 하고, 그린 돈은 가짜라서",
@@ -179,13 +177,13 @@ const LEVEL_1_QUESTIONS = {
       type: "순서 이해",
       q: "이야기의 흐름에 맞게 장면을 차례대로 눌러 보세요.",
       items: [
-        { id: "work", emoji: "💼", label: "또보가 돈은 일을 해서 번다고 알려 줘요." },
-        { id: "enter", emoji: "🐷", label: "또보가 오영이의 방에 들어와요." },
-        { id: "save", emoji: "🪙", label: "오영이가 또보에게 동전을 넣어요." },
-        { id: "show", emoji: "💵", label: "또보가 동전과 지폐를 보여 줘요." },
+        { id: "work", emoji: "💼", label: "{guide}가 돈은 일을 해서 번다고 알려 줘요." },
+        { id: "enter", emoji: "🐷", label: "{guide}가 {hero}의 방에 들어와요." },
+        { id: "save", emoji: "🪙", label: "{hero:이} {guide}에게 동전을 넣어요." },
+        { id: "show", emoji: "💵", label: "{guide}가 동전과 지폐를 보여 줘요." },
       ],
       answer: ["enter", "show", "work", "save"],
-      why: "또보가 방에 찾아와 돈을 보여 주고, 돈을 버는 방법을 설명한 뒤 오영이가 동전을 넣어요.",
+      why: "{guide}가 방에 찾아와 돈을 보여 주고, 돈을 버는 방법을 설명한 뒤 {hero:이} 동전을 넣어요.",
     },
     {
       kind: "image-choice",
@@ -421,9 +419,69 @@ const LEVEL_1_QUESTIONS = {
   ],
 };
 
+// --- Story cast ---------------------------------------------------------
+// A book may declare a `cast` so its story text stays free of another book's
+// proprietary characters. The protagonist (`hero`) is filled from the child's
+// chosen character (default "모리"); the helper (`guide`) is a neutral role.
+// Tokens in the text look like `{hero}` or `{hero:이}` where the part after the
+// colon is a Korean particle the helper conjugates to the name's final sound.
+const DEFAULT_HERO = "모리";
+
+const endsWithBatchim = (word) => {
+  const last = (word || "").trim().slice(-1);
+  const code = last.charCodeAt(0);
+  if (Number.isNaN(code) || code < 0xac00 || code > 0xd7a3) return false;
+  return (code - 0xac00) % 28 !== 0;
+};
+
+// particle token -> [형태 with 받침, 형태 without 받침]
+const JOSA_FORMS = {
+  은: ["은", "는"],
+  는: ["은", "는"],
+  이: ["이", "가"],
+  가: ["이", "가"],
+  을: ["을", "를"],
+  를: ["을", "를"],
+  과: ["과", "와"],
+  와: ["과", "와"],
+};
+
+const applyCast = (text, cast) =>
+  text.replace(/\{(\w+)(?::([^}]+))?\}/g, (whole, key, particle) => {
+    const name = cast[key];
+    if (name == null) return whole; // leave unrelated braces untouched
+    if (!particle) return name;
+    const forms = JOSA_FORMS[particle];
+    if (!forms) return `${name}${particle}`;
+    return `${name}${forms[endsWithBatchim(name) ? 0 : 1]}`;
+  });
+
+const deepCast = (value, cast) => {
+  if (typeof value === "string") return applyCast(value, cast);
+  if (Array.isArray(value)) return value.map((item) => deepCast(item, cast));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, deepCast(item, cast)]),
+    );
+  }
+  return value;
+};
+
+const resolveHero = (childProfile) =>
+  childProfile?.completed && childProfile.name?.trim()
+    ? childProfile.name.trim()
+    : DEFAULT_HERO;
+
+// Books without a `cast` (e.g. the food book) are returned untouched.
+const hydrateCast = (book, hero) =>
+  book.cast ? deepCast(book, { hero, guide: book.cast.guide }) : book;
+
 const DEFAULT_BOOKS = [
   {
     id: "money",
+    // hero is filled from the child's character; guide replaces the source
+    // book's proprietary character so the story carries only the money concept.
+    cast: { guide: "저금통 친구" },
     title: "돈이 뭐야?",
     tag: "생활 · 경제",
     cover: asset("assets/money-cover-v2.png"),
@@ -431,27 +489,22 @@ const DEFAULT_BOOKS = [
     light: "#fff0e7",
     age: "6–8세",
     minutes: 12,
-    desc: "오영이의 방에 찾아온 또보와 함께 돈의 쓰임, 가격, 저축을 알아봐요.",
+    desc: "{hero}의 방에 찾아온 {guide}와 함께 돈의 쓰임, 가격, 저축을 알아봐요.",
     publisher: "그레이트북스",
     series: "내 친구 사회공룡",
     topics: ["생활 경제", "돈", "저축"],
     storyComic: asset("assets/money-story-comic-v1.webp"),
     storySentences: [
-      "오영이의 방에 말하는 저금통 또보가 찾아왔어요.",
-      "또보는 둥근 동전과 네모난 지폐를 보여 주었어요.",
-      "오영이는 가격과 가진 돈을 비교해야 한다는 것을 알았어요.",
+      "{hero}의 방에 말하는 {guide}가 찾아왔어요.",
+      "{guide}가 둥근 동전과 네모난 지폐를 보여 주었어요.",
+      "{hero:은} 가격과 가진 돈을 비교해야 한다는 것을 알았어요.",
       "마음대로 그린 돈은 가게에서 쓸 수 없었어요.",
       "돈은 일을 한 대가로 벌 수 있어요.",
       "진짜 돈으로 필요한 물건과 서비스를 이용할 수 있어요.",
-      "오영이는 쓰지 않은 동전을 또보에게 차곡차곡 모았어요.",
+      "{hero:은} 쓰지 않은 동전을 {guide}에게 차곡차곡 모았어요.",
       "돈을 계획해서 쓰고 모으면 원하는 일을 준비할 수 있어요.",
     ],
-    creature: {
-      emoji: "🐷",
-      name: "저금통 또보",
-      fact: "동전을 차곡차곡 모으는 든든한 저금통 친구",
-    },
-    quizVersion: 4,
+    quizVersion: 5,
     questions: [
       {
         kind: "completion",
@@ -469,14 +522,14 @@ const DEFAULT_BOOKS = [
         skill: "recall",
         method: "Recall",
         type: "기억 꺼내기",
-        q: "책을 잠깐 덮고, 또보가 오영이에게 처음 보여 준 두 가지를 말해 보세요.",
+        q: "책을 잠깐 덮고, {guide}가 {hero}에게 처음 보여 준 두 가지를 말해 보세요.",
         prompts: [
           "두 가지 모두 기억했어요",
           "한 가지가 먼저 떠올랐어요",
           "힌트를 보고 다시 말했어요",
         ],
         hint: "둥글고 단단한 것과 네모난 종이 모양을 떠올려 보세요.",
-        exampleAnswer: "또보는 동전과 지폐를 보여 주었어요.",
+        exampleAnswer: "{guide}가 동전과 지폐를 보여 주었어요.",
         why: "그림과 낱말을 보지 않고 다시 떠올리면 이야기 속 정보가 더 오래 기억에 남아요.",
       },
       {
@@ -510,7 +563,7 @@ const DEFAULT_BOOKS = [
         skill: "wh-question",
         method: "Wh-question",
         type: "어떻게 질문",
-        q: "오영이가 사탕을 사기 전에 어떻게 살 수 있는지 확인해야 할까요?",
+        q: "{hero:이} 사탕을 사기 전에 어떻게 살 수 있는지 확인해야 할까요?",
         options: [
           "사탕의 가격과 가진 돈을 비교해요",
           "사탕의 색깔만 살펴봐요",
@@ -553,11 +606,11 @@ const DEFAULT_BOOKS = [
         skill: "open-ended",
         method: "Open-ended",
         type: "선택 살펴보기",
-        q: "오영이가 동전을 바로 쓰지 않고 또보에게 넣었어요. 이 선택의 좋은 점과 아쉬운 점은 무엇일까요?",
+        q: "{hero:이} 동전을 바로 쓰지 않고 {guide}에게 넣었어요. 이 선택의 좋은 점과 아쉬운 점은 무엇일까요?",
         prompts: [
           "좋은 점은…, 아쉬운 점은…",
           "지금 쓰면…, 모아 두면…",
-          "내가 오영이라면… 왜냐하면…",
+          "나라면 어떻게 했을까… 왜냐하면…",
         ],
         why: "저축하면 더 큰 목표를 이룰 수 있지만 지금 원하는 것을 미뤄야 해요. 두 면을 함께 보는 것이 좋은 선택의 시작이에요.",
       },
@@ -572,7 +625,7 @@ const DEFAULT_BOOKS = [
           "다른 것을 고른 적이 있어요…",
           "아직 없지만 다음에는…",
         ],
-        why: "책 속 오영이의 선택을 내 경험과 연결하면 ‘필요한 것’과 ‘원하는 것’을 구분하는 힘이 자라요.",
+        why: "책 속 {hero}의 선택을 내 경험과 연결하면 ‘필요한 것’과 ‘원하는 것’을 구분하는 힘이 자라요.",
       },
       {
         kind: "distancing",
@@ -614,11 +667,6 @@ const DEFAULT_BOOKS = [
       "빵과 치즈, 배추와 토마토가 한곳에 모였어요.",
       "여러 사람의 손을 거친 재료는 맛있는 샌드위치가 되었어요.",
     ],
-    creature: {
-      emoji: "🍎",
-      name: "새콤 사과",
-      fact: "나무에서 자라 주스와 잼 같은 여러 음식으로 변신해요",
-    },
     questions: [
       {
         kind: "completion",
@@ -1039,14 +1087,20 @@ function App() {
   const previewUrlsRef = useRef(new Set());
   const recordingUrlsRef = useRef(new Set());
   const profileUrlsRef = useRef(new Set());
+  const hero = resolveHero(childProfile);
   const activeBooks = useMemo(
     () =>
-      books.map((book) => ({
-        ...book,
-        quizLevel,
-        questions: questionsForLevel(book, quizLevel),
-      })),
-    [books, quizLevel],
+      books.map((book) =>
+        hydrateCast(
+          {
+            ...book,
+            quizLevel,
+            questions: questionsForLevel(book, quizLevel),
+          },
+          hero,
+        ),
+      ),
+    [books, quizLevel, hero],
   );
   const selected =
     activeBooks.find((book) => book.id === selectedId) || activeBooks[0];
@@ -1639,7 +1693,6 @@ function App() {
             books={activeBooks}
             progress={progress}
             quizLevel={quizLevel}
-            recordings={recordings}
             go={go}
           />
         )}
@@ -2744,8 +2797,8 @@ function StoryRecording({ book, existing, save, finish }) {
 function StoryArchive({ book, recording, back, record, remove }) {
   return (
     <div className="page archive-page">
-      <Back onClick={back} label="도감으로" />
-      <span className="eyebrow">이야기 도감 · {QUIZ_LEVELS[book.quizLevel].label}</span>
+      <Back onClick={back} label="책장으로" />
+      <span className="eyebrow">줄거리 다시 읽기 · {QUIZ_LEVELS[book.quizLevel].label}</span>
       <h1>{book.title}</h1>
       <div className="archive-meta">
         <span>{book.publisher}</span>
@@ -2775,9 +2828,7 @@ function StoryArchive({ book, recording, back, record, remove }) {
   );
 }
 
-function LibraryView({ books, progress, quizLevel, recordings, go }) {
-  const [filterType, setFilterType] = useState("topic");
-  const [filterValue, setFilterValue] = useState("all");
+function LibraryView({ books, progress, quizLevel, go }) {
   const completedBooks = useMemo(
     () =>
       books
@@ -2795,22 +2846,6 @@ function LibraryView({ books, progress, quizLevel, recordings, go }) {
         }),
     [books, progress.completed, progress.readDates, quizLevel],
   );
-  const filterOptions = useMemo(() => {
-    const values = completedBooks.flatMap((book) =>
-      filterType === "publisher"
-        ? [book.publisher]
-        : filterType === "series"
-          ? [book.series]
-          : book.topics,
-    );
-    return [...new Set(values.filter(Boolean))];
-  }, [completedBooks, filterType]);
-  const filteredBooks = completedBooks.filter((book) => {
-    if (filterValue === "all") return true;
-    if (filterType === "publisher") return book.publisher === filterValue;
-    if (filterType === "series") return book.series === filterValue;
-    return book.topics.includes(filterValue);
-  });
   const completedCount = completedBooks.length;
   const emptySlots = Math.max(0, books.length - completedCount);
   return (
@@ -2849,86 +2884,16 @@ function LibraryView({ books, progress, quizLevel, recordings, go }) {
         </div>
         <div className="wood" />
       </div>
-      <section className="collection">
-        <div className="section-title">
-          <div>
-            <span className="overline">최근에 읽은 순서</span>
-            <h2>나의 이야기 도감</h2>
-          </div>
-          <span className="count">{QUIZ_LEVELS[quizLevel].label} · {completedCount}권</span>
+      {completedBooks.length > 0 && (
+        <p className="shelf-hint">책을 누르면 줄거리를 다시 읽고 녹음할 수 있어요.</p>
+      )}
+      {completedBooks.length === 0 && (
+        <div className="catalog-empty">
+          <BookOpen />
+          <strong>아직 완독한 책이 없어요.</strong>
+          <span>새 책 모험을 마치면 책장에 한 권씩 꽂혀요.</span>
         </div>
-        <div
-          className="catalog-filters"
-          data-allow-native-editing="true"
-          aria-label="도감 필터"
-        >
-          <SlidersHorizontal aria-hidden="true" />
-          <label>
-            <span>분류</span>
-            <select
-              value={filterType}
-              onChange={(event) => {
-                setFilterType(event.target.value);
-                setFilterValue("all");
-              }}
-            >
-              <option value="publisher">출판사</option>
-              <option value="series">시리즈</option>
-              <option value="topic">주제</option>
-            </select>
-          </label>
-          <label>
-            <span>찾기</span>
-            <select
-              value={filterValue}
-              onChange={(event) => setFilterValue(event.target.value)}
-            >
-              <option value="all">전체 보기</option>
-              {filterOptions.map((option) => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <div className="catalog-list">
-          {filteredBooks.map((book) => {
-            const progressKey = bookProgressKey(book.id, quizLevel);
-            const recording = recordings[progressKey];
-            return (
-              <button
-                className="catalog-book"
-                key={book.id}
-                onClick={() => go("archive", book)}
-              >
-                <BookCover book={book} className="catalog-cover" />
-                <span className="catalog-book-copy">
-                  <small>{book.publisher} · {book.series}</small>
-                  <strong>{book.title}</strong>
-                  <span className="read-date">
-                    <CalendarDays size={15} />
-                    읽은 날 {formatReadDate(progress.readDates?.[progressKey])}
-                  </span>
-                  <span className="topic-row">
-                    {book.topics.map((topic) => <i key={topic}>{topic}</i>)}
-                  </span>
-                  <span className={`voice-status ${recording ? "saved" : ""}`}>
-                    <Headphones size={15} />
-                    {recording ? "내 줄거리 녹음 듣기" : "줄거리 보기 · 녹음하기"}
-                  </span>
-                </span>
-                <ChevronRight aria-hidden="true" />
-              </button>
-            );
-          })}
-          {!filteredBooks.length && (
-            <div className="catalog-empty">
-              <BookOpen />
-              <strong>조건에 맞는 완독 책이 없어요.</strong>
-              <span>필터를 바꾸거나 새 책 모험을 마쳐 보세요.</span>
-            </div>
-          )}
-        </div>
-      </section>
+      )}
     </div>
   );
 }
