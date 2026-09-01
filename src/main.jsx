@@ -16,6 +16,7 @@ import {
   Sparkles,
   Square,
   Trash2,
+  Trees,
   UserRound,
   Volume2,
   X,
@@ -26,6 +27,7 @@ import {
   saveRecording,
 } from "./audioStore";
 import { getRegisteredBook, registerBook } from "./bookApi";
+import { ForestView } from "./ForestView";
 import { generateCharacterVariations } from "./characterApi";
 import { importCharacterImages } from "./characterSheet";
 import { enableKidSafeInteractions } from "./kidSafeInteractions";
@@ -460,6 +462,7 @@ const hydrateCast = (book, hero) =>
 const DEFAULT_BOOKS = [
   {
     id: "money",
+    genre: 6,
     // hero is filled from the child's character; guide replaces the source
     // book's proprietary character so the story carries only the money concept.
     cast: { guide: "저금통 친구" },
@@ -626,6 +629,7 @@ const DEFAULT_BOOKS = [
   },
   {
     id: "origin",
+    genre: 2,
     // No cast: this book's framing ("우주 친구들") and factual food-origin
     // process use no proprietary named characters, so neutralization is not
     // needed. Explicitly exempt so the copyright guard passes. See AGENTS.md.
@@ -778,6 +782,7 @@ const DEFAULT_BOOKS = [
   },
   {
     id: "cold",
+    genre: 7,
     // hero-only cast: the learner is the child's character; other roles are
     // neutralized to generic names so no proprietary characters remain.
     cast: {},
@@ -811,6 +816,7 @@ const DEFAULT_BOOKS = [
   },
   {
     id: "bicycle",
+    genre: 6,
     cast: {},
     quizVersion: 1,
     title: "자전거 사 주세요",
@@ -843,6 +849,7 @@ const DEFAULT_BOOKS = [
   },
   {
     id: "transport",
+    genre: 4,
     cast: {},
     quizVersion: 1,
     title: "타고, 타고, 타고!",
@@ -1183,6 +1190,44 @@ function App() {
   const selectedCharacter = profileMedia.variants.find(
     (variant) => variant.id === childProfile.selectedVariantId,
   );
+
+  // One tree per completed book: size by highest quiz level reached, and it
+  // grows to a big tree a week after it was read.
+  const forestTrees = useMemo(() => {
+    const trees = [];
+    for (const book of activeBooks) {
+      const lv2Key = bookProgressKey(book.id, "lv2");
+      const lv1Key = bookProgressKey(book.id, "lv1");
+      const lv2Done = progress.completed.includes(lv2Key);
+      const lv1Done = progress.completed.includes(lv1Key);
+      if (!lv2Done && !lv1Done) continue;
+      const qlv = lv2Done ? 2 : 1;
+      const key = lv2Done ? lv2Key : lv1Key;
+      const readIso = progress.readDates?.[key];
+      const daysSince = readIso
+        ? (Date.now() - Date.parse(readIso)) / 86400000
+        : 0;
+      const grown = daysSince >= 7;
+      const score = progress.bestScores?.[key];
+      const total = progress.bestTotals?.[key] || 5;
+      trees.push({
+        bookId: book.id,
+        title: book.title,
+        genre: book.genre ?? 0,
+        qlv,
+        lv: Math.min(3, qlv + (grown ? 1 : 0)),
+        fresh: !grown,
+        dateText: formatReadDate(readIso),
+        scoreText: Number.isFinite(score) ? `${score} / ${total}개` : "—",
+        levelLabel: qlv === 2 ? "LV2 보통" : "LV1 쉬움",
+      });
+    }
+    return trees;
+  }, [activeBooks, progress]);
+  const todayBook =
+    activeBooks.find(
+      (book) => !progress.completed.includes(bookProgressKey(book.id, quizLevel)),
+    ) || activeBooks[0];
 
   useEffect(() => {
     writeUserJson(CURRENT_USER.id, "progress", progress);
@@ -1760,7 +1805,7 @@ function App() {
               recordings[bookProgressKey(selected.id, quizLevel)] || null
             }
             save={storeBookRecording}
-            finish={() => go("library")}
+            finish={() => go("forest")}
           />
         )}
         {view === "archive" && (
@@ -1772,6 +1817,18 @@ function App() {
             back={() => go("library")}
             record={() => go("recording")}
             remove={() => deleteBookRecording(selected)}
+          />
+        )}
+        {view === "forest" && (
+          <ForestView
+            trees={forestTrees}
+            todayBook={todayBook?.title}
+            onQuiz={() => todayBook && startQuiz(todayBook)}
+            onOpenShelf={() => go("library")}
+            onReread={(bookId) => {
+              const book = activeBooks.find((item) => item.id === bookId);
+              if (book) go("detail", book);
+            }}
           />
         )}
         {view === "library" && (
@@ -1828,10 +1885,10 @@ function App() {
             onClick={() => go("home")}
           />
           <NavButton
-            active={view === "library"}
-            icon={Library}
-            label="내 책장"
-            onClick={() => go("library")}
+            active={view === "forest" || view === "library"}
+            icon={Trees}
+            label="내 숲"
+            onClick={() => go("forest")}
           />
           <button
             className="add-nav"
@@ -2712,8 +2769,8 @@ function Result({ book, correct, reflectionCount, go, record }) {
       <button className="primary wide" onClick={record}>
         줄거리 소리 내어 읽기 <Mic />
       </button>
-      <button className="text-btn" onClick={() => go("library")}>
-        녹음은 나중에 하고 책장으로
+      <button className="text-btn" onClick={() => go("forest")}>
+        녹음은 나중에 하고 내 숲으로
       </button>
     </div>
   );
@@ -2911,6 +2968,9 @@ function LibraryView({ books, progress, quizLevel, go }) {
   const emptySlots = Math.max(0, books.length - completedCount);
   return (
     <div className="page library-page">
+      <button className="shelf-to-forest" onClick={() => go("forest")}>
+        <Trees size={17} /> 내 숲으로 보기
+      </button>
       <span className="eyebrow">나의 책숲</span>
       <div className="title-line">
         <h1>
