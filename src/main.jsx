@@ -65,344 +65,6 @@ const childShelfTitle = (name) => {
   return `${cleanName}${hasBatchim ? "이" : ""}의 책장`;
 };
 
-const LEVEL_1_QUESTIONS = {
-  money: [
-    {
-      kind: "choice",
-      skill: "retrieve",
-      type: "내용 찾기",
-      q: "저금통에 넣어 차곡차곡 모을 수 있는 것은 무엇일까요?",
-      options: ["동전", "돌멩이", "나뭇잎", "지우개"],
-      answer: 0,
-      why: "저금통에는 동전이나 지폐 같은 돈을 넣어 모아요.",
-      wrongWhy: {
-        1: "돌멩이는 저금통에 넣어도 돈이 되지 않아요. 가게에서 쓸 수 있는 것을 떠올려 봐요.",
-        2: "나뭇잎은 저금통에 모아도 물건을 살 수 없어요. 둥글고 단단한 돈을 떠올려 봐요.",
-        3: "지우개는 쓰는 물건이지 저금통에 모으는 돈이 아니에요.",
-      },
-    },
-    {
-      kind: "choice",
-      skill: "retrieve",
-      type: "내용 찾기",
-      q: "{guide}가 보여 준 동전과 지폐의 모습으로 알맞은 것은?",
-      options: [
-        "동전은 둥글고 단단하며, 지폐는 네모난 종이 모양이에요.",
-        "동전과 지폐는 모두 똑같은 크기의 세모 모양이에요.",
-        "동전은 종이이고, 지폐는 금속으로 만들어요.",
-        "동전과 지폐에는 아무 숫자도 없어요.",
-      ],
-      answer: 0,
-      why: "{guide}가 둥글고 단단한 동전과 네모난 지폐를 보여 주었어요.",
-      wrongWhy: {
-        1: "동전과 지폐는 똑같은 세모 모양이 아니에요. 두 돈의 서로 다른 모양을 떠올려 봐요.",
-        2: "동전과 지폐의 재료를 서로 바꾸어 말했어요. 손으로 만졌을 때 단단한 돈이 무엇인지 생각해 봐요.",
-        3: "동전과 지폐에는 돈의 가치를 알려 주는 숫자가 적혀 있어요.",
-      },
-    },
-    {
-      kind: "choice",
-      skill: "vocabulary",
-      type: "낱말 이해",
-      q: "물건에 붙은 ‘가격’은 무엇을 알려 줄까요?",
-      options: ["물건의 무게", "물건을 살 때 필요한 돈", "만든 사람의 나이", "가게 문 닫는 시간"],
-      answer: 1,
-      why: "가격은 그 물건을 사려면 돈이 얼마나 필요한지 알려 줘요.",
-      wrongWhy: {
-        0: "무게는 물건이 얼마나 무거운지를 알려 주지만, 살 때 필요한 돈을 알려 주지는 않아요.",
-        2: "만든 사람의 나이는 물건을 사는 데 필요한 돈의 양과 관계가 없어요.",
-        3: "가게 문 닫는 시간은 영업시간이고, 물건에 붙은 가격의 뜻은 아니에요.",
-      },
-    },
-    {
-      kind: "match",
-      skill: "connect",
-      type: "생각 잇기",
-      q: "이야기 속 행동과 돈의 쓰임을 알맞게 연결해 보세요.",
-      leftItems: [
-        { id: "candy", emoji: "🍬", label: "사탕을 산다" },
-        { id: "ride", emoji: "🎡", label: "놀이기구를 탄다" },
-        { id: "chores", emoji: "🧹", label: "집안일을 돕고 용돈을 받는다" },
-      ],
-      rightItems: [
-        { id: "earn", label: "일을 하고 돈을 벌어요" },
-        { id: "goods", label: "물건을 사요" },
-        { id: "service", label: "서비스를 이용해요" },
-      ],
-      answer: { candy: "goods", ride: "service", chores: "earn" },
-      why: "돈으로 물건을 사거나 서비스를 이용할 수 있고, 일을 한 대가로 돈을 벌기도 해요.",
-      matchWhy: {
-        candy: "사탕은 손에 들고 먹을 수 있는 물건이에요.",
-        ride: "놀이기구를 타는 것은 시설이 주는 서비스를 이용하는 일이에요.",
-        chores: "집안일을 돕고 용돈을 받는 것은 일을 한 대가로 돈을 버는 일이에요.",
-      },
-    },
-    {
-      kind: "choice",
-      skill: "infer",
-      type: "까닭 추론",
-      q: "{guide}가, 친구들이 그린 돈을 쓸 수 없다고 말한 까닭은?",
-      options: [
-        "색연필이 너무 짧아서",
-        "진짜 돈은 일을 해서 벌어야 하고, 그린 돈은 가짜라서",
-        "종이가 너무 커서",
-        "친구들이 숫자를 몰라서",
-      ],
-      answer: 1,
-      why: "친구들이 마음대로 그린 가짜 돈은 사용할 수 없고, 진짜 돈은 일을 한 대가로 얻어요.",
-      wrongWhy: {
-        0: "색연필의 길이는 그린 돈을 사용할 수 없는 까닭과 관계가 없어요.",
-        2: "종이의 크기가 커도 마음대로 그린 돈은 진짜 돈이 되지 않아요.",
-        3: "친구들이 숫자를 아는지는 그린 돈이 가짜라는 사실과 관계가 없어요.",
-      },
-    },
-    {
-      kind: "sequence",
-      skill: "sequence",
-      type: "순서 이해",
-      q: "이야기의 흐름에 맞게 장면을 차례대로 눌러 보세요.",
-      items: [
-        { id: "work", emoji: "💼", label: "{guide}가 돈은 일을 해서 번다고 알려 줘요." },
-        { id: "enter", emoji: "🐷", label: "{guide}가 {hero}의 방에 들어와요." },
-        { id: "save", emoji: "🪙", label: "{hero:이} {guide}에게 동전을 넣어요." },
-        { id: "show", emoji: "💵", label: "{guide}가 동전과 지폐를 보여 줘요." },
-      ],
-      answer: ["enter", "show", "work", "save"],
-      why: "{guide}가 방에 찾아와 돈을 보여 주고, 돈을 버는 방법을 설명한 뒤 {hero:이} 동전을 넣어요.",
-    },
-    {
-      kind: "image-choice",
-      skill: "visual-infer",
-      type: "그림 추론",
-      q: "그림 속 아이가 사탕을 사기 전에 가장 먼저 확인해야 할 것은?",
-      visual: asset("assets/money-situation-v1.png"),
-      visualAlt: "동전을 들고 사탕 기계 앞에서 생각하는 아이",
-      options: ["사탕의 가격과 내가 가진 돈", "강아지의 꼬리 길이", "가게 지붕의 색깔", "구름이 움직이는 방향"],
-      answer: 0,
-      why: "물건을 사기 전에는 가격을 보고 내가 가진 돈으로 살 수 있는지 확인해야 해요.",
-      wrongWhy: {
-        1: "강아지의 꼬리 길이는 사탕을 살 수 있는지 판단하는 데 필요한 정보가 아니에요.",
-        2: "가게 지붕의 색깔을 알아도 사탕을 살 돈이 충분한지는 알 수 없어요.",
-        3: "구름의 움직임은 사탕의 값이나 아이가 가진 돈과 관계가 없어요.",
-      },
-    },
-    {
-      kind: "choice",
-      skill: "numeracy",
-      type: "수리 문해",
-      q: "사탕 1개가 100원이라면 1,000원으로 몇 개를 살 수 있을까요?",
-      options: ["1개", "5개", "10개", "100개"],
-      answer: 2,
-      why: "100원이 10번 모이면 1,000원이므로 사탕 10개를 살 수 있어요.",
-      wrongWhy: {
-        0: "사탕 1개에는 100원만 필요해서 1,000원 중 많은 돈이 남아요.",
-        1: "사탕 5개는 500원이에요. 1,000원으로는 그보다 더 살 수 있어요.",
-        3: "사탕 100개에는 10,000원이 필요해서 1,000원으로는 살 수 없어요.",
-      },
-    },
-    {
-      kind: "choice",
-      skill: "apply",
-      type: "생활 적용",
-      q: "사고 싶은 장난감이 있지만 돈이 부족할 때 가장 알맞은 행동은?",
-      options: ["몰래 가져온다", "필요한 만큼 차근차근 모은다", "아무 물건이나 산다", "가격표를 떼어 낸다"],
-      answer: 1,
-      why: "이야기처럼 목표를 정하고 저축하면 기다림과 선택을 배울 수 있어요.",
-      wrongWhy: {
-        0: "돈을 내지 않고 몰래 가져오는 것은 다른 사람의 물건을 훔치는 행동이에요.",
-        2: "아무 물건이나 사면 원하는 장난감을 살 돈을 모으기 더 어려워져요.",
-        3: "가격표를 떼어도 장난감의 가격이나 필요한 돈은 달라지지 않아요.",
-      },
-    },
-    {
-      kind: "choice",
-      skill: "summarize",
-      type: "중심 생각",
-      q: "이 책의 내용을 가장 잘 정리한 문장은 무엇일까요?",
-      options: [
-        "돈은 그림으로 만들어 마음대로 쓸 수 있어요.",
-        "돈은 일을 통해 벌고, 물건이나 서비스에 쓰거나 저축할 수 있어요.",
-        "돈은 장난감 친구들에게만 필요해요.",
-        "돈은 크기가 클수록 언제나 더 값져요.",
-      ],
-      answer: 1,
-      why: "이 책은 돈을 버는 방법과 돈의 쓰임, 그리고 저축을 함께 알려 줘요.",
-      wrongWhy: {
-        0: "책에서는 마음대로 그린 돈은 가짜라서 사용할 수 없다고 했어요.",
-        2: "돈은 장난감 친구뿐 아니라 물건과 서비스를 이용하는 사람 모두에게 필요해요.",
-        3: "돈의 가치는 크기가 아니라 돈에 적힌 금액으로 정해져요.",
-      },
-    },
-  ],
-  origin: [
-    {
-      kind: "choice",
-      skill: "retrieve",
-      type: "내용 찾기",
-      q: "우주 친구들이 지구에서 가장 먼저 궁금해한 것은?",
-      options: ["음식이 어디서 왔는지", "자동차가 빠른 이유", "별이 빛나는 이유", "집을 짓는 방법"],
-      answer: 0,
-      why: "친구들은 마트의 맛있는 음식이 어디에서 왔는지 궁금해했어요.",
-      wrongWhy: {
-        1: "친구들이 처음 궁금해한 것은 자동차의 속도가 아니었어요. 마트에서 본 것들을 떠올려 봐요.",
-        2: "별은 우주 친구들에게 익숙하지만, 지구에서 처음 궁금해한 대상은 아니었어요.",
-        3: "친구들은 집을 짓는 방법보다 마트에 놓인 것들의 출발점을 궁금해했어요.",
-      },
-    },
-    {
-      kind: "choice",
-      skill: "retrieve",
-      type: "내용 찾기",
-      q: "배추의 여행이 가장 먼저 시작된 곳은 어디인가요?",
-      options: ["흙에 심은 작은 씨앗", "마트의 계산대", "식탁 위 접시", "냉장고 안"],
-      answer: 0,
-      why: "배추는 밭의 흙에 심은 작은 씨앗에서 여행을 시작해요.",
-      wrongWhy: {
-        1: "마트 계산대는 배추 여행의 마지막에 가까운 곳이지 시작점이 아니에요.",
-        2: "식탁 위 접시는 배추가 여러 과정을 거친 뒤 도착하는 곳이에요.",
-        3: "냉장고는 다 자란 배추를 보관하는 곳이라 여행이 시작되는 곳이 아니에요.",
-      },
-    },
-    {
-      kind: "choice",
-      skill: "vocabulary",
-      type: "낱말 이해",
-      q: "‘재료’와 뜻이 가장 가까운 것은?",
-      options: ["음식을 만드는 데 쓰는 것", "음식을 파는 사람", "음식을 담는 방", "음식을 먹는 시간"],
-      answer: 0,
-      why: "재료는 다른 물건이나 음식을 만들 때 바탕으로 쓰는 것이에요.",
-      wrongWhy: {
-        1: "음식을 파는 사람은 사람을 가리키고, ‘재료’는 음식을 만드는 데 들어가는 것을 가리켜요.",
-        2: "음식을 담는 방은 장소이고, ‘재료’는 만들 때 사용하는 것을 뜻해요.",
-        3: "음식을 먹는 시간은 때를 나타내므로 ‘재료’의 뜻과 달라요.",
-      },
-    },
-    {
-      kind: "match",
-      skill: "connect",
-      type: "생각 잇기",
-      q: "음식과 여행이 시작된 곳을 알맞게 연결해 보세요.",
-      leftItems: [
-        { id: "cabbage", emoji: "🥬", label: "배추" },
-        { id: "egg", emoji: "🥚", label: "달걀" },
-        { id: "milk", emoji: "🥛", label: "우유" },
-      ],
-      rightItems: [
-        { id: "cow", label: "젖소 농장" },
-        { id: "field", label: "배추밭" },
-        { id: "chicken", label: "닭이 있는 양계장" },
-      ],
-      answer: { cabbage: "field", egg: "chicken", milk: "cow" },
-      why: "배추는 밭에서, 달걀은 닭을 기르는 양계장에서, 우유는 젖소 농장에서 출발해요.",
-      matchWhy: {
-        cabbage: "배추는 흙에 심은 씨앗에서 자라는 채소예요.",
-        egg: "달걀은 닭이 낳기 때문에 닭을 기르는 곳에서 출발해요.",
-        milk: "우유는 젖소에게서 얻어요.",
-      },
-    },
-    {
-      kind: "choice",
-      skill: "infer",
-      type: "까닭 추론",
-      q: "농장에서 모은 우유를 치즈 공장으로 보내는 까닭은 무엇일까요?",
-      options: ["우유로 치즈를 만들기 위해서", "트럭의 색을 바꾸기 위해서", "젖소에게 우유를 돌려주기 위해서", "밭에 우유를 뿌리기 위해서"],
-      answer: 0,
-      why: "젖소에게서 얻은 우유는 공장에서 치즈를 만드는 중요한 재료가 돼요.",
-      wrongWhy: {
-        1: "우유를 공장으로 보내는 목적은 트럭의 색을 바꾸는 일이 아니에요.",
-        2: "젖소에게 돌려주려는 것이 아니라, 모은 우유로 새로운 음식을 만들려고 옮겨요.",
-        3: "우유는 밭에 뿌리는 물이 아니라 치즈를 만드는 재료로 사용돼요.",
-      },
-    },
-    {
-      kind: "sequence",
-      skill: "sequence",
-      type: "순서 이해",
-      q: "토마토가 케첩이 되어 우리에게 오는 순서대로 눌러 보세요.",
-      items: [
-        { id: "market", emoji: "🛒", label: "케첩이 마트에 도착해요." },
-        { id: "grow", emoji: "🍅", label: "토마토가 농장에서 자라요." },
-        { id: "factory", emoji: "🏭", label: "공장에서 토마토를 케첩으로 만들어요." },
-        { id: "truck", emoji: "🚚", label: "잘 익은 토마토를 트럭에 실어요." },
-      ],
-      answer: ["grow", "truck", "factory", "market"],
-      why: "농장에서 자란 토마토를 트럭으로 옮겨 공장에서 케첩으로 만든 뒤 마트로 보내요.",
-    },
-    {
-      kind: "image-choice",
-      skill: "visual-infer",
-      type: "그림 추론",
-      q: "그림 속 장면 다음에 일어날 일로 가장 알맞은 것은?",
-      visual: asset("assets/origin-situation-v1.png"),
-      visualAlt: "농부가 젖소 농장에서 우유통을 냉장 트럭에 싣는 장면",
-      options: [
-        "냉장 트럭이 우유를 치즈 공장으로 옮겨요.",
-        "농부가 우유통을 다시 비워 버려요.",
-        "젖소가 트럭을 타고 마트에 가요.",
-        "우유통으로 배추를 심어요.",
-      ],
-      answer: 0,
-      why: "농장에서 모은 우유는 상하지 않도록 차갑게 운반되어 치즈 같은 음식의 재료가 돼요.",
-      wrongWhy: {
-        1: "농부는 모은 우유를 버리지 않고 음식의 재료로 쓰기 위해 옮겨요.",
-        2: "젖소가 아니라 젖소에게서 얻은 우유가 냉장 트럭에 실려 이동해요.",
-        3: "우유통은 배추를 심는 도구가 아니며, 그림에서는 트럭에 실리고 있어요.",
-      },
-    },
-    {
-      kind: "choice",
-      skill: "infer",
-      type: "생각 추론",
-      q: "치즈, 빵, 배추, 토마토가 한곳에 모인 까닭은 무엇일까요?",
-      options: [
-        "함께 샌드위치의 재료가 되기 위해서",
-        "각자 다시 농장으로 돌아가기 위해서",
-        "누가 더 무거운지 겨루기 위해서",
-        "마트 문을 닫기 위해서",
-      ],
-      answer: 0,
-      why: "서로 다른 곳에서 온 재료들이 모여 하나의 샌드위치가 돼요.",
-      wrongWhy: {
-        1: "재료들은 농장으로 돌아가려는 것이 아니라 한곳에 모여 음식이 돼요.",
-        2: "재료들이 모인 까닭은 무게를 겨루기 위해서가 아니에요.",
-        3: "마트 문을 닫는 일은 여러 재료가 한곳에 모인 까닭과 관계가 없어요.",
-      },
-    },
-    {
-      kind: "choice",
-      skill: "apply",
-      type: "생활 적용",
-      q: "사과 주스가 어디서 왔는지 알고 싶을 때 가장 좋은 질문은?",
-      options: ["사과는 어디에서 자랐나요?", "병은 무슨 색인가요?", "누가 먼저 마실까요?", "냉장고는 얼마나 큰가요?"],
-      answer: 0,
-      why: "재료의 출발점을 물으면 음식이 우리에게 오는 과정을 추적할 수 있어요.",
-      wrongWhy: {
-        1: "병의 색깔을 알아도 주스의 재료인 사과가 어디서 왔는지는 알 수 없어요.",
-        2: "마시는 순서는 정할 수 있지만 사과 주스의 출발점을 찾는 질문은 아니에요.",
-        3: "냉장고의 크기는 주스를 보관하는 곳에 대한 정보이지 사과의 고향에 대한 정보가 아니에요.",
-      },
-    },
-    {
-      kind: "choice",
-      skill: "summarize",
-      type: "중심 생각",
-      q: "이 책의 중심 생각을 가장 잘 나타낸 문장은 무엇일까요?",
-      options: [
-        "모든 음식은 처음부터 마트에서 생겨나요.",
-        "음식은 농장과 공장, 운반 과정을 거쳐 우리 식탁에 와요.",
-        "음식은 색깔이 같으면 모두 같은 곳에서 와요.",
-        "트럭은 음식보다 먼저 밭에서 자라요.",
-      ],
-      answer: 1,
-      why: "책은 여러 음식이 어디서 시작해 어떤 과정을 거쳐 식탁에 오는지 보여 줘요.",
-      wrongWhy: {
-        0: "책에서는 음식이 마트에서 생기는 것이 아니라 농장과 공장에서 온다고 알려 줘요.",
-        2: "색깔이 같은 음식도 재료와 출발점은 서로 다를 수 있어요.",
-        3: "트럭은 밭에서 자라는 것이 아니라 다 자란 재료와 완성된 음식을 옮겨요.",
-      },
-    },
-  ],
-};
 
 // --- Story cast ---------------------------------------------------------
 // A book may declare a `cast` so its story text stays free of another book's
@@ -902,11 +564,7 @@ const isReflectiveQuestion = (question) =>
 const isScoredQuestion = (question) =>
   question.scoreMode !== "performance" && !isReflectiveQuestion(question);
 const questionsForLevel = (book, level) =>
-  book.levelQuestions?.[level] ||
-  CURRICULUM_QUESTIONS[book.id]?.[level] ||
-  (level === "lv1"
-    ? book.level1Questions || LEVEL_1_QUESTIONS[book.id] || book.questions
-    : book.questions);
+  CURRICULUM_QUESTIONS[book.id]?.[level] || book.questions;
 const bookProgressKey = (bookId, level) => `${bookId}:${level}`;
 const loadQuizLevel = () => {
   const saved = readUserText(
@@ -1061,51 +719,10 @@ const quizStage = (index, level, total) => {
   return QUIZ_LEVELS[level].stages[stageIndex];
 };
 
-const loadBooks = () => {
-  try {
-    const saved = readUserJson(
-      CURRENT_USER.id,
-      "reviewed-books",
-      null,
-      "mori-reviewed-books",
-    );
-    if (!Array.isArray(saved)) return DEFAULT_BOOKS;
-    return DEFAULT_BOOKS.map((book) => {
-      const reviewed = saved.find((item) => item.id === book.id);
-      const reviewedVersionMatches = reviewed?.quizVersion === book.quizVersion;
-      const defaultLevels = CURRICULUM_QUESTIONS[book.id] || {};
-      const levelQuestions = Object.fromEntries(
-        Object.keys(QUIZ_LEVELS).map((level) => {
-          const defaults = defaultLevels[level];
-          const savedLevel = reviewedVersionMatches
-            ? reviewed?.levelQuestions?.[level]
-            : null;
-          // Match on question ids, not just count: an older curriculum could
-          // have the same number of questions and would otherwise silently
-          // replace the current ones (e.g. a 3-option Lv1 with speaking
-          // questions surviving the rewrite).
-          const validSavedLevel =
-            Array.isArray(savedLevel) &&
-            (!defaults ||
-              (savedLevel.length === defaults.length &&
-                defaults.every(
-                  (question, index) => savedLevel[index]?.id === question.id,
-                )));
-          return [level, validSavedLevel ? savedLevel : defaults];
-        }),
-      );
-      return {
-        ...book,
-        levelQuestions,
-        questions: levelQuestions.lv2 || book.questions,
-        level1Questions:
-          levelQuestions.lv1 || LEVEL_1_QUESTIONS[book.id] || book.questions,
-      };
-    });
-  } catch {
-    return DEFAULT_BOOKS;
-  }
-};
+// Books always come from the current curriculum. Questions used to be
+// persisted for the guardian preview, which meant an older saved copy could
+// silently replace the shipped quizzes.
+const loadBooks = () => DEFAULT_BOOKS;
 
 const loadProgress = () => {
   try {
@@ -1185,7 +802,6 @@ function App() {
   const [characterState, setCharacterState] = useState("idle");
   const [characterError, setCharacterError] = useState("");
   const [recordings, setRecordings] = useState({});
-  const [reviewOrigin, setReviewOrigin] = useState("detail");
   const topRef = useRef(null);
   const bookPollTimerRef = useRef(null);
   const previewUrlsRef = useRef(new Set());
@@ -1275,24 +891,6 @@ function App() {
   useEffect(() => {
     writeUserText(CURRENT_USER.id, "quiz-level", quizLevel);
   }, [quizLevel]);
-  useEffect(() => {
-    writeUserJson(
-      CURRENT_USER.id,
-      "reviewed-books",
-      books.map((book) => ({
-        id: book.id,
-        quizVersion: book.quizVersion,
-        questions: questionsForLevel(book, "lv2"),
-        level1Questions: questionsForLevel(book, "lv1"),
-        levelQuestions: Object.fromEntries(
-          Object.keys(QUIZ_LEVELS).map((level) => [
-            level,
-            questionsForLevel(book, level),
-          ]),
-        ),
-      })),
-    );
-  }, [books]);
   useEffect(() => {
     let cancelled = false;
     Promise.all([
@@ -1394,9 +992,10 @@ function App() {
     };
     setProgress(cleared);
     writeUserJson(CURRENT_USER.id, "progress", cleared);
-    // Restoring books re-persists reviewed-books from the current defaults,
-    // which also drops any guardian-reviewed edits.
     setBooks(DEFAULT_BOOKS);
+    // Clear the retired guardian-preview store so stale questions cannot
+    // survive on devices that used the old build.
+    writeUserJson(CURRENT_USER.id, "reviewed-books", []);
     await Promise.all(
       Object.keys(recordings).map((key) =>
         removeRecording(CURRENT_USER.id, key).catch(() => {}),
@@ -1445,10 +1044,6 @@ function App() {
     if (!QUIZ_LEVELS[level] || level === quizLevel) return;
     setQuizLevel(level);
     setToast(`${QUIZ_LEVELS[level].label} · ${QUIZ_LEVELS[level].name}로 바꿨어요.`);
-  };
-  const openReview = (book, origin) => {
-    setReviewOrigin(origin);
-    go("review", book);
   };
   const answer = () => {
     const question = selected.questions[quizIndex];
@@ -1778,32 +1373,6 @@ function App() {
     setToast("이 기기에 저장된 녹음을 지웠어요.");
   };
 
-  const publishDraft = (reviewedBook) => {
-    setBooks((current) =>
-      current.map((book) => {
-        if (book.id !== reviewedBook.id) return book;
-        const levelQuestions = {
-          ...(book.levelQuestions || {}),
-          [reviewedBook.quizLevel]: reviewedBook.questions,
-        };
-        return {
-          ...book,
-          levelQuestions,
-          ...(reviewedBook.quizLevel === "lv1"
-            ? { level1Questions: reviewedBook.questions }
-            : {}),
-          ...(reviewedBook.quizLevel === "lv2"
-            ? { questions: reviewedBook.questions }
-            : {}),
-        };
-      }),
-    );
-    setSelectedId(reviewedBook.id);
-    go("home", reviewedBook);
-    setToast(
-      `보호자 확인 완료! 문제 ${reviewedBook.questions.length}개를 아이에게 공개했어요.`,
-    );
-  };
 
   return (
     <div className="app" ref={topRef}>
@@ -1857,7 +1426,6 @@ function App() {
             )}
             back={() => go("home")}
             start={() => startQuiz(selected)}
-            review={() => openReview(selected, "detail")}
           />
         )}
         {view === "story-intro" && (
@@ -1977,14 +1545,6 @@ function App() {
             removeImage={removeBookImage}
             submit={submitBookRegistration}
             reset={resetBookRegistration}
-          />
-        )}
-        {view === "review" && (
-          <ReviewDraft
-            key={`${selected.id}-${quizLevel}`}
-            book={selected}
-            back={() => go(reviewOrigin)}
-            publish={publishDraft}
           />
         )}
         {view === "profile" && (
@@ -2210,7 +1770,7 @@ function Back({ onClick, label = "돌아가기" }) {
     </button>
   );
 }
-function Detail({ book, done, back, start, review }) {
+function Detail({ book, done, back, start }) {
   const level = QUIZ_LEVELS[book.quizLevel];
   return (
     <div className="page detail">
@@ -2257,9 +1817,6 @@ function Detail({ book, done, back, start, review }) {
       </div>
       <button className="primary wide" onClick={start}>
         {done ? `${level.label} 다시 도전하기` : `${level.label} 퀴즈 시작하기`} <ChevronRight />
-      </button>
-      <button className="secondary wide" onClick={review}>
-        <LockKeyhole size={18} /> 보호자 문제 미리보기
       </button>
     </div>
   );
@@ -3574,348 +3131,6 @@ const isReviewQuestionValid = (question) => {
     question.answer < question.options.length
   );
 };
-
-function ReviewDraft({ book, back, publish }) {
-  const [draft, setDraft] = useState(() => ({
-    ...book,
-    questions: book.questions.map(cloneQuestionForReview),
-  }));
-  const [approved, setApproved] = useState(() =>
-    Array(book.questions.length).fill(false),
-  );
-
-  const validQuestions = useMemo(
-    () => draft.questions.map(isReviewQuestionValid),
-    [draft.questions],
-  );
-  const approvedCount = approved.filter(Boolean).length;
-  const canPublish =
-    approvedCount === draft.questions.length && validQuestions.every(Boolean);
-
-  const updateQuestion = (index, changes) => {
-    setDraft((current) => ({
-      ...current,
-      questions: current.questions.map((question, questionIndex) =>
-        questionIndex === index ? { ...question, ...changes } : question,
-      ),
-    }));
-    setApproved((current) =>
-      current.map((isApproved, questionIndex) =>
-        questionIndex === index ? false : isApproved,
-      ),
-    );
-  };
-
-  const updateOption = (questionIndex, optionIndex, value) => {
-    const options = [...draft.questions[questionIndex].options];
-    options[optionIndex] = value;
-    updateQuestion(questionIndex, { options });
-  };
-
-  const updatePrompt = (questionIndex, promptIndex, value) => {
-    const prompts = [...draft.questions[questionIndex].prompts];
-    prompts[promptIndex] = value;
-    updateQuestion(questionIndex, { prompts });
-  };
-
-  const updateSequenceAnswer = (questionIndex, orderIndex, itemId) => {
-    const answer = [...draft.questions[questionIndex].answer];
-    answer[orderIndex] = itemId;
-    updateQuestion(questionIndex, { answer });
-  };
-
-  const updateMatchAnswer = (questionIndex, leftId, rightId) => {
-    updateQuestion(questionIndex, {
-      answer: {
-        ...draft.questions[questionIndex].answer,
-        [leftId]: rightId,
-      },
-    });
-  };
-
-  const approveAll = () => setApproved(validQuestions.map(Boolean));
-
-  return (
-    <form
-      className="page review-page"
-      data-allow-native-editing="true"
-      onSubmit={(event) => {
-        event.preventDefault();
-        if (canPublish) publish(draft);
-      }}
-    >
-      <Back onClick={back} label="검수 나가기" />
-      <div className="review-heading">
-        <div>
-          <span className="eyebrow">
-            보호자 확인함 · {QUIZ_LEVELS[book.quizLevel].label} 생성 초안
-          </span>
-          <h1>
-            아이에게 보여 주기 전
-            <br />한 번만 확인해 주세요
-          </h1>
-        </div>
-        <div className="review-score" aria-label={`${approvedCount}개 확인 완료`}>
-          <strong>{approvedCount}</strong>
-          <span>/ {draft.questions.length}</span>
-        </div>
-      </div>
-
-      <div className="review-book">
-        <BookCover book={book} className="review-cover" />
-        <div>
-          <span>분석된 책</span>
-          <strong>{book.title}</strong>
-          <p>
-            지금은 샘플 책으로 검수 동작을 시험합니다. 실제 자동 생성 버전에서는
-            촬영한 페이지의 근거가 함께 표시됩니다.
-          </p>
-        </div>
-      </div>
-
-      <div className="review-toolbar">
-        <div>
-          <strong>문제 {draft.questions.length}개</strong>
-          <span>문장·정답·설명을 확인하세요.</span>
-        </div>
-        <button type="button" className="mini-action" onClick={approveAll}>
-          <Check size={16} /> 모두 확인
-        </button>
-      </div>
-
-      <div className="review-list">
-        {draft.questions.map((question, questionIndex) => (
-          <details
-            className={`review-question ${approved[questionIndex] ? "approved" : ""}`}
-            key={questionIndex}
-          >
-            <summary>
-              <span>{questionIndex + 1}</span>
-              <div>
-                <small>
-                  {question.method ? `${question.method} · ` : ""}{question.type}
-                </small>
-                <strong>{question.q || "질문을 입력해 주세요."}</strong>
-              </div>
-              <i>{approved[questionIndex] ? "확인됨" : "확인 필요"}</i>
-            </summary>
-            <div className="review-fields">
-              {question.sourceAnchors?.length > 0 && (
-                <aside className="review-source" aria-label="문항의 책 속 근거">
-                  <span>
-                    근거 장면 {question.sourceAnchors.join(" · ")} · {question.sourceRelation}
-                  </span>
-                  <strong>{question.sourceEvidence}</strong>
-                  <small>현재 상태: 8장면 각색 요약 기준 · 원문 페이지 대조 전</small>
-                </aside>
-              )}
-              <label>
-                <span>질문</span>
-                <textarea
-                  rows="2"
-                  value={question.q}
-                  onChange={(event) =>
-                    updateQuestion(questionIndex, { q: event.target.value })
-                  }
-                />
-              </label>
-              {(questionKind(question) === "choice" ||
-                questionKind(question) === "image-choice" ||
-                questionKind(question) === "completion") && (
-                <fieldset>
-                  <legend>선택지와 정답</legend>
-                  <p>정답으로 공개할 선택지의 동그라미를 골라 주세요.</p>
-                  {question.options.map((option, optionIndex) => (
-                    <label className="review-option" key={optionIndex}>
-                      <input
-                        type="radio"
-                        name={`answer-${questionIndex}`}
-                        checked={question.answer === optionIndex}
-                        onChange={() =>
-                          updateQuestion(questionIndex, { answer: optionIndex })
-                        }
-                      />
-                      <span>{String.fromCharCode(65 + optionIndex)}</span>
-                      <input
-                        type="text"
-                        value={option}
-                        aria-label={`${questionIndex + 1}번 문제 ${optionIndex + 1}번 선택지`}
-                        onChange={(event) =>
-                          updateOption(questionIndex, optionIndex, event.target.value)
-                        }
-                      />
-                    </label>
-                  ))}
-                </fieldset>
-              )}
-              {questionKind(question) === "completion" && (
-                <label>
-                  <span>빈칸 문장</span>
-                  <textarea
-                    rows="2"
-                    value={question.sentence}
-                    onChange={(event) =>
-                      updateQuestion(questionIndex, {
-                        sentence: event.target.value,
-                      })
-                    }
-                  />
-                  <small>빈칸 자리에 밑줄 네 개(____)를 남겨 주세요.</small>
-                </label>
-              )}
-              {isReflectiveQuestion(question) && (
-                <fieldset className="review-structured">
-                  <legend>말하기 도움 카드</legend>
-                  <p>아이의 말문을 열어 줄 문장이나 활동 확인 문구예요.</p>
-                  {question.prompts.map((prompt, promptIndex) => (
-                    <label key={promptIndex}>
-                      <span>{promptIndex + 1}</span>
-                      <input
-                        type="text"
-                        value={prompt}
-                        aria-label={`${questionIndex + 1}번 문제 ${promptIndex + 1}번 말하기 도움`}
-                        onChange={(event) =>
-                          updatePrompt(
-                            questionIndex,
-                            promptIndex,
-                            event.target.value,
-                          )
-                        }
-                      />
-                    </label>
-                  ))}
-                </fieldset>
-              )}
-              {question.hint !== undefined && (
-                <label>
-                  <span>기억이 막힐 때 보여 줄 힌트</span>
-                  <textarea
-                    rows="2"
-                    value={question.hint}
-                    onChange={(event) =>
-                      updateQuestion(questionIndex, { hint: event.target.value })
-                    }
-                  />
-                </label>
-              )}
-              {question.exampleAnswer !== undefined && (
-                <label>
-                  <span>활동 뒤 보여 줄 책 속 기억 예시</span>
-                  <textarea
-                    rows="2"
-                    value={question.exampleAnswer}
-                    onChange={(event) =>
-                      updateQuestion(questionIndex, {
-                        exampleAnswer: event.target.value,
-                      })
-                    }
-                  />
-                </label>
-              )}
-              {questionKind(question) === "sequence" && (
-                <fieldset className="review-structured">
-                  <legend>정답 순서</legend>
-                  <p>각 자리에서 먼저 일어날 장면부터 차례대로 골라 주세요.</p>
-                  {question.answer.map((itemId, orderIndex) => (
-                    <label key={orderIndex}>
-                      <span>{orderIndex + 1}</span>
-                      <select
-                        value={itemId}
-                        aria-label={`${orderIndex + 1}번째 장면`}
-                        onChange={(event) =>
-                          updateSequenceAnswer(
-                            questionIndex,
-                            orderIndex,
-                            event.target.value,
-                          )
-                        }
-                      >
-                        {question.items.map((item) => (
-                          <option key={item.id} value={item.id}>
-                            {item.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  ))}
-                </fieldset>
-              )}
-              {questionKind(question) === "match" && (
-                <fieldset className="review-structured">
-                  <legend>짝 연결 정답</legend>
-                  <p>왼쪽 카드마다 알맞은 오른쪽 카드를 골라 주세요.</p>
-                  {question.leftItems.map((left) => (
-                    <label className="match-review-row" key={left.id}>
-                      <strong>{left.label}</strong>
-                      <select
-                        value={question.answer[left.id]}
-                        aria-label={`${left.label}의 연결 정답`}
-                        onChange={(event) =>
-                          updateMatchAnswer(
-                            questionIndex,
-                            left.id,
-                            event.target.value,
-                          )
-                        }
-                      >
-                        {question.rightItems.map((right) => (
-                          <option key={right.id} value={right.id}>
-                            {right.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  ))}
-                </fieldset>
-              )}
-              <label>
-                <span>아이에게 보여 줄 책 속 단서</span>
-                <textarea
-                  rows="2"
-                  value={question.why}
-                  onChange={(event) =>
-                    updateQuestion(questionIndex, { why: event.target.value })
-                  }
-                />
-              </label>
-              <label className="approve-check">
-                <input
-                  type="checkbox"
-                  checked={approved[questionIndex]}
-                  disabled={!validQuestions[questionIndex]}
-                  onChange={(event) =>
-                    setApproved((current) =>
-                      current.map((value, index) =>
-                        index === questionIndex ? event.target.checked : value,
-                      ),
-                    )
-                  }
-                />
-                <span>
-                  <strong>이 문제를 확인했어요</strong>
-                  <small>수정하면 다시 확인해야 해요.</small>
-                </span>
-              </label>
-            </div>
-          </details>
-        ))}
-      </div>
-
-      <div className="publish-bar">
-        <div>
-          <LockKeyhole size={18} />
-          <span>
-            <strong>{approvedCount}개 확인 완료</strong>
-            <small>모든 문제를 확인해야 공개할 수 있어요.</small>
-          </span>
-        </div>
-        <button className="primary" type="submit" disabled={!canPublish}>
-          아이에게 공개하기 <ChevronRight size={18} />
-        </button>
-      </div>
-    </form>
-  );
-}
 
 function Profile({
   onResetReadingData,
