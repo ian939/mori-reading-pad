@@ -431,10 +431,20 @@ const JOSA_FORMS = {
   와: ["과", "와"],
 };
 
+// A Korean given name ending in a consonant takes the familiar "이" suffix
+// before a particle, so 지온 reads as 지온이는 / 지온이가 rather than the stiff
+// 지온은 / 지온이. Names ending in a vowel (모리) are used as-is. This matches
+// how childShelfTitle already builds "지온이의 책장".
+const spokenName = (name) =>
+  endsWithBatchim(name) ? `${name}이` : name;
+
 const applyCast = (text, cast) =>
   text.replace(/\{(\w+)(?::([^}]+))?\}/g, (whole, key, particle) => {
-    const name = cast[key];
-    if (name == null) return whole; // leave unrelated braces untouched
+    const raw = cast[key];
+    if (raw == null) return whole; // leave unrelated braces untouched
+    // Only personal names take the familiar suffix; role nouns like
+    // "저금통 친구" are left alone.
+    const name = key === "hero" ? spokenName(raw) : raw;
     if (!particle) return name;
     const forms = JOSA_FORMS[particle];
     if (!forms) return `${name}${particle}`;
@@ -1370,6 +1380,36 @@ function App() {
       setView("quiz");
     }
   };
+  // Stepping back re-opens the previous question with the child's earlier
+  // answer restored, and drops its recorded result so the score is not
+  // counted twice when they answer again. From the first question this
+  // returns to the story instead.
+  const goBackInQuiz = () => {
+    if (quizIndex === 0) {
+      setView("story-intro");
+      return;
+    }
+    const previousIndex = quizIndex - 1;
+    const previousId = selected.questions[previousIndex]?.id;
+    const previous = answers.find((item) => item.questionId === previousId);
+    setQuizIndex(previousIndex);
+    setAnswers((current) =>
+      current.filter((item) => item.questionId !== previousId),
+    );
+    setQuestionAttempts((current) => {
+      const next = { ...current };
+      delete next[previousIndex];
+      return next;
+    });
+    setEliminatedOptions((current) => {
+      const next = { ...current };
+      delete next[previousIndex];
+      return next;
+    });
+    setChoice(previous?.response ?? null);
+    setFeedbackMode("final");
+    setView("quiz");
+  };
   const selectQuizLevel = (level) => {
     if (!QUIZ_LEVELS[level] || level === quizLevel) return;
     setQuizLevel(level);
@@ -1805,6 +1845,7 @@ function App() {
             eliminatedOptions={eliminatedOptions[quizIndex] || []}
             submit={answer}
             close={() => go("detail")}
+            goBack={goBackInQuiz}
           />
         )}
         {view === "feedback" && (
@@ -2244,6 +2285,7 @@ function Quiz({
   eliminatedOptions,
   submit,
   close,
+  goBack,
 }) {
   const q = book.questions[index];
   const complete = isQuestionComplete(q, choice);
@@ -2253,6 +2295,13 @@ function Quiz({
   return (
     <div className="quiz-page">
       <div className="quiz-top">
+        <button
+          className="quiz-back"
+          onClick={goBack}
+          aria-label={index === 0 ? "줄거리로 돌아가기" : "이전 문제로"}
+        >
+          <ArrowLeft />
+        </button>
         <button onClick={close} aria-label="퀴즈 닫기">
           <X />
         </button>
@@ -2938,6 +2987,7 @@ function StoryRecording({ book, existing, save, finish, beforeQuiz = false }) {
           ? "여덟 문장을 이어 읽고 녹음한 뒤 Lv.2 문제로 넘어가요. 녹음은 이 기기에만 저장돼요."
           : "여덟 문장을 이어 읽어 보세요. 녹음은 서버가 아닌 이 기기에만 저장돼요."}
       </p>
+      <StoryComic book={book} />
       <div className="recording-script">
         <ol>
           {book.storySentences.map((sentence) => (
