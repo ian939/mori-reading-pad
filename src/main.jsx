@@ -2238,6 +2238,7 @@ function Detail({ book, done, back, start, review }) {
 }
 
 function StoryIntro({ book, back, begin }) {
+  const isLv2 = book.quizLevel === "lv2";
   return (
     <div className="page story-intro-page">
       <Back onClick={back} label="책 정보로" />
@@ -2254,7 +2255,15 @@ function StoryIntro({ book, back, begin }) {
       </p>
       <StoryComic book={book} />
       <button className="primary wide story-begin" onClick={begin}>
-        줄거리를 읽었어요 · 퀴즈 시작 <ChevronRight />
+        {isLv2 ? (
+          <>
+            줄거리를 소리 내어 읽어 보자! <Mic />
+          </>
+        ) : (
+          <>
+            줄거리를 읽었어요 · 퀴즈 시작 <ChevronRight />
+          </>
+        )}
       </button>
     </div>
   );
@@ -2918,6 +2927,17 @@ function StoryRecording({ book, existing, save, finish, beforeQuiz = false }) {
     [],
   );
 
+  // Coming from the Lv2 intro the child already tapped "읽어 보자!", so begin
+  // recording right away instead of asking for a second tap. If the mic is
+  // blocked, startRecording surfaces the error and the manual button remains.
+  const autoStarted = useRef(false);
+  useEffect(() => {
+    if (!beforeQuiz || autoStarted.current) return;
+    autoStarted.current = true;
+    startRecording();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [beforeQuiz]);
+
   const startRecording = async () => {
     setError("");
     if (!navigator.mediaDevices?.getUserMedia || !("MediaRecorder" in window)) {
@@ -2987,22 +3007,32 @@ function StoryRecording({ book, existing, save, finish, beforeQuiz = false }) {
         {beforeQuiz ? "Lv.2 시작 · 줄거리 낭독" : "마지막 읽기 활동"}
       </span>
       <h1>
-        줄거리를 천천히
-        <br />소리 내어 읽어 봐요
+        {beforeQuiz ? (
+          <>
+            줄거리를 소리 내어
+            <br />읽어 보자!
+          </>
+        ) : (
+          <>
+            줄거리를 천천히
+            <br />소리 내어 읽어 봐요
+          </>
+        )}
       </h1>
       <p>
         {beforeQuiz
-          ? "여덟 문장을 이어 읽고 녹음한 뒤 Lv.2 문제로 넘어가요. 녹음은 이 기기에만 저장돼요."
+          ? "앞에서 본 그림을 떠올리며 이야기해 보세요. 녹음은 이 기기에만 저장돼요."
           : "여덟 문장을 이어 읽어 보세요. 녹음은 서버가 아닌 이 기기에만 저장돼요."}
       </p>
-      <StoryComic book={book} />
-      <div className="recording-script">
-        <ol>
-          {book.storySentences.map((sentence) => (
-            <li key={sentence}>{sentence}</li>
-          ))}
-        </ol>
-      </div>
+      {!beforeQuiz && (
+        <div className="recording-script">
+          <ol>
+            {book.storySentences.map((sentence) => (
+              <li key={sentence}>{sentence}</li>
+            ))}
+          </ol>
+        </div>
+      )}
       <div className={`recorder-panel ${status}`}>
         {status === "recording" ? (
           <>
