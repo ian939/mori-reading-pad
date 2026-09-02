@@ -3991,6 +3991,10 @@ function Profile({
         </div>
       </section>
 
+      <p className="build-stamp">
+        앱 버전 {typeof __BUILD_ID__ === "string" ? __BUILD_ID__ : "dev"}
+      </p>
+
       <section className="level-setting" aria-labelledby="level-setting-title">
         <div className="level-setting-heading">
           <div>
@@ -4049,7 +4053,30 @@ enableKidSafeInteractions();
 createRoot(document.getElementById("root")).render(<App />);
 
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
-  window.addEventListener("load", () =>
-    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`),
-  );
+  // A tablet can not force-refresh, so the app has to pull its own updates.
+  // updateViaCache:"none" stops the browser from serving a cached sw.js
+  // (which would keep an old worker, and its old cached index.html, alive
+  // forever). When a new worker takes over we reload once so the child
+  // immediately gets the current quizzes instead of a stale bundle.
+  window.addEventListener("load", async () => {
+    try {
+      const registration = await navigator.serviceWorker.register(
+        `${import.meta.env.BASE_URL}sw.js`,
+        { updateViaCache: "none" },
+      );
+      let reloading = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (reloading) return;
+        reloading = true;
+        window.location.reload();
+      });
+      registration.update();
+      // Check again when the app is re-opened from the home screen.
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") registration.update();
+      });
+    } catch {
+      // An unavailable service worker must never block the app.
+    }
+  });
 }

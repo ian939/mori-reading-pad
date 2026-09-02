@@ -4280,3 +4280,13 @@ button {
 .recording-page .story-comic {
   margin-bottom: 14px;
 }
+
+
+
+
+.build-stamp {
+  margin: 18px 0 0;
+  font-size: 11px;
+  color: #a8a89f;
+  text-align: center;
+}

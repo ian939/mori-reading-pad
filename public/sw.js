@@ -1,4 +1,4 @@
-const CACHE = "mori-book-forest-v7";
+const CACHE = "mori-book-forest-v8";
 const ROOT = self.location.pathname.replace(/sw\.js$/, "");
 const SHELL = [
   ROOT,
@@ -41,6 +41,24 @@ self.addEventListener("fetch", (event) => {
     !event.request.url.startsWith(self.location.origin)
   )
     return;
+  // Always go to the network for the HTML document and for sw.js itself.
+  // A cached document pins the old hashed asset names, which is how a
+  // tablet ends up running last week's quizzes with no way to hard refresh.
+  const isDocument =
+    event.request.mode === "navigate" ||
+    event.request.destination === "document";
+  if (isDocument) {
+    event.respondWith(
+      fetch(event.request, { cache: "no-store" })
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE).then((cache) => cache.put(ROOT, copy));
+          return response;
+        })
+        .catch(() => caches.match(ROOT)),
+    );
+    return;
+  }
   event.respondWith(
     fetch(event.request)
       .then((response) => {

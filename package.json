@@ -11,7 +11,7 @@
     "dev:web": "vite --host 0.0.0.0",
     "dev:api": "node --env-file-if-exists=.env --watch server/index.js",
     "start": "node --env-file-if-exists=.env server/index.js",
-    "build": "vite build",
+    "build": "vite build && node scripts/stamp-sw.mjs",
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --test",
     "verify:touch": "node scripts/verify-touch.mjs"
