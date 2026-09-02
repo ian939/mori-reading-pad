@@ -566,6 +566,11 @@ const isScoredQuestion = (question) =>
 const questionsForLevel = (book, level) =>
   CURRICULUM_QUESTIONS[book.id]?.[level] || book.questions;
 const bookProgressKey = (bookId, level) => `${bookId}:${level}`;
+// Story reading keeps the original key so recordings made before speaking
+// questions existed still load. Each speaking answer gets its own key.
+const storyRecordingKey = bookProgressKey;
+const answerRecordingKey = (bookId, level, questionId) =>
+  `${bookId}:${level}:q:${questionId}`;
 const loadQuizLevel = () => {
   const saved = readUserText(
     CURRENT_USER.id,
@@ -1342,8 +1347,7 @@ function App() {
     setScanState("idle");
   };
 
-  const storeBookRecording = async (blob) => {
-    const recordingKey = bookProgressKey(selected.id, quizLevel);
+  const persistRecording = async (recordingKey, blob) => {
     const record = await saveRecording(CURRENT_USER.id, recordingKey, blob);
     const url = URL.createObjectURL(blob);
     recordingUrlsRef.current.add(url);
@@ -1355,6 +1359,17 @@ function App() {
       }
       return { ...current, [recordingKey]: { ...record, url } };
     });
+  };
+  const storeBookRecording = (blob) =>
+    persistRecording(storyRecordingKey(selected.id, quizLevel), blob);
+  // Speaking answers are stored per question so each can be replayed later.
+  const storeAnswerRecording = async (blob) => {
+    const question = selected.questions[quizIndex];
+    if (!question) return;
+    await persistRecording(
+      answerRecordingKey(selected.id, quizLevel, question.id),
+      blob,
+    );
   };
 
   const deleteBookRecording = async (book) => {
@@ -1449,6 +1464,16 @@ function App() {
             submit={answer}
             close={() => go("detail")}
             goBack={goBackInQuiz}
+            answerRecording={
+              recordings[
+                answerRecordingKey(
+                  selected.id,
+                  quizLevel,
+                  selected.questions[quizIndex]?.id,
+                )
+              ] || null
+            }
+            onAnswerRecorded={storeAnswerRecording}
           />
         )}
         {view === "feedback" && (
@@ -1499,6 +1524,19 @@ function App() {
             recording={
               recordings[bookProgressKey(selected.id, quizLevel)] || null
             }
+            answerRecordings={selected.questions
+              .filter(isReflectiveQuestion)
+              .map((question) => {
+                const key = answerRecordingKey(
+                  selected.id,
+                  quizLevel,
+                  question.id,
+                );
+                return recordings[key]
+                  ? { key, question: question.q, url: recordings[key].url }
+                  : null;
+              })
+              .filter(Boolean)}
             back={() => go("library")}
             record={() => {
               setRecordingReturn("archive");
@@ -1515,8 +1553,10 @@ function App() {
             onOpenShelf={() => go("library")}
             onOpenStats={() => go("stats")}
             onReread={(bookId) => {
+              // Open the book's archive so the story and spoken answers can
+              // be replayed, with 다시 읽기 available from there.
               const book = activeBooks.find((item) => item.id === bookId);
-              if (book) go("detail", book);
+              if (book) go("archive", book);
             }}
           />
         )}
@@ -1941,6 +1981,8 @@ function Quiz({
   submit,
   close,
   goBack,
+  answerRecording,
+  onAnswerRecorded,
 }) {
   const q = book.questions[index];
   const complete = isQuestionComplete(q, choice);
@@ -2019,7 +2061,13 @@ function Quiz({
           />
         )}
         {isReflectiveQuestion(q) && (
-          <ReflectionQuestion q={q} choice={choice} setChoice={setChoice} />
+          <ReflectionQuestion
+            q={q}
+            choice={choice}
+            setChoice={setChoice}
+            recording={answerRecording}
+            onRecorded={onAnswerRecorded}
+          />
         )}
         {questionKind(q) === "sequence" && (
           <SequenceQuestion q={q} choice={choice} setChoice={setChoice} />
@@ -2072,8 +2120,19 @@ function CompletionQuestion({
   );
 }
 
-function ReflectionQuestion({ q, choice, setChoice }) {
+function ReflectionQuestion({ q, choice, setChoice, recording, onRecorded }) {
   const kind = questionKind(q);
+  const { status, error, draft, startRecording, stopRecording } =
+    useStoryRecorder();
+
+  // Saving the clip is what marks a speaking question as answered, so the
+  // child's voice is kept rather than only a self-rating.
+  useEffect(() => {
+    if (!draft) return;
+    onRecorded(draft.blob);
+    setChoice({ ...(choice || {}), recorded: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft]);
   const intro =
     kind === "recall"
       ? "책을 보지 않고 먼저 소리 내어 말해 봐요."
@@ -2096,6 +2155,16 @@ function ReflectionQuestion({ q, choice, setChoice }) {
           <p>{q.hint}</p>
         </details>
       )}
+      <div className="answer-record">
+        <RecorderPanel
+          status={status}
+          draft={draft}
+          existing={recording}
+          error={error}
+          onStart={startRecording}
+          onStop={stopRecording}
+        />
+      </div>
       <div className="reflection-prompts">
         <span>말한 뒤, 지금의 나와 가장 가까운 카드를 골라요.</span>
         {q.prompts.map((prompt, promptIndex) => (
@@ -2716,7 +2785,14 @@ function RecorderPanel({ status, draft, existing, error, onStart, onStop }) {
   );
 }
 
-function StoryArchive({ book, recording, back, record, remove }) {
+function StoryArchive({
+  book,
+  recording,
+  answerRecordings = [],
+  back,
+  record,
+  remove,
+}) {
   return (
     <div className="page archive-page">
       <Back onClick={back} label="책장으로" />
@@ -2746,6 +2822,24 @@ function StoryArchive({ book, recording, back, record, remove }) {
           </button>
         )}
       </section>
+
+      {answerRecordings.length > 0 && (
+        <section className="saved-answers">
+          <div className="section-title">
+            <div>
+              <span className="overline">내가 말한 대답</span>
+              <h2>말하기 녹음 다시 듣기</h2>
+            </div>
+            <span className="count">{answerRecordings.length}개</span>
+          </div>
+          {answerRecordings.map((item) => (
+            <div className="saved-answer" key={item.key}>
+              <strong>{item.question}</strong>
+              <audio controls src={item.url} />
+            </div>
+          ))}
+        </section>
+      )}
     </div>
   );
 }

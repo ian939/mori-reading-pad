@@ -4369,3 +4369,33 @@ button {
   background: #e0c6c1;
   cursor: default;
 }
+
+/* Recording inside a speaking question */
+.answer-record {
+  margin: 14px 0 4px;
+}
+.answer-record .recorder-panel {
+  min-height: 170px;
+}
+
+/* Saved speaking answers in the archive */
+.saved-answers {
+  margin-top: 22px;
+}
+.saved-answer {
+  background: #fff;
+  border: 1px solid #ece9dd;
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-top: 10px;
+}
+.saved-answer strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #2f4f45;
+  margin-bottom: 10px;
+}
+.saved-answer audio {
+  width: 100%;
+}
