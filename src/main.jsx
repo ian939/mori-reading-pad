@@ -501,7 +501,7 @@ const DEFAULT_BOOKS = [
       "{hero:은} 쓰지 않은 동전을 {guide}에게 차곡차곡 모았어요.",
       "돈을 계획해서 쓰고 모으면 원하는 일을 준비할 수 있어요.",
     ],
-    quizVersion: 6,
+    quizVersion: 7,
     questions: [
       {
         kind: "completion",
@@ -646,7 +646,7 @@ const DEFAULT_BOOKS = [
     // process use no proprietary named characters, so neutralization is not
     // needed. Explicitly exempt so the copyright guard passes. See AGENTS.md.
     castExempt: true,
-    quizVersion: 5,
+    quizVersion: 7,
     title: "우리가 어디서 왔게?",
     tag: "자연 · 음식",
     cover: asset("assets/origin-cover-v2.png"),
@@ -798,7 +798,7 @@ const DEFAULT_BOOKS = [
     // hero-only cast: the learner is the child's character; other roles are
     // neutralized to generic names so no proprietary characters remain.
     cast: {},
-    quizVersion: 1,
+    quizVersion: 7,
     title: "막아라! 감기",
     tag: "건강 · 안전",
     cover: asset("assets/cold-cover-v1.png"),
@@ -830,7 +830,7 @@ const DEFAULT_BOOKS = [
     id: "bicycle",
     genre: 6,
     cast: {},
-    quizVersion: 1,
+    quizVersion: 7,
     title: "자전거 사 주세요",
     tag: "생활 · 경제",
     cover: asset("assets/bicycle-cover-v1.png"),
@@ -863,7 +863,7 @@ const DEFAULT_BOOKS = [
     id: "transport",
     genre: 4,
     cast: {},
-    quizVersion: 1,
+    quizVersion: 7,
     title: "타고, 타고, 타고!",
     tag: "우리 사회 · 교통",
     cover: asset("assets/transport-cover-v1.png"),
@@ -1080,9 +1080,17 @@ const loadBooks = () => {
           const savedLevel = reviewedVersionMatches
             ? reviewed?.levelQuestions?.[level]
             : null;
+          // Match on question ids, not just count: an older curriculum could
+          // have the same number of questions and would otherwise silently
+          // replace the current ones (e.g. a 3-option Lv1 with speaking
+          // questions surviving the rewrite).
           const validSavedLevel =
             Array.isArray(savedLevel) &&
-            (!defaults || savedLevel.length === defaults.length);
+            (!defaults ||
+              (savedLevel.length === defaults.length &&
+                defaults.every(
+                  (question, index) => savedLevel[index]?.id === question.id,
+                )));
           return [level, validSavedLevel ? savedLevel : defaults];
         }),
       );
