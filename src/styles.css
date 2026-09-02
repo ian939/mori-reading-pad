@@ -554,9 +554,16 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  font-size: 10px;
+  justify-content: center;
+  align-self: stretch;
+  gap: 5px;
+  font-size: 11px;
+  line-height: 1.25;
   color: #8b9995;
+}
+.bottom-nav > button svg {
+  width: 25px;
+  height: 25px;
 }
 .bottom-nav > button.active {
   color: var(--ink);
@@ -3341,9 +3348,12 @@ button {
     border-radius: 0 0 30px 30px;
   }
   .bottom-nav > button {
-    min-height: 64px;
-    gap: 6px;
-    font-size: 12px;
+    gap: 7px;
+    font-size: 13px;
+  }
+  .bottom-nav > button svg {
+    width: 29px;
+    height: 29px;
   }
   .bottom-nav .add-nav {
     width: 64px;
