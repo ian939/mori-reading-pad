@@ -1380,14 +1380,37 @@ function App() {
   };
   // Lv2 starts with a baseline 줄거리 낭독 recording before the questions
   // (per the generation guide); Lv1 goes straight to the objective quiz.
-  const beginQuestions = () => {
-    if (quizLevel === "lv2") {
-      setRecordingReturn("quiz");
-      setView("recording");
-    } else {
-      setView("quiz");
-    }
+  // Lv2's baseline reading is recorded inline on the story screen, so both
+  // levels go straight to the questions from here.
+  // Testing aid: wipe reading data (progress, guardian-reviewed questions and
+  // recordings) so a run can start from zero, while keeping the child's
+  // character/profile so it does not have to be made again.
+  const resetReadingData = async () => {
+    const cleared = {
+      completed: [],
+      bestScores: {},
+      bestTotals: {},
+      readDates: {},
+    };
+    setProgress(cleared);
+    writeUserJson(CURRENT_USER.id, "progress", cleared);
+    // Restoring books re-persists reviewed-books from the current defaults,
+    // which also drops any guardian-reviewed edits.
+    setBooks(DEFAULT_BOOKS);
+    await Promise.all(
+      Object.keys(recordings).map((key) =>
+        removeRecording(CURRENT_USER.id, key).catch(() => {}),
+      ),
+    );
+    Object.values(recordings).forEach((item) => {
+      if (item?.url) URL.revokeObjectURL(item.url);
+    });
+    setRecordings({});
+    setToast("책·숲·책장을 처음 상태로 되돌렸어요.");
+    go("home");
   };
+
+  const beginQuestions = () => setView("quiz");
   // Stepping back re-opens the previous question with the child's earlier
   // answer restored, and drops its recorded result so the score is not
   // counted twice when they answer again. From the first question this
@@ -1842,6 +1865,10 @@ function App() {
             book={selected}
             back={() => go("detail")}
             begin={beginQuestions}
+            existingRecording={
+              recordings[bookProgressKey(selected.id, quizLevel)] || null
+            }
+            saveRecording={storeBookRecording}
           />
         )}
         {view === "quiz" && (
@@ -1962,6 +1989,7 @@ function App() {
         )}
         {view === "profile" && (
           <Profile
+            onResetReadingData={resetReadingData}
             profile={childProfile}
             photoUrl={profileMedia.photoUrl}
             variants={profileMedia.variants}
@@ -2237,8 +2265,27 @@ function Detail({ book, done, back, start, review }) {
   );
 }
 
-function StoryIntro({ book, back, begin }) {
+function StoryIntro({ book, back, begin, existingRecording, saveRecording }) {
   const isLv2 = book.quizLevel === "lv2";
+  const { status, setStatus, error, draft, startRecording, stopRecording } =
+    useStoryRecorder();
+
+  // Lv2 records right here so the child can read the sentences above while
+  // speaking, instead of being moved to a screen without them.
+  const saveAndContinue = async () => {
+    if (!draft) {
+      begin();
+      return;
+    }
+    setStatus("saving");
+    try {
+      await saveRecording(draft.blob);
+    } catch {
+      // A failed save must not trap the child before the quiz.
+    }
+    begin();
+  };
+
   return (
     <div className="page story-intro-page">
       <Back onClick={back} label="책 정보로" />
@@ -2254,17 +2301,51 @@ function StoryIntro({ book, back, begin }) {
         천천히 읽어 줘요.
       </p>
       <StoryComic book={book} />
-      <button className="primary wide story-begin" onClick={begin}>
-        {isLv2 ? (
-          <>
-            줄거리를 소리 내어 읽어 보자! <Mic />
-          </>
-        ) : (
-          <>
-            줄거리를 읽었어요 · 퀴즈 시작 <ChevronRight />
-          </>
-        )}
-      </button>
+      {isLv2 ? (
+        <div className="story-record">
+          {status === "idle" && !draft ? (
+            <button
+              className="primary wide story-begin"
+              onClick={startRecording}
+            >
+              줄거리를 소리 내어 읽어 보자! <Mic />
+            </button>
+          ) : (
+            <RecorderPanel
+              status={status}
+              draft={draft}
+              existing={existingRecording}
+              error={error}
+              onStart={startRecording}
+              onStop={stopRecording}
+            />
+          )}
+          {error && status === "idle" && (
+            <button className="text-btn" onClick={begin}>
+              녹음 없이 퀴즈 시작
+            </button>
+          )}
+          {draft && status !== "recording" && (
+            <button
+              className="primary wide"
+              onClick={saveAndContinue}
+              disabled={status === "saving"}
+            >
+              {status === "saving" ? "저장하는 중…" : "이 녹음으로 퀴즈 시작"}
+              <ChevronRight />
+            </button>
+          )}
+          {status !== "recording" && !draft && !error && (
+            <button className="text-btn" onClick={begin}>
+              녹음 없이 퀴즈 시작
+            </button>
+          )}
+        </div>
+      ) : (
+        <button className="primary wide story-begin" onClick={begin}>
+          줄거리를 읽었어요 · 퀴즈 시작 <ChevronRight />
+        </button>
+      )}
     </div>
   );
 }
@@ -2910,7 +2991,10 @@ function Result({ book, correct, reflectionCount, go, onChallengeLv2 }) {
   );
 }
 
-function StoryRecording({ book, existing, save, finish, beforeQuiz = false }) {
+// Shared recorder so the story screen can record inline (the child needs to
+// see the sentences while reading them aloud) and the standalone recording
+// screen can reuse the exact same behaviour.
+function useStoryRecorder() {
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
   const [draft, setDraft] = useState(null);
@@ -2926,17 +3010,6 @@ function StoryRecording({ book, existing, save, finish, beforeQuiz = false }) {
     },
     [],
   );
-
-  // Coming from the Lv2 intro the child already tapped "읽어 보자!", so begin
-  // recording right away instead of asking for a second tap. If the mic is
-  // blocked, startRecording surfaces the error and the manual button remains.
-  const autoStarted = useRef(false);
-  useEffect(() => {
-    if (!beforeQuiz || autoStarted.current) return;
-    autoStarted.current = true;
-    startRecording();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [beforeQuiz]);
 
   const startRecording = async () => {
     setError("");
@@ -2989,57 +3062,84 @@ function StoryRecording({ book, existing, save, finish, beforeQuiz = false }) {
     if (recorderRef.current?.state === "recording") recorderRef.current.stop();
   };
 
+  return {
+    status,
+    setStatus,
+    error,
+    setError,
+    draft,
+    startRecording,
+    stopRecording,
+  };
+}
+
+function StoryRecording({ book, existing, save, finish }) {
+  const { status, setStatus, error, draft, startRecording, stopRecording } =
+    useStoryRecorder();
+
   const saveAndFinish = async () => {
-    if (!draft?.blob) return;
+    if (!draft) return;
     setStatus("saving");
     try {
       await save(draft.blob);
       finish();
     } catch {
-      setError("녹음을 이 기기에 저장하지 못했어요. 다시 시도해 주세요.");
       setStatus("ready");
     }
   };
 
   return (
     <div className="page recording-page">
-      <span className="eyebrow">
-        {beforeQuiz ? "Lv.2 시작 · 줄거리 낭독" : "마지막 읽기 활동"}
-      </span>
+      <span className="eyebrow">마지막 읽기 활동</span>
       <h1>
-        {beforeQuiz ? (
-          <>
-            줄거리를 소리 내어
-            <br />읽어 보자!
-          </>
-        ) : (
-          <>
-            줄거리를 천천히
-            <br />소리 내어 읽어 봐요
-          </>
-        )}
+        줄거리를 천천히
+        <br />소리 내어 읽어 봐요
       </h1>
       <p>
-        {beforeQuiz
-          ? "앞에서 본 그림을 떠올리며 이야기해 보세요. 녹음은 이 기기에만 저장돼요."
-          : "여덟 문장을 이어 읽어 보세요. 녹음은 서버가 아닌 이 기기에만 저장돼요."}
+        여덟 문장을 이어 읽어 보세요. 녹음은 서버가 아닌 이 기기에만 저장돼요.
       </p>
-      {!beforeQuiz && (
-        <div className="recording-script">
-          <ol>
-            {book.storySentences.map((sentence) => (
-              <li key={sentence}>{sentence}</li>
-            ))}
-          </ol>
-        </div>
+      <div className="recording-script">
+        <ol>
+          {book.storySentences.map((sentence) => (
+            <li key={sentence}>{sentence}</li>
+          ))}
+        </ol>
+      </div>
+      <RecorderPanel
+        status={status}
+        draft={draft}
+        existing={existing}
+        error={error}
+        onStart={startRecording}
+        onStop={stopRecording}
+      />
+      {draft && status !== "recording" && (
+        <button
+          className="primary wide"
+          onClick={saveAndFinish}
+          disabled={status === "saving"}
+        >
+          {status === "saving" ? "저장하는 중…" : "녹음 저장하고 책장에 꽂기"}
+          <Library />
+        </button>
       )}
+      <button className="text-btn" onClick={finish}>
+        녹음은 나중에 하기
+      </button>
+    </div>
+  );
+}
+
+function RecorderPanel({ status, draft, existing, error, onStart, onStop }) {
+  return (
+    <>
       <div className={`recorder-panel ${status}`}>
         {status === "recording" ? (
           <>
             <span className="recording-pulse"><Mic /></span>
             <strong>목소리를 듣고 있어요…</strong>
-            <button className="stop-recording" onClick={stopRecording}>
-              <Square fill="currentColor" /> 녹음 멈추기
+            <button className="stop-recording" onClick={onStop}>
+              <Square fill="currentColor" /> 다 읽었어요
             </button>
           </>
         ) : (
@@ -3048,31 +3148,14 @@ function StoryRecording({ book, existing, save, finish, beforeQuiz = false }) {
             <strong>{draft ? "내 목소리를 확인해 보세요" : "준비되면 녹음을 시작해요"}</strong>
             {draft && <audio controls src={draft.url} />}
             {!draft && existing && <audio controls src={existing.url} />}
-            <button className="secondary wide" onClick={startRecording}>
+            <button className="secondary wide" onClick={onStart}>
               <Mic /> {draft || existing ? "다시 녹음하기" : "녹음 시작하기"}
             </button>
           </>
         )}
       </div>
       {error && <p className="recording-error" role="alert">{error}</p>}
-      {draft && status !== "recording" && (
-        <button
-          className="primary wide"
-          onClick={saveAndFinish}
-          disabled={status === "saving"}
-        >
-          {status === "saving"
-            ? "저장하는 중…"
-            : beforeQuiz
-              ? "이 녹음으로 퀴즈 시작하기"
-              : "녹음 저장하고 책장에 꽂기"}
-          {beforeQuiz ? <ChevronRight /> : <Library />}
-        </button>
-      )}
-      <button className="text-btn" onClick={finish}>
-        {beforeQuiz ? "녹음 없이 퀴즈 시작" : "녹음은 나중에 하기"}
-      </button>
-    </div>
+    </>
   );
 }
 
@@ -3835,6 +3918,7 @@ function ReviewDraft({ book, back, publish }) {
 }
 
 function Profile({
+  onResetReadingData,
   profile,
   photoUrl,
   variants,
@@ -4029,10 +4113,6 @@ function Profile({
         </div>
       </section>
 
-      <p className="build-stamp">
-        앱 버전 {typeof __BUILD_ID__ === "string" ? __BUILD_ID__ : "dev"}
-      </p>
-
       <section className="level-setting" aria-labelledby="level-setting-title">
         <div className="level-setting-heading">
           <div>
@@ -4082,6 +4162,74 @@ function Profile({
           })}
         </div>
       </section>
+
+      <ResetReadingData onReset={onResetReadingData} />
+    </div>
+  );
+}
+
+// Destructive, so it only runs once "초기화" is typed exactly. Clears books,
+// forest and shelf for a fresh test run; the child's character is kept.
+function ResetReadingData({ onReset }) {
+  const [open, setOpen] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [busy, setBusy] = useState(false);
+  const confirmed = typed.trim() === "초기화";
+
+  const run = async () => {
+    if (!confirmed || busy) return;
+    setBusy(true);
+    try {
+      await onReset();
+      setOpen(false);
+      setTyped("");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="profile-footer" data-allow-native-editing="true">
+      <span className="build-stamp">
+        앱 버전 {typeof __BUILD_ID__ === "string" ? __BUILD_ID__ : "dev"}
+      </span>
+      {open ? (
+        <div className="reset-confirm">
+          <p>
+            책·숲·책장 기록을 모두 지워요. 캐릭터는 그대로 남아요. 계속하려면
+            <b> 초기화</b>라고 입력해 주세요.
+          </p>
+          <input
+            type="text"
+            value={typed}
+            onChange={(event) => setTyped(event.target.value)}
+            placeholder="초기화"
+            aria-label="초기화라고 입력"
+          />
+          <div className="reset-actions">
+            <button
+              className="text-btn"
+              onClick={() => {
+                setOpen(false);
+                setTyped("");
+              }}
+            >
+              취소
+            </button>
+            <button
+              className="reset-run"
+              onClick={run}
+              disabled={!confirmed || busy}
+            >
+              {busy ? "지우는 중…" : "초기화"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button className="reset-open" onClick={() => setOpen(true)}>
+          초기화
+        </button>
+      )}
     </div>
   );
 }

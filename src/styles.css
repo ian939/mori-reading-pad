@@ -4290,3 +4290,82 @@ button {
   color: #a8a89f;
   text-align: center;
 }
+
+/* Inline recording on the Lv2 story screen */
+.story-record {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Profile footer: version on the left, reset on the far right */
+.profile-footer {
+  margin-top: 26px;
+  /* keep the confirm box clear of the fixed bottom nav */
+  padding-bottom: 96px;
+  padding-top: 16px;
+  border-top: 1px solid #ece9dd;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.profile-footer .build-stamp {
+  margin: 0;
+  text-align: left;
+}
+.reset-open {
+  border: 1px solid #e6d6d2;
+  background: #fff;
+  color: #b0655a;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 12px;
+  cursor: pointer;
+  min-height: 40px;
+}
+.reset-confirm {
+  flex: 1 1 100%;
+  background: #fdf1ef;
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+.reset-confirm p {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #8a5348;
+}
+.reset-confirm input {
+  width: 100%;
+  border: 1.5px solid #e6cdc7;
+  border-radius: 12px;
+  padding: 11px 13px;
+  font-size: 15px;
+  background: #fff;
+  min-height: 44px;
+}
+.reset-actions {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.reset-run {
+  border: 0;
+  background: #c0554a;
+  color: #fff;
+  border-radius: 12px;
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  min-height: 44px;
+}
+.reset-run:disabled {
+  background: #e0c6c1;
+  cursor: default;
+}
