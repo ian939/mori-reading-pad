@@ -3676,7 +3676,14 @@ function ResetReadingData({ onReset }) {
   );
 }
 
-enableKidSafeInteractions();
+// On-device diagnostics for the landscape swipe failure that cannot be
+// reproduced in headless WebKit. Query flags are invisible to the child and
+// each isolates one suspect: ?nosnap ?flat ?nocompact ?nolock.
+const debugFlags = new URLSearchParams(window.location.search);
+["nosnap", "flat", "nocompact", "nolock"].forEach((flag) => {
+  if (debugFlags.has(flag)) document.documentElement.classList.add(`dbg-${flag}`);
+});
+if (!debugFlags.has("nolock")) enableKidSafeInteractions();
 
 createRoot(document.getElementById("root")).render(<App />);
 

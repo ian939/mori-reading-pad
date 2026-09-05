@@ -4610,3 +4610,13 @@ button {
   }
 
 }
+
+/* ---- Temporary on-device diagnostics (URL flags), remove once resolved ---- */
+.dbg-nosnap .shelf-track { scroll-snap-type: none !important; }
+.dbg-flat .shelf-slot { perspective: none !important; }
+.dbg-flat .book-card.spine { transform: none !important; }
+.dbg-nocompact .shelf-slot.front { width: 208px !important; }
+.dbg-nocompact .shelf-slot.side { width: 54px !important; }
+.dbg-nocompact .shelf-carousel { --cover-h: 310px !important; }
+.dbg-nocompact .shelf-carousel .cover-wrap { height: 310px !important; }
+.dbg-nocompact .shelf-track { padding: 10px calc(50% - 104px) 22px !important; }
