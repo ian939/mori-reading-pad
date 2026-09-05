@@ -3,9 +3,8 @@ export const QUIZ_LEVELS = {
     id: "lv1",
     label: "Lv.1",
     age: "4–5세",
-    name: "보고 찾고 짧게 말하기",
+    name: "보고 찾고 스스로 풀기",
     summary: "그림과 핵심 낱말을 단서로 이야기의 기본 내용을 스스로 찾아요.",
-    detail: "선택지 4개 · 4장면 순서 · 혼자 풀기",
     stages: ["대상 찾기", "순서 이어 보기", "결과 확인하기"],
   },
   lv2: {
@@ -13,8 +12,7 @@ export const QUIZ_LEVELS = {
     label: "Lv.2",
     age: "6–7세",
     name: "떠올리고 이어서 설명하기",
-    summary: "책 속 정보를 기억하고 관계와 순서를 연결하며 말하기·녹음으로 설명해요.",
-    detail: "객관 5 + 말하기·녹음 4 · 줄거리 낭독으로 시작",
+    summary: "책 속 정보를 기억하고 관계와 순서를 연결한 뒤, 마지막에 소리 내어 말해요.",
     stages: ["정보 떠올리기", "관계 이어 보기", "이야기 설명하기"],
   },
 };
@@ -2088,4 +2086,18 @@ export const CURRICULUM_QUESTIONS = {
       }
     ]
   }
+};
+
+const SPEAKING_KINDS = new Set(["recall", "open-ended", "distancing"]);
+
+// Built from the real questions, so the level card always matches the quiz.
+export const levelDetail = (level) => {
+  const books = Object.values(CURRICULUM_QUESTIONS);
+  const questions = books[0]?.[level] || [];
+  const speaking = questions.filter((q) => SPEAKING_KINDS.has(q.kind)).length;
+  const objective = questions.length - speaking;
+  if (level === "lv1") {
+    return `문제 ${objective}개 · 선택지 4개 · 혼자 풀기`;
+  }
+  return `객관 ${objective} + 말하기·녹음 ${speaking} · 줄거리 낭독으로 시작`;
 };

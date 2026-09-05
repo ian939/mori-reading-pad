@@ -5,6 +5,7 @@ import {
   CURRICULUM_QUESTIONS,
   QUIZ_LEVELS,
   SOURCE_ANCHORS,
+  levelDetail,
 } from "./quizCurriculum.js";
 
 const expectedCounts = {
@@ -93,5 +94,18 @@ test("Lv2 ends with exactly two speaking questions", () => {
     // and they must be the last two, so the child answers aloud at the end
     assert.deepEqual(kinds.slice(-2), [true, true], bookId);
     assert.equal(kinds.slice(0, -2).some(Boolean), false, bookId);
+  }
+});
+
+test("the level card describes the questions that actually ship", () => {
+  const speaking = new Set(["recall", "open-ended", "distancing"]);
+  for (const level of ["lv1", "lv2"]) {
+    const questions = CURRICULUM_QUESTIONS.money[level];
+    const spoken = questions.filter((q) => speaking.has(q.kind)).length;
+    const detail = levelDetail(level);
+    assert.match(detail, new RegExp(String(questions.length - spoken)));
+    if (level === "lv2") assert.match(detail, new RegExp(`말하기·녹음 ${spoken}`));
+    // Lv1 is objective only, so it must not advertise speaking at all.
+    if (level === "lv1") assert.equal(/말하기/.test(detail), false);
   }
 });

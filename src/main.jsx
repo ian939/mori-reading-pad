@@ -33,7 +33,11 @@ import { GENRES, LV, place, treeParts } from "./forestGeometry";
 import { generateCharacterVariations } from "./characterApi";
 import { importCharacterImages } from "./characterSheet";
 import { enableKidSafeInteractions } from "./kidSafeInteractions";
-import { CURRICULUM_QUESTIONS, QUIZ_LEVELS } from "./quizCurriculum";
+import {
+  CURRICULUM_QUESTIONS,
+  QUIZ_LEVELS,
+  levelDetail,
+} from "./quizCurriculum";
 import {
   clearCharacterVariants,
   loadCharacterVariants,
@@ -3481,7 +3485,7 @@ function Profile({
                 </span>
                 <b>{level.name}</b>
                 <p>{level.summary}</p>
-                <small>{level.detail}</small>
+                <small>{levelDetail(level.id)}</small>
                 <span
                   className="difficulty-meter"
                   aria-label={`난이도 ${levelIndex + 1}단계`}
