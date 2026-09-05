@@ -4399,3 +4399,16 @@ button {
 .saved-answer audio {
   width: 100%;
 }
+
+.forest-detail-actions .secondary {
+  flex: 1;
+  background: #f0ecfa;
+  color: #4a3a9e;
+  border: 0;
+  border-radius: 16px;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  min-height: 52px;
+}

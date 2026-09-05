@@ -20,7 +20,7 @@ const TIMES = [
 // growing island. Tree type = book genre, tree size = quiz level (and it grows
 // to a big tree a week after it was read). Visual is kept from the design
 // handoff; text uses the app font to stay offline-friendly.
-export function ForestView({ trees, todayBook, onQuiz, onOpenShelf, onOpenStats, onReread }) {
+export function ForestView({ trees, todayBook, onQuiz, onOpenShelf, onOpenStats, onReread, onChallengeLv2 }) {
   const [selIdx, setSelIdx] = useState(null);
   const [time, setTime] = useState("day");
   const n = trees.length;
@@ -205,8 +205,16 @@ export function ForestView({ trees, todayBook, onQuiz, onOpenShelf, onOpenStats,
               {sel.fresh ? "아직 자라는 중 · 일주일 뒤 큰 나무로" : "일주일 성장 완료"}
             </div>
             <div className="forest-detail-actions">
-              <button className="primary" onClick={() => onReread(sel.bookId)}>
-                다시 읽기
+              {sel.qlv === 1 && onChallengeLv2 && (
+                <button
+                  className="primary"
+                  onClick={() => onChallengeLv2(sel.bookId)}
+                >
+                  Lv.2 도전하기
+                </button>
+              )}
+              <button className="secondary" onClick={() => onReread(sel.bookId)}>
+                다시 듣기
               </button>
             </div>
           </div>

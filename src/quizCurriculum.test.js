@@ -8,11 +8,11 @@ import {
 } from "./quizCurriculum.js";
 
 const expectedCounts = {
-  money: { lv1: 6, lv2: 9 },
-  origin: { lv1: 6, lv2: 9 },
-  cold: { lv1: 6, lv2: 9 },
-  bicycle: { lv1: 6, lv2: 9 },
-  transport: { lv1: 6, lv2: 9 },
+  money: { lv1: 6, lv2: 7 },
+  origin: { lv1: 6, lv2: 7 },
+  cold: { lv1: 6, lv2: 7 },
+  bicycle: { lv1: 6, lv2: 7 },
+  transport: { lv1: 6, lv2: 7 },
 };
 const supportedKinds = new Set([
   "choice",
@@ -25,7 +25,7 @@ const supportedKinds = new Set([
   "distancing",
 ]);
 
-test("curriculum defines the intended age bands and 75 question records", () => {
+test("curriculum defines the intended age bands and 65 question records", () => {
   assert.deepEqual(
     Object.fromEntries(
       Object.values(QUIZ_LEVELS).map((level) => [level.id, level.age]),
@@ -40,7 +40,7 @@ test("curriculum defines the intended age bands and 75 question records", () => 
       total += count;
     }
   }
-  assert.equal(total, 75);
+  assert.equal(total, 65);
 });
 
 test("every question has traceable evidence and a supported interaction", () => {
@@ -81,5 +81,17 @@ test("only Lv1 and Lv2 exist (Lv3 removed per the generation guide)", () => {
   assert.deepEqual(Object.keys(QUIZ_LEVELS), ["lv1", "lv2"]);
   for (const levels of Object.values(CURRICULUM_QUESTIONS)) {
     assert.deepEqual(Object.keys(levels), ["lv1", "lv2"]);
+  }
+});
+
+test("Lv2 ends with exactly two speaking questions", () => {
+  const speaking = new Set(["recall", "open-ended", "distancing"]);
+  for (const [bookId, levels] of Object.entries(CURRICULUM_QUESTIONS)) {
+    const kinds = levels.lv2.map((question) => speaking.has(question.kind));
+    const total = kinds.filter(Boolean).length;
+    assert.equal(total, 2, `${bookId}: expected 2 speaking questions`);
+    // and they must be the last two, so the child answers aloud at the end
+    assert.deepEqual(kinds.slice(-2), [true, true], bookId);
+    assert.equal(kinds.slice(0, -2).some(Boolean), false, bookId);
   }
 });

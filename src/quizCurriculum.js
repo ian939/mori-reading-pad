@@ -278,7 +278,8 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "M7에서 동전을 모으고, M8에서 계획해서 쓰고 모으면 원하는 일을 준비할 수 있다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 1
       },
       {
         "id": "money-lv2-02",
@@ -328,34 +329,11 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "M3 가격 비교, M5 일로 돈 벌기, M7 저금통에 저축이 각각의 개념에 대응한다.",
         "sourceRelation": "inference",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 2
       },
       {
         "id": "money-lv2-03",
-        "kind": "recall",
-        "skill": "recall",
-        "type": "회상 말하기",
-        "q": "저금통 친구가 알려 준 것을 두 가지 이상 말해 보세요.",
-        "prompts": [
-          "저금통 친구가 보여 준 돈은 어떤 모양이었나요?",
-          "돈은 어떻게 벌 수 있다고 했나요?",
-          "돈으로 무엇을 할 수 있다고 했나요?"
-        ],
-        "hint": "동전과 지폐, 일, 물건을 떠올려 보세요.",
-        "exampleAnswer": "둥근 동전과 네모난 지폐를 보여 주었고, 돈은 일을 한 대가로 벌며, 그 돈으로 필요한 물건과 서비스를 이용할 수 있다고 했어요.",
-        "why": "책 속 내용을 내 말로 다시 꺼내면 이해가 더 단단해져요.",
-        "sourceAnchors": [
-          "M2",
-          "M5",
-          "M6"
-        ],
-        "sourceEvidence": "M2 동전·지폐, M5 일의 대가로 벌기, M6 물건·서비스 이용을 회상한다.",
-        "sourceRelation": "direct",
-        "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
-      },
-      {
-        "id": "money-lv2-04",
         "kind": "choice",
         "skill": "verify-detail",
         "type": "직접 확인",
@@ -374,10 +352,11 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "M4에서 마음대로 그린 돈은 가게에서 쓸 수 없다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 3
       },
       {
-        "id": "money-lv2-05",
+        "id": "money-lv2-04",
         "kind": "sequence",
         "skill": "sequence-flow",
         "type": "흐름 순서",
@@ -416,35 +395,11 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "M5 벌기, M3 비교, M6 사용, M8 모아 준비하기 순으로 돈을 다룬다.",
         "sourceRelation": "inference",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 4
       },
       {
-        "id": "money-lv2-06",
-        "kind": "open-ended",
-        "skill": "retell",
-        "type": "다시 말하기",
-        "q": "이야기를 처음, 가운데, 끝으로 나누어 다시 말해 보세요.",
-        "prompts": [
-          "처음에 {hero}의 방에 누가 찾아왔나요?",
-          "가운데에서 돈으로 무엇을 하고 무엇을 배웠나요?",
-          "끝에는 돈을 어떻게 하기로 했나요?"
-        ],
-        "hint": "저금통 친구, 돈 쓰기, 돈 모으기 순으로 말해 보세요.",
-        "exampleAnswer": "처음에 방에 말하는 저금통 친구가 찾아왔고, 가운데에서 돈으로 필요한 물건을 사고 그린 돈은 못 쓴다는 것을 배웠으며, 끝에는 돈을 계획해서 쓰고 모으기로 했어요.",
-        "why": "책 속 내용을 내 말로 다시 꺼내면 이해가 더 단단해져요.",
-        "sourceAnchors": [
-          "M1",
-          "M4",
-          "M6",
-          "M8"
-        ],
-        "sourceEvidence": "M1 시작, M4·M6 가운데 배움, M8 끝의 다짐으로 이야기를 다시 말한다.",
-        "sourceRelation": "direct",
-        "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
-      },
-      {
-        "id": "money-lv2-07",
+        "id": "money-lv2-05",
         "kind": "choice",
         "skill": "main-idea",
         "type": "중심 생각",
@@ -465,33 +420,36 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "M3 비교, M6 알맞게 쓰기, M8 계획해 모으기가 함께 중심 생각을 이룬다.",
         "sourceRelation": "inference",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 5
       },
       {
-        "id": "money-lv2-08",
-        "kind": "open-ended",
-        "skill": "compare-contrast",
-        "type": "비교하기",
-        "q": "동전과 지폐의 같은 점과 다른 점을 말해 보세요.",
+        "id": "money-lv2-06",
+        "kind": "recall",
+        "skill": "recall",
+        "type": "회상 말하기",
+        "q": "저금통 친구가 알려 준 것을 두 가지 이상 말해 보세요.",
         "prompts": [
-          "동전과 지폐는 어떤 점이 같은가요?",
-          "동전과 지폐는 모양이 어떻게 다른가요?",
-          "둘 다 무엇을 할 때 쓰나요?"
+          "저금통 친구가 보여 준 돈은 어떤 모양이었나요?",
+          "돈은 어떻게 벌 수 있다고 했나요?",
+          "돈으로 무엇을 할 수 있다고 했나요?"
         ],
-        "hint": "모양과 쓰임을 나누어 생각해 보세요.",
-        "exampleAnswer": "동전과 지폐는 둘 다 진짜 돈이고 물건을 살 때 써요. 다른 점은 동전은 둥글고 지폐는 네모난 모양이에요.",
+        "hint": "동전과 지폐, 일, 물건을 떠올려 보세요.",
+        "exampleAnswer": "둥근 동전과 네모난 지폐를 보여 주었고, 돈은 일을 한 대가로 벌며, 그 돈으로 필요한 물건과 서비스를 이용할 수 있다고 했어요.",
         "why": "책 속 내용을 내 말로 다시 꺼내면 이해가 더 단단해져요.",
         "sourceAnchors": [
           "M2",
+          "M5",
           "M6"
         ],
-        "sourceEvidence": "M2에서 동전은 둥글고 지폐는 네모나며, M6에서 돈으로 물건을 이용한다.",
+        "sourceEvidence": "M2 동전·지폐, M5 일의 대가로 벌기, M6 물건·서비스 이용을 회상한다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
+        "scoreMode": "performance",
+        "order": 6
       },
       {
-        "id": "money-lv2-09",
+        "id": "money-lv2-07",
         "kind": "distancing",
         "skill": "distancing",
         "type": "질문 만들기",
@@ -510,7 +468,8 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "M8의 계획해서 모으는 생각을 넓혀 새 질문과 조사 순서를 만든다.",
         "sourceRelation": "extension",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
+        "scoreMode": "performance",
+        "order": 7
       }
     ]
   },
@@ -721,7 +680,8 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "우유를 차갑게 지켜 공장으로 옮기고 치즈로 만든다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 1
       },
       {
         "id": "origin-lv2-02",
@@ -771,34 +731,11 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "배추는 밭에서 자라고, 토마토는 트럭으로 옮겨지고, 재료는 합쳐져 샌드위치가 된다.",
         "sourceRelation": "inference",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 2
       },
       {
         "id": "origin-lv2-03",
-        "kind": "recall",
-        "skill": "recall-sources",
-        "type": "기억해 말하기",
-        "q": "음식 재료가 어디에서 오는지 기억나는 대로 두 가지 이상 말해 볼까요?",
-        "prompts": [
-          "달걀은 어디에서 왔나요?",
-          "우유는 어디에서 왔나요?",
-          "배추는 어떻게 자라기 시작했나요?"
-        ],
-        "hint": "양계장, 농장, 밭을 떠올려 보세요.",
-        "exampleAnswer": "달걀은 닭을 기르는 양계장에서 오고, 우유는 젖소를 기르는 농장에서 와요. 배추는 밭의 작은 씨앗에서 자라기 시작해요.",
-        "why": "책 속 내용을 내 말로 다시 꺼내면 이해가 더 단단해져요.",
-        "sourceAnchors": [
-          "O2",
-          "O3",
-          "O4"
-        ],
-        "sourceEvidence": "달걀은 양계장, 우유는 농장, 배추는 밭의 씨앗에서 온다.",
-        "sourceRelation": "direct",
-        "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
-      },
-      {
-        "id": "origin-lv2-04",
         "kind": "choice",
         "skill": "verify-fact",
         "type": "직접 확인",
@@ -817,10 +754,11 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "토마토는 농장에서 자라 트럭을 타고 공장으로 간다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 3
       },
       {
-        "id": "origin-lv2-05",
+        "id": "origin-lv2-04",
         "kind": "sequence",
         "skill": "rebuild-flow",
         "type": "흐름 재구성",
@@ -859,34 +797,11 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "궁금증으로 시작해 달걀과 우유 재료를 거쳐 재료가 모여 샌드위치가 된다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 4
       },
       {
-        "id": "origin-lv2-06",
-        "kind": "open-ended",
-        "skill": "retell-story",
-        "type": "다시 말하기",
-        "q": "이야기를 처음·가운데·끝으로 나누어 다시 말해 볼까요?",
-        "prompts": [
-          "처음에 우주 친구들은 무엇을 궁금해했나요?",
-          "가운데에 음식 재료들은 어디에서 왔나요?",
-          "끝에 재료들은 무엇이 되었나요?"
-        ],
-        "hint": "처음-가운데-끝 순서로 이어서 말해 보세요.",
-        "exampleAnswer": "처음에 우주 친구들은 마트 음식이 어디에서 왔는지 궁금해했어요. 가운데에 배추·달걀·우유·토마토가 밭·양계장·농장·공장에서 왔어요. 끝에 그 재료들이 모여 샌드위치가 되었어요.",
-        "why": "책 속 내용을 내 말로 다시 꺼내면 이해가 더 단단해져요.",
-        "sourceAnchors": [
-          "O1",
-          "O2",
-          "O8"
-        ],
-        "sourceEvidence": "궁금증으로 시작해 여러 재료의 출처를 거쳐 샌드위치로 끝난다.",
-        "sourceRelation": "direct",
-        "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
-      },
-      {
-        "id": "origin-lv2-07",
+        "id": "origin-lv2-05",
         "kind": "choice",
         "skill": "main-idea",
         "type": "중심 생각",
@@ -908,34 +823,36 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "배추·우유·토마토 등 재료가 여러 곳을 거쳐 샌드위치가 되어 우리에게 온다.",
         "sourceRelation": "inference",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 5
       },
       {
-        "id": "origin-lv2-08",
-        "kind": "open-ended",
-        "skill": "compare-two",
-        "type": "비교하기",
-        "q": "달걀과 우유는 어디에서 오는지 비슷한 점과 다른 점을 말해 볼까요?",
+        "id": "origin-lv2-06",
+        "kind": "recall",
+        "skill": "recall-sources",
+        "type": "기억해 말하기",
+        "q": "음식 재료가 어디에서 오는지 기억나는 대로 두 가지 이상 말해 볼까요?",
         "prompts": [
-          "달걀과 우유는 어디에서 오는지 어떻게 비슷한가요?",
-          "달걀과 우유는 어디에서 오는지 무엇이 다른가요?",
-          "우유는 그다음에 무엇이 되나요?"
+          "달걀은 어디에서 왔나요?",
+          "우유는 어디에서 왔나요?",
+          "배추는 어떻게 자라기 시작했나요?"
         ],
-        "hint": "동물을 기르는 곳이라는 점과, 어떤 동물인지 달라요.",
-        "exampleAnswer": "둘 다 동물을 기르는 곳에서 와요. 달걀은 닭을 기르는 양계장에서, 우유는 젖소를 기르는 농장에서 와요. 우유는 공장으로 옮겨 치즈가 되기도 해요.",
+        "hint": "양계장, 농장, 밭을 떠올려 보세요.",
+        "exampleAnswer": "달걀은 닭을 기르는 양계장에서 오고, 우유는 젖소를 기르는 농장에서 와요. 배추는 밭의 작은 씨앗에서 자라기 시작해요.",
         "why": "책 속 내용을 내 말로 다시 꺼내면 이해가 더 단단해져요.",
         "sourceAnchors": [
+          "O2",
           "O3",
-          "O4",
-          "O5"
+          "O4"
         ],
-        "sourceEvidence": "달걀은 양계장의 닭에게서, 우유는 농장의 젖소에게서 오고 우유는 치즈가 된다.",
-        "sourceRelation": "inference",
+        "sourceEvidence": "달걀은 양계장, 우유는 농장, 배추는 밭의 씨앗에서 온다.",
+        "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
+        "scoreMode": "performance",
+        "order": 6
       },
       {
-        "id": "origin-lv2-09",
+        "id": "origin-lv2-07",
         "kind": "distancing",
         "skill": "new-inquiry",
         "type": "새 질문 만들기",
@@ -954,7 +871,8 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "우주 친구들이 음식이 어디에서 왔는지 궁금해한 것처럼 새 질문을 만든다.",
         "sourceRelation": "extension",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
+        "scoreMode": "performance",
+        "order": 7
       }
     ]
   },
@@ -1163,7 +1081,8 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "빵집 아저씨의 재채기와 함께 감기 바이러스가 침방울을 타고 나왔다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 1
       },
       {
         "id": "cold-lv2-02",
@@ -1213,32 +1132,11 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "재채기로 바이러스가 나오고, 얼굴을 맞대 옮겨 가고, 손으로 코를 만져 몸으로 들어간다.",
         "sourceRelation": "inference",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 2
       },
       {
         "id": "cold-lv2-03",
-        "kind": "recall",
-        "skill": "recall-two",
-        "type": "두 가지 이상 회상",
-        "q": "감기 바이러스가 빵집 아저씨의 재채기에서 나온 뒤, 어디어디에 내려앉았는지 두 가지 이상 말해 볼까요?",
-        "prompts": [
-          "먼저 한 곳을 말해 보세요",
-          "그다음 또 다른 곳도 말해 보세요",
-          "모두 몇 곳에 앉았는지 세어 보세요"
-        ],
-        "hint": "빵, 손님, 엄마의 손을 떠올려 보세요.",
-        "exampleAnswer": "바이러스가 손님한테도 앉고, 빵에도 앉고, 엄마 손에도 앉았어요.",
-        "why": "책 속 내용을 내 말로 다시 꺼내면 이해가 더 단단해져요.",
-        "sourceAnchors": [
-          "C3"
-        ],
-        "sourceEvidence": "감기 바이러스가 손님과 빵, 엄마의 손에 내려앉았다.",
-        "sourceRelation": "direct",
-        "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
-      },
-      {
-        "id": "cold-lv2-04",
         "kind": "choice",
         "skill": "verify-fact",
         "type": "직접 확인하기",
@@ -1257,10 +1155,11 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "엄마가 빵을 먹고 아이가 올 시간이라며 집으로 서둘러 갔다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 3
       },
       {
-        "id": "cold-lv2-05",
+        "id": "cold-lv2-04",
         "kind": "sequence",
         "skill": "reconstruct-flow",
         "type": "전체 흐름 순서",
@@ -1299,34 +1198,11 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "빵집 아저씨의 코에서 시작한 바이러스가 빵과 손에 앉고, 아이가 손을 안 씻고 코를 만진 뒤 입을 안 가리고 재채기해 다시 퍼진다.",
         "sourceRelation": "inference",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 4
       },
       {
-        "id": "cold-lv2-06",
-        "kind": "open-ended",
-        "skill": "retell-bme",
-        "type": "처음·가운데·끝 말하기",
-        "q": "이 이야기를 처음, 가운데, 끝으로 나누어 다시 말해 볼까요?",
-        "prompts": [
-          "처음에 빵집에서 무슨 일이 있었는지 말해 보세요",
-          "가운데에 바이러스가 어떻게 {hero}에게 갔는지 말해 보세요",
-          "끝에 {hero}가 어떻게 되었는지 말해 보세요"
-        ],
-        "hint": "빵집 → 엄마 → {hero} 순서로 떠올려 보세요.",
-        "exampleAnswer": "처음에 빵집 아저씨가 재채기를 했어요. 가운데에 엄마를 거쳐 {hero}한테 바이러스가 갔어요. 끝에 {hero}가 감기에 걸렸어요.",
-        "why": "책 속 내용을 내 말로 다시 꺼내면 이해가 더 단단해져요.",
-        "sourceAnchors": [
-          "C1",
-          "C5",
-          "C7"
-        ],
-        "sourceEvidence": "빵집 아저씨의 재채기에서 시작해 엄마를 거쳐 아이에게 옮아 아이가 감기에 걸린다.",
-        "sourceRelation": "inference",
-        "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
-      },
-      {
-        "id": "cold-lv2-07",
+        "id": "cold-lv2-05",
         "kind": "choice",
         "skill": "main-idea",
         "type": "중심 생각 찾기",
@@ -1348,35 +1224,34 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "재채기로 나온 바이러스가 손과 접촉을 타고 여러 사람에게 옮겨 다닌다.",
         "sourceRelation": "inference",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 5
       },
       {
-        "id": "cold-lv2-08",
-        "kind": "open-ended",
-        "skill": "compare-contrast",
-        "type": "공통점과 차이점 말하기",
-        "q": "빵집 아저씨와 {hero}가 바이러스를 퍼뜨린 모습의 같은 점과 다른 점을 말해 볼까요?",
+        "id": "cold-lv2-06",
+        "kind": "recall",
+        "skill": "recall-two",
+        "type": "두 가지 이상 회상",
+        "q": "감기 바이러스가 빵집 아저씨의 재채기에서 나온 뒤, 어디어디에 내려앉았는지 두 가지 이상 말해 볼까요?",
         "prompts": [
-          "두 사람이 똑같이 한 일을 말해 보세요",
-          "빵집 아저씨는 어떻게 퍼뜨렸는지 말해 보세요",
-          "{hero}는 어떻게 퍼뜨렸는지 말해 보세요"
+          "먼저 한 곳을 말해 보세요",
+          "그다음 또 다른 곳도 말해 보세요",
+          "모두 몇 곳에 앉았는지 세어 보세요"
         ],
-        "hint": "재채기와 손을 떠올려 보세요.",
-        "exampleAnswer": "둘 다 재채기로 침방울을 퍼뜨렸어요. 아저씨는 코를 문질러서, {hero}는 손을 안 씻어서 바이러스를 옮겼어요.",
+        "hint": "빵, 손님, 엄마의 손을 떠올려 보세요.",
+        "exampleAnswer": "바이러스가 손님한테도 앉고, 빵에도 앉고, 엄마 손에도 앉았어요.",
         "why": "책 속 내용을 내 말로 다시 꺼내면 이해가 더 단단해져요.",
         "sourceAnchors": [
-          "C1",
-          "C2",
-          "C6",
-          "C8"
+          "C3"
         ],
-        "sourceEvidence": "빵집 아저씨는 코를 문지르고 재채기해, 아이는 손을 안 씻고 재채기해 바이러스를 퍼뜨린다.",
-        "sourceRelation": "inference",
+        "sourceEvidence": "감기 바이러스가 손님과 빵, 엄마의 손에 내려앉았다.",
+        "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
+        "scoreMode": "performance",
+        "order": 6
       },
       {
-        "id": "cold-lv2-09",
+        "id": "cold-lv2-07",
         "kind": "distancing",
         "skill": "new-question",
         "type": "새 질문과 조사하기",
@@ -1396,7 +1271,8 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "아이가 손을 안 씻고 입을 안 가려 바이러스가 퍼진 장면에서 예방 질문으로 확장한다.",
         "sourceRelation": "extension",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
+        "scoreMode": "performance",
+        "order": 7
       }
     ]
   },
@@ -1606,7 +1482,8 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "엄마가 저축을 알려 주고, 저축은 돈이 모일 때까지 아껴 모으는 일이다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 1
       },
       {
         "id": "bicycle-lv2-02",
@@ -1656,34 +1533,11 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "값을 비교하는 장면, 아껴 모으는 저축 장면, 용돈을 다 쓰는 장면이 각각 나온다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 2
       },
       {
         "id": "bicycle-lv2-03",
-        "kind": "recall",
-        "skill": "recall",
-        "type": "정보 회상",
-        "q": "엄마가 자전거를 바로 사 주지 않으면서 보여 주거나 알려 준 것을 두 가지 이상 말해 보세요.",
-        "prompts": [
-          "엄마가 방에서 무엇을 보여 주었는지 말했어요",
-          "자전거 값에 대해 무엇이라고 했는지 말했어요",
-          "돈을 어떻게 하라고 알려 주었는지 말했어요"
-        ],
-        "hint": "킥보드와 많은 장난감, 비싼 값, 저축을 떠올려 보세요.",
-        "exampleAnswer": "엄마는 얼마 전에 산 킥보드와 방 안 장난감을 보여 주고, 자전거는 과자보다 비싸다고 하며 용돈을 아껴 모으는 저축을 알려 주었어요.",
-        "why": "책 속 내용을 내 말로 다시 꺼내면 이해가 더 단단해져요.",
-        "sourceAnchors": [
-          "B3",
-          "B4",
-          "B5"
-        ],
-        "sourceEvidence": "엄마가 킥보드와 장난감을 보여 주고, 비싼 값을 설명하고, 저축을 알려 준다.",
-        "sourceRelation": "direct",
-        "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
-      },
-      {
-        "id": "bicycle-lv2-04",
         "kind": "choice",
         "skill": "source-boundary",
         "type": "직접 확인",
@@ -1702,10 +1556,11 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "며칠 뒤 마트에서 {hero}가 저축이 잘되지 않는다며 엄마에게 방법을 묻는다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 3
       },
       {
-        "id": "bicycle-lv2-05",
+        "id": "bicycle-lv2-04",
         "kind": "sequence",
         "skill": "sequence",
         "type": "흐름 재구성",
@@ -1744,34 +1599,11 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "조르기, 값 설명, 용돈 소진, 마트에서의 질문이 이야기 흐름을 이룬다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 4
       },
       {
-        "id": "bicycle-lv2-06",
-        "kind": "open-ended",
-        "skill": "retell",
-        "type": "다시 말하기",
-        "q": "처음·가운데·끝을 생각하며 이 이야기를 짧게 다시 말해 보세요.",
-        "prompts": [
-          "처음에 {hero}가 무엇을 보고 무엇을 했는지 말했어요",
-          "가운데에 엄마가 무엇을 알려 주고 {hero}가 용돈을 어떻게 했는지 말했어요",
-          "끝에 {hero}가 무엇을 물었는지 말했어요"
-        ],
-        "hint": "처음에는 자전거, 가운데에는 용돈과 저축, 끝에는 마트에서의 질문을 떠올려요.",
-        "exampleAnswer": "처음에 {hero}는 가게에서 자전거를 보고 사 달라고 졸랐어요. 가운데에 엄마가 저축을 알려 주었지만 {hero}는 용돈을 다 썼어요. 끝에 {hero}는 마트에서 저축하는 방법을 물었어요.",
-        "why": "책 속 내용을 내 말로 다시 꺼내면 이해가 더 단단해져요.",
-        "sourceAnchors": [
-          "B1",
-          "B5",
-          "B7"
-        ],
-        "sourceEvidence": "자전거 발견과 조르기, 저축 배우기와 용돈 소진, 마트에서의 질문으로 이어진다.",
-        "sourceRelation": "direct",
-        "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
-      },
-      {
-        "id": "bicycle-lv2-07",
+        "id": "bicycle-lv2-05",
         "kind": "choice",
         "skill": "main-idea",
         "type": "중심 생각",
@@ -1792,33 +1624,36 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "저축을 배우고 용돈을 다 써 본 뒤, 저축은 살 만큼 돈이 모일 때까지 모으는 일임이 드러난다.",
         "sourceRelation": "inference",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 5
       },
       {
-        "id": "bicycle-lv2-08",
-        "kind": "open-ended",
-        "skill": "compare",
-        "type": "공통점과 차이점",
-        "q": "용돈을 바로 쓰는 것과 아껴 모으는 것을 견주어 공통점 한 가지와 차이점 한 가지를 말해 보세요.",
+        "id": "bicycle-lv2-06",
+        "kind": "recall",
+        "skill": "recall",
+        "type": "정보 회상",
+        "q": "엄마가 자전거를 바로 사 주지 않으면서 보여 주거나 알려 준 것을 두 가지 이상 말해 보세요.",
         "prompts": [
-          "두 가지 모두 용돈으로 하는 일임을 말했어요",
-          "바로 쓰면 어떻게 되는지 말했어요",
-          "아껴 모으면 어떻게 되는지 말했어요"
+          "엄마가 방에서 무엇을 보여 주었는지 말했어요",
+          "자전거 값에 대해 무엇이라고 했는지 말했어요",
+          "돈을 어떻게 하라고 알려 주었는지 말했어요"
         ],
-        "hint": "바로 쓰면 돈이 남지 않고, 아껴 모으면 갖고 싶은 것을 살 수 있어요.",
-        "exampleAnswer": "둘 다 용돈으로 하는 일이에요. 하지만 바로 쓰면 돈이 하나도 남지 않고, 아껴 모으면 원하는 것을 살 만큼 돈이 모여요.",
+        "hint": "킥보드와 많은 장난감, 비싼 값, 저축을 떠올려 보세요.",
+        "exampleAnswer": "엄마는 얼마 전에 산 킥보드와 방 안 장난감을 보여 주고, 자전거는 과자보다 비싸다고 하며 용돈을 아껴 모으는 저축을 알려 주었어요.",
         "why": "책 속 내용을 내 말로 다시 꺼내면 이해가 더 단단해져요.",
         "sourceAnchors": [
-          "B6",
-          "B8"
+          "B3",
+          "B4",
+          "B5"
         ],
-        "sourceEvidence": "용돈을 다 쓰면 돈이 남지 않고, 저축은 살 만큼 돈이 모일 때까지 아껴 모으는 일이다.",
-        "sourceRelation": "inference",
+        "sourceEvidence": "엄마가 킥보드와 장난감을 보여 주고, 비싼 값을 설명하고, 저축을 알려 준다.",
+        "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
+        "scoreMode": "performance",
+        "order": 6
       },
       {
-        "id": "bicycle-lv2-09",
+        "id": "bicycle-lv2-07",
         "kind": "distancing",
         "skill": "inquiry-plan",
         "type": "질문 만들기",
@@ -1838,7 +1673,8 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "엄마가 저축을 알려 주고, 저축은 살 만큼 돈이 모일 때까지 아껴 모으는 일이다.",
         "sourceRelation": "extension",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
+        "scoreMode": "performance",
+        "order": 7
       }
     ]
   },
@@ -2048,7 +1884,8 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "지하철이 기차역에 도착하고, 거기서 번호를 찾아 빠른 기차로 갈아탄다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 1
       },
       {
         "id": "transport-lv2-02",
@@ -2098,34 +1935,11 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "교통 카드를 찍고 타며, 내릴 곳에서 벨을 누르고, 개찰구를 지나 줄을 서서 탄다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 2
       },
       {
         "id": "transport-lv2-03",
-        "kind": "recall",
-        "skill": "recall",
-        "type": "두 가지 회상",
-        "q": "{hero}가 이번 여행에서 탄 탈것을 두 가지 이상 말해 보세요.",
-        "prompts": [
-          "탈것 이름을 두 가지 말했어요",
-          "갈아탄 순서를 이어 말했어요",
-          "힌트를 보고 다시 말했어요"
-        ],
-        "hint": "버스, 지하철, 기차 가운데 떠오르는 것을 골라 보세요.",
-        "exampleAnswer": "{hero}는 버스를 타고 가다가 지하철로 갈아타고, 마지막에는 빠른 기차를 탔어요.",
-        "why": "책 속 내용을 내 말로 다시 꺼내면 이해가 더 단단해져요.",
-        "sourceAnchors": [
-          "T3",
-          "T5",
-          "T8"
-        ],
-        "sourceEvidence": "버스에 탔다가 지하철로 갈아타고 마지막에 기차에 오른다.",
-        "sourceRelation": "direct",
-        "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
-      },
-      {
-        "id": "transport-lv2-04",
         "kind": "choice",
         "skill": "verify-detail",
         "type": "직접 확인",
@@ -2144,10 +1958,11 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "지하철이 땅속과 땅 위를 달려 기차역에 도착한다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 3
       },
       {
-        "id": "transport-lv2-05",
+        "id": "transport-lv2-04",
         "kind": "sequence",
         "skill": "sequence",
         "type": "흐름 재구성",
@@ -2186,34 +2001,11 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "할머니 댁에 가기로 한 뒤 버스, 지하철, 기차를 차례로 갈아탄다.",
         "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 4
       },
       {
-        "id": "transport-lv2-06",
-        "kind": "open-ended",
-        "skill": "retell",
-        "type": "다시 말하기",
-        "q": "처음·가운데·끝을 생각하며 이야기를 다시 말해 보세요.",
-        "prompts": [
-          "처음에 어디로 가기로 했는지 말했어요",
-          "가운데에 무엇으로 갈아탔는지 말했어요",
-          "끝에 무엇을 탔는지 말했어요"
-        ],
-        "hint": "처음-가운데-끝 순서 낱말을 넣어 보세요.",
-        "exampleAnswer": "처음에 할머니 댁에 가기로 했고, 가운데에 버스에서 지하철로 갈아탔고, 끝에 빠른 기차를 탔어요.",
-        "why": "책 속 내용을 내 말로 다시 꺼내면 이해가 더 단단해져요.",
-        "sourceAnchors": [
-          "T1",
-          "T5",
-          "T8"
-        ],
-        "sourceEvidence": "할머니 댁으로 출발해 지하철로 갈아타고 마지막에 기차에 오르는 흐름이다.",
-        "sourceRelation": "direct",
-        "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
-      },
-      {
-        "id": "transport-lv2-07",
+        "id": "transport-lv2-05",
         "kind": "choice",
         "skill": "main-idea",
         "type": "중심 생각",
@@ -2236,36 +2028,36 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "할머니 댁으로 가며 버스에서 지하철, 기차로 갈아타는 여러 장면이 이어진다.",
         "sourceRelation": "inference",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "objective"
+        "scoreMode": "objective",
+        "order": 5
       },
       {
-        "id": "transport-lv2-08",
-        "kind": "open-ended",
-        "skill": "compare",
-        "type": "공통점과 차이점",
-        "q": "버스와 지하철의 같은 점과 다른 점을 하나씩 말해 보세요.",
+        "id": "transport-lv2-06",
+        "kind": "recall",
+        "skill": "recall",
+        "type": "두 가지 회상",
+        "q": "{hero}가 이번 여행에서 탄 탈것을 두 가지 이상 말해 보세요.",
         "prompts": [
-          "버스와 지하철의 같은 점을 말했어요",
-          "다른 점을 말했어요",
-          "책 속 장면을 근거로 들었어요"
+          "탈것 이름을 두 가지 말했어요",
+          "갈아탄 순서를 이어 말했어요",
+          "힌트를 보고 다시 말했어요"
         ],
-        "hint": "탈 때 무엇을 하는지, 어디로 달리는지 비교해 보세요.",
-        "exampleAnswer": "버스와 지하철 둘 다 사람이 타고 내리는 탈것이에요. 버스는 도로를 달리며 카드를 찍고 타고, 지하철은 개찰구를 지나 땅속과 땅 위를 달리는 점이 달라요.",
+        "hint": "버스, 지하철, 기차 가운데 떠오르는 것을 골라 보세요.",
+        "exampleAnswer": "{hero}는 버스를 타고 가다가 지하철로 갈아타고, 마지막에는 빠른 기차를 탔어요.",
         "why": "책 속 내용을 내 말로 다시 꺼내면 이해가 더 단단해져요.",
         "sourceAnchors": [
-          "T2",
           "T3",
-          "T4",
-          "T6",
-          "T7"
+          "T5",
+          "T8"
         ],
-        "sourceEvidence": "버스는 카드를 찍고 손잡이·벨을 쓰며 도로를 달리고, 지하철은 개찰구를 지나 땅속과 땅 위를 달린다.",
-        "sourceRelation": "inference",
+        "sourceEvidence": "버스에 탔다가 지하철로 갈아타고 마지막에 기차에 오른다.",
+        "sourceRelation": "direct",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
+        "scoreMode": "performance",
+        "order": 6
       },
       {
-        "id": "transport-lv2-09",
+        "id": "transport-lv2-07",
         "kind": "distancing",
         "skill": "inquiry",
         "type": "새 질문 만들기",
@@ -2291,7 +2083,8 @@ export const CURRICULUM_QUESTIONS = {
         "sourceEvidence": "책은 버스·지하철·기차를 타고 갈아타는 과정을 보여 주지만 다른 탈것은 다루지 않는다.",
         "sourceRelation": "extension",
         "sourceStatus": "adapted-story-awaiting-page-verification",
-        "scoreMode": "performance"
+        "scoreMode": "performance",
+        "order": 7
       }
     ]
   }

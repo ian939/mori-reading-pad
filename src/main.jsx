@@ -580,6 +580,16 @@ const loadQuizLevel = () => {
   return QUIZ_LEVELS[saved] ? saved : "lv1";
 };
 
+// Each book tracks its own level, so finishing Lv1 on one book does not move
+// every other book to Lv2. The setting above is only the starting level.
+const loadBookLevels = () => {
+  const saved = readUserJson(CURRENT_USER.id, "book-levels", null);
+  if (!saved || typeof saved !== "object") return {};
+  return Object.fromEntries(
+    Object.entries(saved).filter(([, level]) => QUIZ_LEVELS[level]),
+  );
+};
+
 const isQuestionComplete = (question, response) => {
   const kind = questionKind(question);
   if (isReflectiveQuestion(question)) {
@@ -782,6 +792,14 @@ const loadProgress = () => {
 function App() {
   const [books, setBooks] = useState(loadBooks);
   const [quizLevel, setQuizLevel] = useState(loadQuizLevel);
+  const [bookLevels, setBookLevels] = useState(loadBookLevels);
+  const levelOf = (bookId) => bookLevels[bookId] || quizLevel;
+  const setLevelFor = (bookId, level) =>
+    setBookLevels((current) => {
+      const next = { ...current, [bookId]: level };
+      writeUserJson(CURRENT_USER.id, "book-levels", next);
+      return next;
+    });
   const [view, setView] = useState("home");
   const [selectedId, setSelectedId] = useState(DEFAULT_BOOKS[0].id);
   const [progress, setProgress] = useState(loadProgress);
@@ -819,13 +837,16 @@ function App() {
         hydrateCast(
           {
             ...book,
-            quizLevel,
-            questions: questionsForLevel(book, quizLevel),
+            quizLevel: bookLevels[book.id] || quizLevel,
+            questions: questionsForLevel(
+              book,
+              bookLevels[book.id] || quizLevel,
+            ),
           },
           hero,
         ),
       ),
-    [books, quizLevel, hero],
+    [books, quizLevel, bookLevels, hero],
   );
   const selected =
     activeBooks.find((book) => book.id === selectedId) || activeBooks[0];
@@ -870,7 +891,7 @@ function App() {
   }, [activeBooks, progress]);
   const todayBook =
     activeBooks.find(
-      (book) => !progress.completed.includes(bookProgressKey(book.id, quizLevel)),
+      (book) => !progress.completed.includes(bookProgressKey(book.id, book.quizLevel)),
     ) || activeBooks[0];
   const weekBars = useMemo(() => {
     const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
@@ -1056,7 +1077,7 @@ function App() {
     const correct = isQuestionCorrect(question, choice);
     const attempts = questionAttempts[quizIndex] || 0;
 
-    if (quizLevel === "lv1" && !correct && attempts === 0) {
+    if (selected.quizLevel === "lv1" && !correct && attempts === 0) {
       setQuestionAttempts((current) => ({
         ...current,
         [quizIndex]: 1,
@@ -1108,7 +1129,7 @@ function App() {
         isScoredQuestion,
       ).length;
       setProgress((p) => {
-        const progressKey = bookProgressKey(selected.id, quizLevel);
+        const progressKey = bookProgressKey(selected.id, selected.quizLevel);
         const hasPreviousScore = Number.isFinite(p.bestScores?.[progressKey]);
         const previousBest = hasPreviousScore
           ? p.bestScores[progressKey]
@@ -1361,13 +1382,13 @@ function App() {
     });
   };
   const storeBookRecording = (blob) =>
-    persistRecording(storyRecordingKey(selected.id, quizLevel), blob);
+    persistRecording(storyRecordingKey(selected.id, selected.quizLevel), blob);
   // Speaking answers are stored per question so each can be replayed later.
   const storeAnswerRecording = async (blob) => {
     const question = selected.questions[quizIndex];
     if (!question) return;
     await persistRecording(
-      answerRecordingKey(selected.id, quizLevel, question.id),
+      answerRecordingKey(selected.id, selected.quizLevel, question.id),
       blob,
     );
   };
@@ -1437,7 +1458,7 @@ function App() {
           <Detail
             book={selected}
             done={progress.completed.includes(
-              bookProgressKey(selected.id, quizLevel),
+              bookProgressKey(selected.id, selected.quizLevel),
             )}
             back={() => go("home")}
             start={() => startQuiz(selected)}
@@ -1449,7 +1470,7 @@ function App() {
             back={() => go("detail")}
             begin={beginQuestions}
             existingRecording={
-              recordings[bookProgressKey(selected.id, quizLevel)] || null
+              recordings[bookProgressKey(selected.id, selected.quizLevel)] || null
             }
             saveRecording={storeBookRecording}
           />
@@ -1468,7 +1489,7 @@ function App() {
               recordings[
                 answerRecordingKey(
                   selected.id,
-                  quizLevel,
+                  selected.quizLevel,
                   selected.questions[quizIndex]?.id,
                 )
               ] || null
@@ -1480,7 +1501,7 @@ function App() {
           <Feedback
             q={selected.questions[quizIndex]}
             choice={choice}
-            level={quizLevel}
+            level={selected.quizLevel}
             mode={feedbackMode}
             retry={retryQuestion}
             next={next}
@@ -1496,8 +1517,9 @@ function App() {
             reflectionCount={answers.filter((item) => item.reflective).length}
             go={go}
             onChallengeLv2={() => {
-              setQuizLevel("lv2");
-              startQuiz(selected);
+              // Only this book moves up; other books keep their own level.
+              setLevelFor(selected.id, "lv2");
+              startQuiz({ ...selected, quizLevel: "lv2" });
             }}
           />
         )}
@@ -1505,7 +1527,7 @@ function App() {
           <StoryRecording
             book={selected}
             existing={
-              recordings[bookProgressKey(selected.id, quizLevel)] || null
+              recordings[bookProgressKey(selected.id, selected.quizLevel)] || null
             }
             beforeQuiz={recordingReturn === "quiz"}
             save={storeBookRecording}
@@ -1522,14 +1544,14 @@ function App() {
           <StoryArchive
             book={selected}
             recording={
-              recordings[bookProgressKey(selected.id, quizLevel)] || null
+              recordings[bookProgressKey(selected.id, selected.quizLevel)] || null
             }
             answerRecordings={selected.questions
               .filter(isReflectiveQuestion)
               .map((question) => {
                 const key = answerRecordingKey(
                   selected.id,
-                  quizLevel,
+                  selected.quizLevel,
                   question.id,
                 );
                 return recordings[key]
@@ -1557,6 +1579,12 @@ function App() {
               // be replayed, with 다시 읽기 available from there.
               const book = activeBooks.find((item) => item.id === bookId);
               if (book) go("archive", book);
+            }}
+            onChallengeLv2={(bookId) => {
+              const book = activeBooks.find((item) => item.id === bookId);
+              if (!book) return;
+              setLevelFor(bookId, "lv2");
+              startQuiz({ ...book, quizLevel: "lv2" });
             }}
           />
         )}
@@ -1663,7 +1691,7 @@ function HomeView({
   const level = QUIZ_LEVELS[quizLevel];
   const childName = childProfile.completed ? childProfile.name : "";
   const completedCount = books.filter((book) =>
-    progress.completed.includes(bookProgressKey(book.id, quizLevel)),
+    progress.completed.includes(bookProgressKey(book.id, book.quizLevel)),
   ).length;
   return (
     <>
@@ -1693,7 +1721,7 @@ function HomeView({
                 books.find(
                   (book) =>
                     !progress.completed.includes(
-                      bookProgressKey(book.id, quizLevel),
+                      bookProgressKey(book.id, book.quizLevel),
                     ),
                 ) ||
                   books[0],
@@ -1752,7 +1780,7 @@ function HomeView({
               key={b.id}
               book={b}
               done={progress.completed.includes(
-                bookProgressKey(b.id, quizLevel),
+                bookProgressKey(b.id, b.quizLevel),
               )}
               onClick={() => go("detail", b)}
             />
@@ -2849,14 +2877,14 @@ function LibraryView({ books, progress, quizLevel, go }) {
     () =>
       books
         .filter((book) =>
-          progress.completed.includes(bookProgressKey(book.id, quizLevel)),
+          progress.completed.includes(bookProgressKey(book.id, book.quizLevel)),
         )
         .sort((left, right) => {
           const leftDate = progress.readDates?.[
-            bookProgressKey(left.id, quizLevel)
+            bookProgressKey(left.id, left.quizLevel)
           ];
           const rightDate = progress.readDates?.[
-            bookProgressKey(right.id, quizLevel)
+            bookProgressKey(right.id, right.quizLevel)
           ];
           return new Date(rightDate || 0) - new Date(leftDate || 0);
         }),
