@@ -4429,6 +4429,9 @@ button {
 }
 .shelf-track {
   display: flex;
+  /* The kid-safe lock sets touch-action: manipulation globally, which stops
+     horizontal panning, so the shelf must opt back in to left/right drags. */
+  touch-action: pan-x;
   /* align to the top so spines line up with the front book's cover */
   align-items: flex-start;
   gap: 12px;
@@ -4461,6 +4464,12 @@ button {
 }
 .shelf-slot .book-card {
   width: 100%;
+}
+/* Buttons get touch-action: manipulation from the kid-safe lock; inside the
+   shelf they must let a horizontal drag through to the scroller. */
+.kid-safe-interactions .shelf-track button,
+.shelf-track button {
+  touch-action: pan-x;
 }
 
 /* Side-on spine */
