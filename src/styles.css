@@ -4422,3 +4422,113 @@ button {
   text-decoration: line-through;
   cursor: not-allowed;
 }
+
+/* ---- Home shelf carousel: swipe sideways, centre book faces front ---- */
+.shelf-carousel {
+  margin: 0 -20px;
+}
+.shelf-track {
+  display: flex;
+  /* align to the top so spines line up with the front book's cover */
+  align-items: flex-start;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  /* room so the first and last book can still reach the middle */
+  padding: 10px calc(50% - 104px) 22px;
+  perspective: 1100px;
+}
+.shelf-track::-webkit-scrollbar {
+  display: none;
+}
+.shelf-slot {
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+  transform-style: preserve-3d;
+}
+.shelf-slot.front {
+  width: 208px;
+}
+.shelf-carousel {
+  --cover-h: 214px;
+}
+.shelf-slot.side {
+  width: 54px;
+  opacity: 0.9;
+}
+.shelf-slot .book-card {
+  width: 100%;
+}
+
+/* Side-on spine */
+.book-card.spine {
+  /* Sized from the front cover so the shelf reads as one row. The rotated
+     face renders at 0.96x its box under this perspective, so scale up by
+     1/0.96 to land on the same shelf line. Measured, not guessed. */
+  height: calc(var(--cover-h, 214px) * 1.042);
+  transform-origin: 50% 0;
+  border-radius: 6px 10px 10px 6px;
+  border: 0;
+  padding: 14px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: inset -6px 0 10px rgba(0, 0, 0, 0.08),
+    2px 6px 14px rgba(46, 36, 112, 0.12);
+  border-left: 6px solid var(--book, #cfc6b6);
+  transform: rotateY(26deg) scale(0.96);
+}
+.shelf-slot.side:last-child .book-card.spine {
+  transform: rotateY(-26deg) scale(0.96);
+}
+.spine-title {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 14px;
+  font-weight: 900;
+  color: #4a4a3f;
+  letter-spacing: 0.02em;
+  max-height: 232px;
+  overflow: hidden;
+}
+
+.shelf-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+.shelf-dots button {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #dcdad0;
+  cursor: pointer;
+}
+.shelf-dots button.on {
+  width: 22px;
+  background: var(--ink, #2f4f45);
+}
+
+@media (min-width: 700px) {
+  .shelf-track {
+    padding: 14px calc(50% - 128px) 26px;
+    gap: 16px;
+  }
+  .shelf-slot.front {
+    width: 256px;
+  }
+  .shelf-carousel {
+    --cover-h: 310px;
+  }
+  .shelf-slot.side {
+    width: 64px;
+  }
+
+}

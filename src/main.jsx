@@ -1780,18 +1780,11 @@ function HomeView({
           </div>
           <span className="count">{books.length}권</span>
         </div>
-        <div className="book-grid">
-          {books.map((b) => (
-            <BookCard
-              key={b.id}
-              book={b}
-              done={progress.completed.includes(
-                bookProgressKey(b.id, b.quizLevel),
-              )}
-              onClick={() => go("detail", b)}
-            />
-          ))}
-        </div>
+        <BookShelfCarousel
+          books={books}
+          progress={progress}
+          onOpen={(book) => go("detail", book)}
+        />
       </section>
     </>
   );
@@ -1813,7 +1806,107 @@ function BookCover({ book, className = "" }) {
   );
 }
 
-function BookCard({ book, done, onClick }) {
+// A side-on shelf the child swipes through: books sit like spines and the
+// one in the middle turns to face front. Snap scrolling keeps a single book
+// centred, and the same swipe works with a mouse, touch or keyboard.
+function BookShelfCarousel({ books, progress, onOpen }) {
+  const trackRef = useRef(null);
+  const [active, setActive] = useState(0);
+
+  // Track the centred book from scroll position rather than a timer, so it
+  // stays right whether the child flicks, drags or uses the arrows.
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const middle = track.scrollLeft + track.clientWidth / 2;
+      let closest = 0;
+      let best = Infinity;
+      [...track.children].forEach((child, index) => {
+        const centre = child.offsetLeft + child.offsetWidth / 2;
+        const distance = Math.abs(centre - middle);
+        if (distance < best) {
+          best = distance;
+          closest = index;
+        }
+      });
+      setActive(closest);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    track.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      track.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [books.length]);
+
+  const scrollTo = (index) => {
+    const track = trackRef.current;
+    const child = track?.children[index];
+    if (!track || !child) return;
+    track.scrollTo({
+      left: child.offsetLeft - (track.clientWidth - child.offsetWidth) / 2,
+      behavior: "smooth",
+    });
+  };
+
+  return (
+    <div className="shelf-carousel">
+      <div className="shelf-track" ref={trackRef}>
+        {books.map((book, index) => {
+          const done = progress.completed.includes(
+            bookProgressKey(book.id, book.quizLevel),
+          );
+          const isActive = index === active;
+          return (
+            <div
+              className={`shelf-slot ${isActive ? "front" : "side"}`}
+              key={book.id}
+            >
+              <BookCard
+                book={book}
+                done={done}
+                spine={!isActive}
+                onClick={() => (isActive ? onOpen(book) : scrollTo(index))}
+              />
+            </div>
+          );
+        })}
+      </div>
+      <div className="shelf-dots" role="tablist" aria-label="책 고르기">
+        {books.map((book, index) => (
+          <button
+            key={book.id}
+            role="tab"
+            aria-selected={index === active}
+            aria-label={book.title}
+            className={index === active ? "on" : ""}
+            onClick={() => scrollTo(index)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BookCard({ book, done, onClick, spine = false }) {
+  if (spine) {
+    return (
+      <button
+        className="book-card spine"
+        onClick={onClick}
+        style={{ "--book": book.color, background: book.light }}
+        aria-label={`${book.title} 펼치기`}
+      >
+        <span className="spine-title">{book.title}</span>
+      </button>
+    );
+  }
   return (
     <button className="book-card" onClick={onClick}>
       <div className="cover-wrap" style={{ background: book.light }}>
