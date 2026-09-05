@@ -4541,3 +4541,70 @@ button {
   }
 
 }
+
+/* ---- Short screens (tablet landscape) --------------------------------
+   The home layout is tuned for portrait: a tall hero pushes the book shelf
+   below the fold, so on a landscape pad the child cannot reach it to swipe.
+   Compact the hero and daily card so the shelf is visible without scrolling. */
+@media (max-height: 900px) and (min-width: 700px) {
+  .hero {
+    min-height: 168px;
+    padding: 16px 24px 14px;
+  }
+  .hero img {
+    max-height: 108px;
+  }
+  .hero h1 {
+    font-size: 24px;
+    margin: 6px 0 8px;
+  }
+  /* The hero text block (heading, blurb, two buttons) stacked to ~296px,
+     which is what actually kept the shelf off a landscape screen. */
+  .hero > div > p {
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .hero .level-shortcut {
+    margin-top: 8px;
+    min-height: 38px;
+  }
+  .hero .primary {
+    margin-top: 8px;
+    min-height: 48px;
+  }
+  .hero .eyebrow {
+    margin-bottom: 2px;
+  }
+  .daily {
+    padding: 12px 18px;
+    margin: 12px 14px;
+  }
+  .section .section-title {
+    margin-bottom: 8px;
+  }
+  /* Shrink the books themselves: at 484px tall the shelf alone did not fit
+     a landscape pad, leaving it unreachable below the fold. The cover has a
+     fixed height of its own, so it must be overridden here too or the
+     --cover-h variable has no effect. */
+  .shelf-carousel {
+    --cover-h: 176px;
+  }
+  .shelf-carousel .cover-wrap {
+    height: var(--cover-h);
+  }
+  .shelf-slot.front {
+    width: 146px;
+  }
+  .shelf-slot.side {
+    width: 44px;
+  }
+  .shelf-track {
+    padding: 8px calc(50% - 73px) 12px;
+  }
+  .shelf-slot.front .book-meta p {
+    display: none;
+  }
+  .spine-title {
+    font-size: 12px;
+  }
+}
