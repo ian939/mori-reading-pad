@@ -411,6 +411,27 @@ button {
   letter-spacing: -0.035em;
   word-break: keep-all;
 }
+.book-art-status {
+  position: absolute;
+  z-index: 2;
+  top: 27%;
+  left: 50%;
+  min-height: 28px;
+  border: 1px solid #876e5355;
+  border-radius: 999px;
+  background: #fffaf0e8;
+  padding: 5px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #796650;
+  font-size: clamp(7px, 6cqi, 12px);
+  font-weight: 900;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
 .cover-wrap {
   height: 214px;
   border-radius: 22px;
@@ -1406,10 +1427,22 @@ button {
   height: 205px;
   display: flex;
   align-items: flex-end;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 4px;
+  overscroll-behavior-inline: contain;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.shelf-books::-webkit-scrollbar {
+  display: none;
 }
 .shelf-book {
+  flex: 0 0 92px;
   width: 92px;
   height: 178px;
   background: var(--book);
@@ -1425,6 +1458,7 @@ button {
   font: 400 14px "Jua";
   align-items: center;
   gap: 10px;
+  scroll-snap-align: start;
 }
 .shelf-book:nth-child(2) {
   height: 192px;
@@ -1436,6 +1470,7 @@ button {
   border-radius: 4px;
 }
 .empty-book {
+  flex: 0 0 92px;
   width: 92px;
   height: 158px;
   border: 2px dashed #8fb2a5;
@@ -1642,6 +1677,8 @@ button {
   overflow-x: auto;
   scroll-snap-type: x proximity;
   overscroll-behavior-inline: contain;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 .page-preview {
   width: 96px;
@@ -1830,6 +1867,32 @@ button {
 .story-comic {
   display: grid;
   gap: 15px;
+}
+.story-art-notice {
+  min-height: 62px;
+  border: 1px solid #e6d0ac;
+  border-radius: 16px;
+  background: #fff8ea;
+  padding: 11px 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #775d3e;
+}
+.story-art-notice > svg {
+  flex: 0 0 auto;
+}
+.story-art-notice > span {
+  display: grid;
+  gap: 2px;
+}
+.story-art-notice strong {
+  font-size: 12px;
+}
+.story-art-notice small {
+  color: #8b765e;
+  font-size: 10px;
+  line-height: 1.45;
 }
 .story-comic figure {
   margin: 0;
@@ -3647,6 +3710,7 @@ button {
     gap: 20px;
   }
   .shelf-book {
+    flex-basis: 125px;
     width: 125px;
     height: 230px;
     font-size: 18px;
@@ -3659,6 +3723,7 @@ button {
     height: 155px;
   }
   .empty-book {
+    flex-basis: 125px;
     width: 125px;
     height: 215px;
   }

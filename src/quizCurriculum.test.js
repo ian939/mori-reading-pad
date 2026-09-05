@@ -14,7 +14,11 @@ const expectedCounts = {
   cold: { lv1: 6, lv2: 7 },
   bicycle: { lv1: 6, lv2: 7 },
   transport: { lv1: 6, lv2: 7 },
+  worry: { lv1: 6, lv2: 7 },
+  honesty: { lv1: 6, lv2: 7 },
+  playground: { lv1: 6, lv2: 7 },
 };
+const preparingBookIds = ["worry", "honesty", "playground"];
 const supportedKinds = new Set([
   "choice",
   "image-choice",
@@ -26,7 +30,7 @@ const supportedKinds = new Set([
   "distancing",
 ]);
 
-test("curriculum defines the intended age bands and 65 question records", () => {
+test("curriculum defines the intended age bands and 104 question records", () => {
   assert.deepEqual(
     Object.fromEntries(
       Object.values(QUIZ_LEVELS).map((level) => [level.id, level.age]),
@@ -41,7 +45,66 @@ test("curriculum defines the intended age bands and 65 question records", () => 
       total += count;
     }
   }
-  assert.equal(total, 65);
+  assert.equal(total, 104);
+});
+
+test("new books keep Lv1 independent, objective, and image-free", () => {
+  for (const bookId of preparingBookIds) {
+    const questions = CURRICULUM_QUESTIONS[bookId].lv1;
+    assert.equal(questions.length, 6, bookId);
+
+    for (const question of questions) {
+      assert.equal(question.scoreMode, "objective", question.id);
+      assert.ok(["choice", "sequence"].includes(question.kind), question.id);
+      assert.equal("visual" in question, false, question.id);
+      assert.equal("visualAlt" in question, false, question.id);
+
+      if (question.kind === "choice") {
+        assert.equal(question.options.length, 4, question.id);
+        assert.equal(new Set(question.options).size, 4, question.id);
+        assert.ok(question.options.every((option) => option.trim().length >= 2), question.id);
+      }
+      if (question.kind === "sequence") {
+        assert.equal(question.items.length, 4, question.id);
+        assert.equal(question.answer.length, 4, question.id);
+        assert.deepEqual(
+          new Set(question.items.map((item) => item.id)),
+          new Set(question.answer),
+          question.id,
+        );
+      }
+    }
+
+    const answerPositions = questions
+      .filter((question) => question.kind === "choice")
+      .map((question) => question.answer);
+    assert.ok(new Set(answerPositions).size >= 3, `${bookId}: answer positions`);
+  }
+});
+
+test("new books keep five objective tasks followed by two speaking tasks in Lv2", () => {
+  for (const bookId of preparingBookIds) {
+    const questions = CURRICULUM_QUESTIONS[bookId].lv2;
+    const objective = questions.filter((question) => question.scoreMode === "objective");
+    const performance = questions.filter((question) => question.scoreMode === "performance");
+
+    assert.equal(questions.length, 7, bookId);
+    assert.equal(objective.length, 5, `${bookId}: objective`);
+    assert.equal(performance.length, 2, `${bookId}: performance`);
+    assert.deepEqual(
+      questions.slice(-2).map((question) => question.scoreMode),
+      ["performance", "performance"],
+      bookId,
+    );
+    assert.ok(performance.every((question) => question.prompts?.length >= 3), bookId);
+    assert.ok(performance.every((question) => question.exampleAnswer?.length > 0), bookId);
+
+    for (const question of questions.filter((item) => ["choice", "completion"].includes(item.kind))) {
+      assert.equal(question.options.length, 4, question.id);
+      assert.equal(new Set(question.options).size, 4, question.id);
+      assert.ok(question.options.every((option) => option.trim().length >= 4), question.id);
+    }
+  }
 });
 
 test("every question has traceable evidence and a supported interaction", () => {

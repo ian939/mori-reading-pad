@@ -558,6 +558,105 @@ const DEFAULT_BOOKS = [
     ],
     questions: CURRICULUM_QUESTIONS.transport.lv2,
   },
+  {
+    id: "worry",
+    genre: 7,
+    cast: {},
+    quizVersion: 2,
+    artStatus: "preparing",
+    title: "걱정 아저씨, 어디 가세요?",
+    tag: "마음 · 걱정",
+    cover: asset("assets/worry-cover-v1.png"),
+    color: "#c98a3f",
+    light: "#fdf1e2",
+    age: "4–9세",
+    minutes: 13,
+    desc: "생일 파티에 가는 {hero:를} 따라가며 걱정한 일과 실제로 일어난 일을 견주어 봐요.",
+    mission: "걱정을 잔뜩 안고 가면 어떤 일이 생길까요?",
+    publisher: "그레이트북스",
+    series: "안녕 마음아",
+    author: "류혜인",
+    illustrator: "김이조",
+    topics: ["마음 이해", "걱정", "용기"],
+    storyComic: asset("assets/worry-story-comic-v1.webp"),
+    storySentences: [
+      "{hero}의 우편함에 친구의 생일 파티 초대장이 왔어요.",
+      "{hero:는} 선물을 고민하다 무지갯빛 비누를 준비했어요.",
+      "길에서 비나 끊어진 다리를 만날까 봐 걱정이 자꾸 늘었어요.",
+      "{hero:는} 걱정한 일마다 대비할 물건을 잔뜩 챙겼어요.",
+      "하지만 날씨는 맑고 더워 비옷을 벗자 걸음이 가벼워졌어요.",
+      "출렁다리에서는 방해가 된 튜브를 벗고 조심히 건넜어요.",
+      "서두르다 짐에 걸려 물에 빠지는 뜻밖의 일이 생겼어요.",
+      "젖은 비누에서 비눗방울이 솟아 파티는 다시 즐거워졌어요.",
+    ],
+    questions: CURRICULUM_QUESTIONS.worry.lv2,
+  },
+  {
+    id: "honesty",
+    genre: 7,
+    cast: { guide: "친구" },
+    quizVersion: 2,
+    artStatus: "preparing",
+    title: "난 오줌 안 쌌어",
+    tag: "마음 · 정직",
+    cover: asset("assets/honesty-cover-v1.png"),
+    color: "#e0674f",
+    light: "#fdeeea",
+    age: "4–9세",
+    minutes: 12,
+    desc: "실수를 숨기려던 {hero:를} 따라가며 창피한 마음과 솔직하게 말하는 용기를 배워요.",
+    mission: "실수했을 때 숨기면 어떤 일이 생길까요?",
+    publisher: "그레이트북스",
+    series: "안녕 마음아",
+    author: "양대승",
+    illustrator: "어미경",
+    topics: ["마음 이해", "정직", "실수와 용기"],
+    storyComic: asset("assets/honesty-story-comic-v1.webp"),
+    storySentences: [
+      "{hero:는} 옷에 실수한 {guide:를} 보고 가볍게 놀렸어요.",
+      "얼마 뒤 {hero:도} 화장실을 참다가 옷에 실수했어요.",
+      "{hero:는} 친구들이 알게 될까 봐 몹시 걱정했어요.",
+      "솔직히 말하는 대신 아무 일도 없었다고 숨기려 했어요.",
+      "혼자 해결할 여러 방법을 떠올렸지만 어느 것도 잘되지 않았어요.",
+      "숨기려 할수록 마음은 불편해지고 친구들의 관심도 커졌어요.",
+      "선생님은 누구나 실수할 수 있다며 차분히 도와주었어요.",
+      "먼저 놀림받았던 {guide:가} 손을 내밀어 둘은 다시 함께 놀았어요.",
+    ],
+    questions: CURRICULUM_QUESTIONS.honesty.lv2,
+  },
+  {
+    id: "playground",
+    genre: 7,
+    cast: {},
+    quizVersion: 2,
+    artStatus: "preparing",
+    title: "놀이터 귀신",
+    tag: "마음 · 두려움",
+    cover: asset("assets/playground-cover-v1.png"),
+    color: "#6f7fb5",
+    light: "#eceefa",
+    age: "4–9세",
+    minutes: 13,
+    desc: "놀이터 구멍 속 무서운 것의 정체를 확인하며 두려움이 줄어드는 과정을 따라가요.",
+    mission: "무서운 것의 정체를 어떻게 확인할까요?",
+    publisher: "그레이트북스",
+    series: "안녕 마음아",
+    author: "장한섬",
+    illustrator: "천미화",
+    topics: ["마음 이해", "두려움", "확인하기"],
+    storyComic: asset("assets/playground-story-comic-v1.webp"),
+    storySentences: [
+      "저녁 놀이터에서 {hero:와} 친구들은 숨바꼭질하고 있었어요.",
+      "벽의 작은 구멍에서 이상한 소리와 반짝이는 불빛이 나타났어요.",
+      "아이들은 잘 보이지 않는 불빛을 무서운 존재라고 짐작했어요.",
+      "{hero:는} 집에 돌아간 뒤에도 무서운 생각이 쉽게 가시지 않았어요.",
+      "확인하지 않은 짐작은 친구들 사이에서 소문처럼 퍼졌어요.",
+      "아이들은 어른과 함께 놀이터에 가서 안전하게 확인하기로 했어요.",
+      "구멍에서 작은 동물이 움직이자 모두 깜짝 놀랐어요.",
+      "손전등으로 살펴보니 소리와 불빛의 정체는 새끼 고양이였어요.",
+    ],
+    questions: CURRICULUM_QUESTIONS.playground.lv2,
+  },
 ];
 
 
@@ -1791,17 +1890,24 @@ function HomeView({
 }
 
 function BookCover({ book, className = "" }) {
+  const artPreparing = book.artStatus === "preparing";
   return (
     <div
       className={`book-cover ${className}`.trim()}
       role="img"
-      aria-label={`${book.title} 모리 책 모험 표지`}
+      aria-label={`${book.title} 모리 책 모험 표지${artPreparing ? ", 그림 준비 중" : ""}`}
+      data-art-status={book.artStatus || "ready"}
     >
       <img src={book.cover} alt="" />
       <span className="book-cover-copy">
         <small>모리의 책 모험</small>
         <strong>{book.title}</strong>
       </span>
+      {artPreparing && (
+        <span className="book-art-status">
+          <BookOpen size={14} aria-hidden="true" /> 그림 준비 중
+        </span>
+      )}
     </div>
   );
 }
@@ -2075,15 +2181,33 @@ function StoryIntro({ book, back, begin, existingRecording, saveRecording }) {
 }
 
 function StoryComic({ book }) {
+  const artPreparing = book.artStatus === "preparing";
   return (
     <section className="story-comic" aria-label={`${book.title} 8컷 줄거리`}>
+      {artPreparing && (
+        <div className="story-art-notice" role="status">
+          <BookOpen size={20} aria-hidden="true" />
+          <span>
+            <strong>8컷 그림을 준비하고 있어요</strong>
+            <small>지금은 아래 문장으로 이야기 흐름을 먼저 만날 수 있어요.</small>
+          </span>
+        </div>
+      )}
       <figure>
         <img
           src={book.storyComic}
-          alt={`${book.title}의 핵심 흐름을 왼쪽 위부터 오른쪽 아래까지 보여 주는 글자 없는 8컷 그림`}
+          alt={
+            artPreparing
+              ? `${book.title} 8컷 그림 준비 중 자리표시`
+              : `${book.title}의 핵심 흐름을 왼쪽 위부터 오른쪽 아래까지 보여 주는 글자 없는 8컷 그림`
+          }
           draggable="false"
         />
-        <figcaption>그림 1–8과 아래 문장 1–8이 서로 이어져요.</figcaption>
+        <figcaption>
+          {artPreparing
+            ? "그림이 완성되기 전까지 문장 1–8을 차례대로 살펴보세요."
+            : "그림 1–8과 아래 문장 1–8이 서로 이어져요."}
+        </figcaption>
       </figure>
       <ol className="story-sentences">
         {book.storySentences.map((sentence, sentenceIndex) => (

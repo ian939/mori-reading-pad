@@ -64,11 +64,27 @@ try {
     ["막아라! 감기", "감기 바이러스의 이동을 어떻게 막을까요?"],
     ["자전거 사 주세요", "갖고 싶은 것을 위해 어떻게 돈을 모을까요?"],
     ["타고, 타고, 타고!", "먼 길을 갈 때 어떤 교통수단을 어떻게 이용할까요?"],
+    ["걱정 아저씨, 어디 가세요?", "걱정을 잔뜩 안고 가면 어떤 일이 생길까요?"],
+    ["난 오줌 안 쌌어", "실수했을 때 숨기면 어떤 일이 생길까요?"],
+    ["놀이터 귀신", "무서운 것의 정체를 어떻게 확인할까요?"],
   ];
+  // Books whose first Lv.1 question is an image-choice backed by a situation
+  // illustration. The 안녕 마음아 titles follow the Lv.1 text-only image policy
+  // in docs/quiz-generation-guide.md, so they have no question artwork.
+  const situationBooks = new Set([
+    "막아라! 감기",
+    "자전거 사 주세요",
+    "타고, 타고, 타고!",
+  ]);
+  const preparingArtBooks = new Set([
+    "걱정 아저씨, 어디 가세요?",
+    "난 오줌 안 쌌어",
+    "놀이터 귀신",
+  ]);
   assert.equal(
     await page.locator(".book-card").count(),
     catalogBooks.length,
-    "The home catalog must expose all five registered books",
+    "The home catalog must expose every registered book",
   );
   for (const [title] of catalogBooks) {
     const card = page.locator(".book-card").filter({ hasText: title });
@@ -80,6 +96,14 @@ try {
       true,
       `${title} cover must load`,
     );
+    if (preparingArtBooks.has(title)) {
+      assert.equal(
+        await card.locator(".book-cover").getAttribute("data-art-status"),
+        "preparing",
+        `${title} cover must expose its preparation state`,
+      );
+      await card.getByText("그림 준비 중", { exact: true }).waitFor();
+    }
   }
 
   for (const [title, mission] of catalogBooks.slice(2)) {
@@ -87,6 +111,15 @@ try {
     await page.getByRole("heading", { name: title, exact: true }).waitFor();
     await page.getByRole("heading", { name: mission, exact: true }).waitFor();
     await page.getByRole("button", { name: /Lv\.1 퀴즈 시작하기/ }).click();
+    if (preparingArtBooks.has(title)) {
+      await page.getByText("8컷 그림을 준비하고 있어요", { exact: true }).waitFor();
+    } else {
+      assert.equal(
+        await page.locator(".story-art-notice").count(),
+        0,
+        `${title} must not show a preparation notice`,
+      );
+    }
     assert.equal(
       await page.locator(".story-sentences button").count(),
       8,
@@ -101,15 +134,24 @@ try {
       `${title} story comic must load`,
     );
     await page.getByRole("button", { name: /줄거리를 읽었어요/ }).click();
-    await page.getByText("그림 상황 이해", { exact: true }).waitFor();
-    assert.equal(
-      await page.locator(".question-visual img").evaluate(async (image) => {
-        if (!image.complete) await image.decode();
-        return image.naturalWidth > 0 && image.naturalHeight > 0;
-      }),
-      true,
-      `${title} situation illustration must load`,
-    );
+    if (situationBooks.has(title)) {
+      await page.getByText("그림 상황 이해", { exact: true }).waitFor();
+      assert.equal(
+        await page.locator(".question-visual img").evaluate(async (image) => {
+          if (!image.complete) await image.decode();
+          return image.naturalWidth > 0 && image.naturalHeight > 0;
+        }),
+        true,
+        `${title} situation illustration must load`,
+      );
+    } else {
+      await page.locator(".quiz-body h1").waitFor();
+      assert.equal(
+        await page.locator(".question-visual").count(),
+        0,
+        `${title} Lv.1 questions must stay free of generated quiz artwork`,
+      );
+    }
     await page.goto(target, { waitUntil: "networkidle" });
   }
 
@@ -160,6 +202,42 @@ try {
       await touchCdp.send("Input.dispatchTouchEvent", {
         type: "touchMove",
         touchPoints: [touchPoint(point)],
+      });
+    }
+    await touchCdp.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+    await page.waitForTimeout(400);
+  };
+
+  const swipeTouch = async (locator, { x: deltaX, y: deltaY }, label) => {
+    await locator.scrollIntoViewIfNeeded();
+    const box = await locator.boundingBox();
+    assert.ok(box, `${label} must have a swipeable box`);
+    const start = {
+      x: box.x + box.width / 2 - deltaX / 2,
+      y: box.y + box.height / 2 - deltaY / 2,
+    };
+    const touchPoint = (point) => ({
+      ...point,
+      radiusX: 8,
+      radiusY: 8,
+      force: 1,
+    });
+    await touchCdp.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [touchPoint(start)],
+    });
+    for (let step = 1; step <= 8; step += 1) {
+      await touchCdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [
+          touchPoint({
+            x: start.x + (deltaX * step) / 8,
+            y: start.y + (deltaY * step) / 8,
+          }),
+        ],
       });
     }
     await touchCdp.send("Input.dispatchTouchEvent", {
@@ -451,6 +529,27 @@ try {
     .getByRole("heading", { name: /한 권씩 자라는 나만의 책장/ })
     .waitFor();
   assert.equal(await page.getByRole("combobox").count(), 0);
+  const shelf = page.locator(".shelf-books");
+  const shelfMetrics = await shelf.evaluate((element) => ({
+    clientWidth: element.clientWidth,
+    scrollWidth: element.scrollWidth,
+    touchAction: getComputedStyle(element).touchAction,
+  }));
+  assert.ok(
+    shelfMetrics.scrollWidth > shelfMetrics.clientWidth,
+    "The expanded bookshelf must expose horizontal overflow instead of shrinking books",
+  );
+  assert.match(
+    shelfMetrics.touchAction,
+    /^(pan-x pan-y|pan-y pan-x)$/,
+    "The bookshelf must allow horizontal swipes and vertical page panning",
+  );
+  await swipeTouch(shelf, { x: -260, y: 0 }, "Bookshelf horizontal swipe");
+  assert.ok(
+    (await shelf.evaluate((element) => element.scrollLeft)) > 0,
+    "A one-finger horizontal swipe must move the bookshelf",
+  );
+  await shelf.evaluate((element) => element.scrollTo({ left: 0, behavior: "instant" }));
   await page.locator(".shelf-book").first().click();
   await page.getByRole("heading", { name: "돈이 뭐야?" }).waitFor();
   assert.equal(await page.locator(".archive-page .story-sentences button").count(), 8);
