@@ -68,11 +68,6 @@ try {
   ];
   // Lv.1 uses the story text and objective controls only; it never generates
   // or displays question artwork (docs/quiz-generation-guide.md).
-  const preparingArtBooks = new Set([
-    "걱정 아저씨, 어디 가세요?",
-    "난 오줌 안 쌌어",
-    "놀이터 귀신",
-  ]);
   const selectShelfBook = async (title) => {
     const tab = page.getByRole("tab", { name: title, exact: true });
     await tab.click();
@@ -111,14 +106,16 @@ try {
       true,
       `${title} cover must load`,
     );
-    if (preparingArtBooks.has(title)) {
-      assert.equal(
-        await card.locator(".book-cover").getAttribute("data-art-status"),
-        "preparing",
-        `${title} cover must expose its preparation state`,
-      );
-      await card.getByText("그림 준비 중", { exact: true }).waitFor();
-    }
+    assert.equal(
+      await card.locator(".book-cover").getAttribute("data-art-status"),
+      "ready",
+      `${title} cover must expose its ready state`,
+    );
+    assert.equal(
+      await card.getByText("그림 준비 중", { exact: true }).count(),
+      0,
+      `${title} must not show a cover preparation badge`,
+    );
   }
 
   for (const [title, mission] of catalogBooks.slice(2)) {
@@ -127,15 +124,11 @@ try {
     await page.getByRole("heading", { name: title, exact: true }).waitFor();
     await page.getByRole("heading", { name: mission, exact: true }).waitFor();
     await page.getByRole("button", { name: /Lv\.1 퀴즈 시작하기/ }).click();
-    if (preparingArtBooks.has(title)) {
-      await page.getByText("8컷 그림을 준비하고 있어요", { exact: true }).waitFor();
-    } else {
-      assert.equal(
-        await page.locator(".story-art-notice").count(),
-        0,
-        `${title} must not show a preparation notice`,
-      );
-    }
+    assert.equal(
+      await page.locator(".story-art-notice").count(),
+      0,
+      `${title} must not show a preparation notice`,
+    );
     assert.equal(
       await page.locator(".story-sentences li").count(),
       8,

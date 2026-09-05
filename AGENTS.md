@@ -34,3 +34,10 @@ questions in `src/quizCurriculum.js`):
 - Native selection and clipboard behavior may be restored only for an explicit adult or guardian editing area marked with `data-allow-native-editing="true"`.
 - When changing navigation or controls, verify the behavior with touch emulation and confirm that ordinary taps, vertical scrolling, file pickers, and guardian text editing still work.
 - Keep primary touch targets at least 44 by 44 CSS pixels wherever the layout allows.
+
+## Adding books
+
+- When the user asks to add a book to this product, use the project skill at
+  `.agents/skills/mori-add-book/SKILL.md` so metadata, evidence, Lv1/Lv2
+  curriculum, story memory aids, original art, offline caching, and tablet
+  verification are completed together.

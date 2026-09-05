@@ -1,0 +1,4 @@
+interface:
+  display_name: "모리 책 추가"
+  short_description: "새 책의 줄거리·퀴즈·그림·검증을 한 번에 반영"
+  default_prompt: "Use $mori-add-book to add a new book with its reading aids, Lv1/Lv2 quizzes, cover, eight-panel art, and validation."
