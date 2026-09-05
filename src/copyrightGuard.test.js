@@ -22,6 +22,10 @@ const FORBIDDEN_NAMES = [
   "아기 곰",
   "엄마 곰",
   "고릴라",
+  "훈이",
+  "재호",
+  "태준이",
+  "다행 아저씨",
 ];
 
 test("proprietary book character names never ship in book content", () => {

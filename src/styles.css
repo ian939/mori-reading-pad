@@ -4491,27 +4491,36 @@ button {
 /* ---- Home shelf carousel: swipe sideways, centre book faces front ---- */
 .shelf-carousel {
   margin: 0 -20px;
+  --cover-h: 214px;
+  --shelf-step: 143px;
+  --shelf-half-step: 71.5px;
+  --front-book-w: 208px;
+  --spine-book-w: 54px;
 }
 .shelf-track {
   display: flex;
-  /* The kid-safe lock sets touch-action: manipulation globally, which stops
-     horizontal panning, so the shelf must opt back in to left/right drags. */
-  touch-action: pan-x;
+  touch-action: pan-x pan-y;
   /* align to the top so spines line up with the front book's cover */
   align-items: flex-start;
-  gap: 12px;
+  gap: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-snap-type: x mandatory;
+  overscroll-behavior-inline: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   /* room so the first and last book can still reach the middle */
-  padding: 10px calc(50% - 104px) 22px;
+  padding: 10px calc(50% - var(--shelf-half-step)) 22px;
 }
 .shelf-track::-webkit-scrollbar {
   display: none;
 }
 .shelf-slot {
-  flex: 0 0 auto;
+  position: relative;
+  flex: 0 0 var(--shelf-step);
+  width: var(--shelf-step);
+  display: flex;
+  justify-content: center;
   scroll-snap-align: center;
   transition: transform 0.35s ease, opacity 0.35s ease;
   /* Perspective lives on each slot, not on the scroller: putting it on the
@@ -4519,23 +4528,23 @@ button {
   perspective: 1100px;
 }
 .shelf-slot.front {
-  width: 208px;
-}
-.shelf-carousel {
-  --cover-h: 214px;
+  z-index: 2;
 }
 .shelf-slot.side {
-  width: 54px;
   opacity: 0.9;
 }
 .shelf-slot .book-card {
-  width: 100%;
+  flex: 0 0 auto;
+  width: var(--front-book-w);
 }
-/* Buttons get touch-action: manipulation from the kid-safe lock; inside the
-   shelf they must let a horizontal drag through to the scroller. */
+.shelf-slot.side .book-card {
+  width: var(--spine-book-w);
+}
+/* Let either gesture direction reach its native scroller: sideways moves the
+   shelf and vertical moves continue scrolling the page. Pinch stays disabled. */
 .kid-safe-interactions .shelf-track button,
 .shelf-track button {
-  touch-action: pan-x;
+  touch-action: pan-x pan-y;
 }
 
 /* Side-on spine */
@@ -4592,18 +4601,15 @@ button {
 }
 
 @media (min-width: 700px) {
-  .shelf-track {
-    padding: 14px calc(50% - 128px) 26px;
-    gap: 16px;
-  }
-  .shelf-slot.front {
-    width: 256px;
-  }
   .shelf-carousel {
     --cover-h: 310px;
+    --shelf-step: 176px;
+    --shelf-half-step: 88px;
+    --front-book-w: 256px;
+    --spine-book-w: 64px;
   }
-  .shelf-slot.side {
-    width: 64px;
+  .shelf-track {
+    padding: 14px calc(50% - var(--shelf-half-step)) 26px;
   }
 
 }
@@ -4654,18 +4660,16 @@ button {
      --cover-h variable has no effect. */
   .shelf-carousel {
     --cover-h: 176px;
+    --shelf-step: 111px;
+    --shelf-half-step: 55.5px;
+    --front-book-w: 146px;
+    --spine-book-w: 44px;
   }
   .shelf-carousel .cover-wrap {
     height: var(--cover-h);
   }
-  .shelf-slot.front {
-    width: 146px;
-  }
-  .shelf-slot.side {
-    width: 44px;
-  }
   .shelf-track {
-    padding: 8px calc(50% - 73px) 12px;
+    padding: 8px calc(50% - var(--shelf-half-step)) 12px;
   }
   .shelf-slot.front .book-meta p {
     display: none;
@@ -4675,13 +4679,3 @@ button {
   }
 
 }
-
-/* ---- Temporary on-device diagnostics (URL flags), remove once resolved ---- */
-.dbg-nosnap .shelf-track { scroll-snap-type: none !important; }
-.dbg-flat .shelf-slot { perspective: none !important; }
-.dbg-flat .book-card.spine { transform: none !important; }
-.dbg-nocompact .shelf-slot.front { width: 208px !important; }
-.dbg-nocompact .shelf-slot.side { width: 54px !important; }
-.dbg-nocompact .shelf-carousel { --cover-h: 310px !important; }
-.dbg-nocompact .shelf-carousel .cover-wrap { height: 310px !important; }
-.dbg-nocompact .shelf-track { padding: 10px calc(50% - 104px) 22px !important; }

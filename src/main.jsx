@@ -1919,14 +1919,16 @@ function BookShelfCarousel({ books, progress, onOpen }) {
   const trackRef = useRef(null);
   const [active, setActive] = useState(0);
 
-  // Track the centred book from scroll position rather than a timer, so it
-  // stays right whether the child flicks, drags or uses the arrows.
+  // Keep the touched book mounted until the native swipe and its momentum
+  // have finished. Replacing the front card during an active gesture cancels
+  // horizontal scrolling in iPad Safari, especially in the compact landscape
+  // layout where the next book reaches the centre very quickly.
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
-    let frame = 0;
-    const update = () => {
-      frame = 0;
+    let settleTimer = 0;
+    let interacting = false;
+    const updateActive = () => {
       const middle = track.scrollLeft + track.clientWidth / 2;
       let closest = 0;
       let best = Infinity;
@@ -1940,14 +1942,38 @@ function BookShelfCarousel({ books, progress, onOpen }) {
       });
       setActive(closest);
     };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update);
+    const scheduleUpdate = () => {
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(updateActive, 140);
     };
-    update();
+    const onScroll = () => {
+      if (!interacting) scheduleUpdate();
+    };
+    const onInteractionStart = () => {
+      interacting = true;
+      window.clearTimeout(settleTimer);
+    };
+    const onInteractionEnd = () => {
+      interacting = false;
+      scheduleUpdate();
+    };
+    updateActive();
     track.addEventListener("scroll", onScroll, { passive: true });
+    track.addEventListener("pointerdown", onInteractionStart, { passive: true });
+    track.addEventListener("pointerup", onInteractionEnd, { passive: true });
+    track.addEventListener("pointercancel", onInteractionEnd, { passive: true });
+    track.addEventListener("touchstart", onInteractionStart, { passive: true });
+    track.addEventListener("touchend", onInteractionEnd, { passive: true });
+    track.addEventListener("touchcancel", onInteractionEnd, { passive: true });
     return () => {
       track.removeEventListener("scroll", onScroll);
-      if (frame) cancelAnimationFrame(frame);
+      track.removeEventListener("pointerdown", onInteractionStart);
+      track.removeEventListener("pointerup", onInteractionEnd);
+      track.removeEventListener("pointercancel", onInteractionEnd);
+      track.removeEventListener("touchstart", onInteractionStart);
+      track.removeEventListener("touchend", onInteractionEnd);
+      track.removeEventListener("touchcancel", onInteractionEnd);
+      window.clearTimeout(settleTimer);
     };
   }, [books.length]);
 
@@ -1955,6 +1981,7 @@ function BookShelfCarousel({ books, progress, onOpen }) {
     const track = trackRef.current;
     const child = track?.children[index];
     if (!track || !child) return;
+    setActive(index);
     track.scrollTo({
       left: child.offsetLeft - (track.clientWidth - child.offsetWidth) / 2,
       behavior: "smooth",
@@ -3800,14 +3827,7 @@ function ResetReadingData({ onReset }) {
   );
 }
 
-// On-device diagnostics for the landscape swipe failure that cannot be
-// reproduced in headless WebKit. Query flags are invisible to the child and
-// each isolates one suspect: ?nosnap ?flat ?nocompact ?nolock.
-const debugFlags = new URLSearchParams(window.location.search);
-["nosnap", "flat", "nocompact", "nolock"].forEach((flag) => {
-  if (debugFlags.has(flag)) document.documentElement.classList.add(`dbg-${flag}`);
-});
-if (!debugFlags.has("nolock")) enableKidSafeInteractions();
+enableKidSafeInteractions();
 
 createRoot(document.getElementById("root")).render(<App />);
 
