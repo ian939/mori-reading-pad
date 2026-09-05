@@ -4412,3 +4412,13 @@ button {
   cursor: pointer;
   min-height: 52px;
 }
+
+/* An option already tried and ruled out during a retry */
+.options button.ruled-out {
+  opacity: 0.45;
+  background: #f2f1ea;
+  border-color: #e0ded2;
+  color: #9a9a8f;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}

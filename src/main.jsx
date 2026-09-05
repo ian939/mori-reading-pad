@@ -1081,7 +1081,9 @@ function App() {
     const correct = isQuestionCorrect(question, choice);
     const attempts = questionAttempts[quizIndex] || 0;
 
-    if (selected.quizLevel === "lv1" && !correct && attempts === 0) {
+    // One guided second chance on any level: the wrong pick is disabled and
+    // the child tries again before the answer is shown.
+    if (!correct && attempts === 0 && !isReflectiveQuestion(question)) {
       setQuestionAttempts((current) => ({
         ...current,
         [quizIndex]: 1,
@@ -2219,20 +2221,26 @@ function ReflectionQuestion({ q, choice, setChoice, recording, onRecorded }) {
 function ChoiceQuestion({ q, choice, setChoice, eliminatedOptions = [] }) {
   return (
     <div className="options">
-      {q.options.map((option, optionIndex) =>
-        eliminatedOptions.includes(optionIndex) ? null : (
+      {q.options.map((option, optionIndex) => {
+        // A wrong pick stays visible but is disabled, so the child can see
+        // what they already tried instead of the choices shifting around.
+        const ruledOut = eliminatedOptions.includes(optionIndex);
+        return (
           <button
             key={option}
-            className={choice === optionIndex ? "selected" : ""}
+            className={`${choice === optionIndex ? "selected" : ""}${
+              ruledOut ? " ruled-out" : ""
+            }`}
             aria-pressed={choice === optionIndex}
+            disabled={ruledOut}
             onClick={() => setChoice(optionIndex)}
           >
             <span>{String.fromCharCode(65 + optionIndex)}</span>
             {option}
-            {choice === optionIndex && <Check size={20} />}
+            {ruledOut ? <X size={18} /> : choice === optionIndex && <Check size={20} />}
           </button>
-        ),
-      )}
+        );
+      })}
     </div>
   );
 }
