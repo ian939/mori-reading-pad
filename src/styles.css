@@ -4441,7 +4441,6 @@ button {
   scrollbar-width: none;
   /* room so the first and last book can still reach the middle */
   padding: 10px calc(50% - 104px) 22px;
-  perspective: 1100px;
 }
 .shelf-track::-webkit-scrollbar {
   display: none;
@@ -4450,7 +4449,9 @@ button {
   flex: 0 0 auto;
   scroll-snap-align: center;
   transition: transform 0.35s ease, opacity 0.35s ease;
-  transform-style: preserve-3d;
+  /* Perspective lives on each slot, not on the scroller: putting it on the
+     overflow:auto track is a known WebKit hazard that breaks touch scrolling. */
+  perspective: 1100px;
 }
 .shelf-slot.front {
   width: 208px;
@@ -4608,27 +4609,4 @@ button {
     font-size: 12px;
   }
 
-  /* Even compacted, the topbar + hero + daily card + heading came to ~550px,
-     leaving a 96px sliver of shelf above the nav on an 820px screen. Put the
-     books first on short screens so they are reachable without scrolling;
-     the hero still follows underneath. */
-  main {
-    display: flex;
-    flex-direction: column;
-  }
-  main > .section {
-    order: -1;
-  }
-}
-
-/* Phones are short too: the shelf is the point of the home screen, so put it
-   above the hero there as well rather than leaving a 1px sliver on screen. */
-@media (max-width: 699px) {
-  main {
-    display: flex;
-    flex-direction: column;
-  }
-  main > .section {
-    order: -1;
-  }
 }
