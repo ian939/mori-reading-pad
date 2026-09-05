@@ -4522,7 +4522,12 @@ button {
   display: flex;
   justify-content: center;
   scroll-snap-align: center;
-  transition: transform 0.35s ease, opacity 0.35s ease;
+  --shelf-face-opacity: 0;
+  --shelf-face-scale: 0.72;
+  --shelf-face-angle: 64deg;
+  --shelf-spine-opacity: 1;
+  --shelf-spine-angle: 26deg;
+  --shelf-meta-opacity: 0;
   /* Perspective lives on each slot, not on the scroller: putting it on the
      overflow:auto track is a known WebKit hazard that breaks touch scrolling. */
   perspective: 1100px;
@@ -4530,15 +4535,8 @@ button {
 .shelf-slot.front {
   z-index: 2;
 }
-.shelf-slot.side {
-  opacity: 0.9;
-}
 .shelf-slot .book-card {
-  flex: 0 0 auto;
-  width: var(--front-book-w);
-}
-.shelf-slot.side .book-card {
-  width: var(--spine-book-w);
+  width: var(--shelf-step);
 }
 /* Let either gesture direction reach its native scroller: sideways moves the
    shelf and vertical moves continue scrolling the page. Pinch stays disabled. */
@@ -4547,11 +4545,37 @@ button {
   touch-action: pan-x pan-y;
 }
 
-/* Side-on spine */
-.book-card.spine {
+/* Both the cover and spine stay mounted. Only their transforms and opacity
+   change while scrolling, so the book smoothly turns to face the child and
+   iPad Safari never loses the native gesture target. */
+.shelf-book-card {
+  position: relative;
+  display: block;
+  overflow: visible;
+}
+.shelf-book-face {
+  display: block;
+  width: var(--front-book-w);
+  margin-left: 50%;
+  opacity: var(--shelf-face-opacity);
+  transform: translateX(-50%) rotateY(var(--shelf-face-angle))
+    scale(var(--shelf-face-scale));
+  transform-origin: 50% 0;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+.shelf-book-face .book-meta {
+  opacity: var(--shelf-meta-opacity);
+  will-change: opacity;
+}
+.shelf-book-spine {
   /* Sized from the front cover so the shelf reads as one row. The rotated
      face renders at 0.96x its box under this perspective, so scale up by
      1/0.96 to land on the same shelf line. Measured, not guessed. */
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--spine-book-w);
   height: calc(var(--cover-h, 214px) * 1.042);
   transform-origin: 50% 0;
   border-radius: 6px 10px 10px 6px;
@@ -4564,10 +4588,10 @@ button {
   box-shadow: inset -6px 0 10px rgba(0, 0, 0, 0.08),
     2px 6px 14px rgba(46, 36, 112, 0.12);
   border-left: 6px solid var(--book, #cfc6b6);
-  transform: rotateY(26deg) scale(0.96);
-}
-.shelf-slot.side:last-child .book-card.spine {
-  transform: rotateY(-26deg) scale(0.96);
+  opacity: var(--shelf-spine-opacity);
+  transform: translateX(-50%) rotateY(var(--shelf-spine-angle)) scale(0.96);
+  will-change: transform, opacity;
+  pointer-events: none;
 }
 .spine-title {
   writing-mode: vertical-rl;
@@ -4671,7 +4695,7 @@ button {
   .shelf-track {
     padding: 8px calc(50% - var(--shelf-half-step)) 12px;
   }
-  .shelf-slot.front .book-meta p {
+  .shelf-book-face .book-meta p {
     display: none;
   }
   .spine-title {

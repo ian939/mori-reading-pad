@@ -273,11 +273,36 @@ try {
     1,
     "Book slots must keep stable widths throughout a native swipe",
   );
+  await homeShelf.evaluate((element) => {
+    window.__homeShelfMotion = [];
+    const sampleMotion = () => {
+      requestAnimationFrame(() => {
+        window.__homeShelfMotion.push(
+          [...element.children].map((child) =>
+            Number.parseFloat(
+              getComputedStyle(child).getPropertyValue("--shelf-open") || "0",
+            ),
+          ),
+        );
+      });
+    };
+    element.addEventListener("scroll", sampleMotion, {
+      passive: true,
+      once: false,
+    });
+  });
   await swipeTouch(homeShelf, { x: -260, y: 0 }, "Landscape home shelf swipe");
   assert.ok(
     (await homeShelf.evaluate((element) => element.scrollLeft)) >
       homeShelfBefore.scrollLeft,
     "A one-finger swipe must move the home shelf in landscape",
+  );
+  const homeShelfMotion = await page.evaluate(() => window.__homeShelfMotion);
+  assert.ok(
+    homeShelfMotion.some((sample) =>
+      sample.some((open) => open > 0.05 && open < 0.95),
+    ),
+    "Books must progressively turn from spine to cover during a native swipe",
   );
   await homeShelf.evaluate((element) =>
     element.scrollTo({ left: 0, behavior: "instant" }),

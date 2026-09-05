@@ -1919,34 +1919,85 @@ function BookShelfCarousel({ books, progress, onOpen }) {
   const trackRef = useRef(null);
   const [active, setActive] = useState(0);
 
-  // Keep the touched book mounted until the native swipe and its momentum
-  // have finished. Replacing the front card during an active gesture cancels
-  // horizontal scrolling in iPad Safari, especially in the compact landscape
-  // layout where the next book reaches the centre very quickly.
+  // Paint the opening/closing effect directly from scroll position while
+  // keeping every book's DOM mounted. Swapping a cover for a spine during a
+  // native gesture cancels horizontal scrolling in iPad Safari, especially in
+  // landscape. Updating only CSS variables gives the child the same fluid
+  // feedback without replacing the element under their finger.
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
     let settleTimer = 0;
+    let paintFrame = 0;
     let interacting = false;
-    const updateActive = () => {
+
+    const paintShelf = () => {
       const middle = track.scrollLeft + track.clientWidth / 2;
       let closest = 0;
       let best = Infinity;
       [...track.children].forEach((child, index) => {
         const centre = child.offsetLeft + child.offsetWidth / 2;
         const distance = Math.abs(centre - middle);
+        const rawOpen = Math.max(
+          0,
+          Math.min(1, 1 - distance / Math.max(child.offsetWidth, 1)),
+        );
+        const open = rawOpen * rawOpen * (3 - 2 * rawOpen);
+        const direction = centre < middle ? 1 : -1;
+        const faceOpacity = Math.min(1, open * 1.35);
+        const spineOpacity = Math.max(0, 1 - open * 1.6);
+        const metaOpacity = Math.max(0, Math.min(1, (open - 0.55) / 0.45));
+
+        child.style.setProperty("--shelf-open", open.toFixed(4));
+        child.style.setProperty(
+          "--shelf-face-scale",
+          (0.72 + open * 0.28).toFixed(4),
+        );
+        child.style.setProperty(
+          "--shelf-face-angle",
+          `${(direction * (1 - open) * 64).toFixed(2)}deg`,
+        );
+        child.style.setProperty(
+          "--shelf-face-opacity",
+          faceOpacity.toFixed(4),
+        );
+        child.style.setProperty(
+          "--shelf-spine-opacity",
+          spineOpacity.toFixed(4),
+        );
+        child.style.setProperty(
+          "--shelf-meta-opacity",
+          metaOpacity.toFixed(4),
+        );
+        child.style.setProperty(
+          "--shelf-spine-angle",
+          `${direction * 26}deg`,
+        );
+        child.style.zIndex = String(1 + Math.round(open * 100));
+
         if (distance < best) {
           best = distance;
           closest = index;
         }
       });
-      setActive(closest);
+      return closest;
+    };
+    const requestPaint = () => {
+      if (paintFrame) return;
+      paintFrame = window.requestAnimationFrame(() => {
+        paintFrame = 0;
+        paintShelf();
+      });
+    };
+    const updateActive = () => {
+      setActive(paintShelf());
     };
     const scheduleUpdate = () => {
       window.clearTimeout(settleTimer);
       settleTimer = window.setTimeout(updateActive, 140);
     };
     const onScroll = () => {
+      requestPaint();
       if (!interacting) scheduleUpdate();
     };
     const onInteractionStart = () => {
@@ -1965,6 +2016,7 @@ function BookShelfCarousel({ books, progress, onOpen }) {
     track.addEventListener("touchstart", onInteractionStart, { passive: true });
     track.addEventListener("touchend", onInteractionEnd, { passive: true });
     track.addEventListener("touchcancel", onInteractionEnd, { passive: true });
+    window.addEventListener("resize", requestPaint, { passive: true });
     return () => {
       track.removeEventListener("scroll", onScroll);
       track.removeEventListener("pointerdown", onInteractionStart);
@@ -1973,7 +2025,9 @@ function BookShelfCarousel({ books, progress, onOpen }) {
       track.removeEventListener("touchstart", onInteractionStart);
       track.removeEventListener("touchend", onInteractionEnd);
       track.removeEventListener("touchcancel", onInteractionEnd);
+      window.removeEventListener("resize", requestPaint);
       window.clearTimeout(settleTimer);
+      if (paintFrame) window.cancelAnimationFrame(paintFrame);
     };
   }, [books.length]);
 
@@ -2004,7 +2058,7 @@ function BookShelfCarousel({ books, progress, onOpen }) {
               <BookCard
                 book={book}
                 done={done}
-                spine={!isActive}
+                front={isActive}
                 onClick={() => (isActive ? onOpen(book) : scrollTo(index))}
               />
             </div>
@@ -2027,37 +2081,38 @@ function BookShelfCarousel({ books, progress, onOpen }) {
   );
 }
 
-function BookCard({ book, done, onClick, spine = false }) {
-  if (spine) {
-    return (
-      <button
-        className="book-card spine"
-        onClick={onClick}
+function BookCard({ book, done, onClick, front = false }) {
+  return (
+    <button
+      className="book-card shelf-book-card"
+      onClick={onClick}
+      aria-label={`${book.title} ${front ? "읽기" : "펼치기"}`}
+    >
+      <div className="shelf-book-face">
+        <div className="cover-wrap" style={{ background: book.light }}>
+          <BookCover book={book} />
+          {done && (
+            <span className="done-badge">
+              <Check size={15} /> 완독
+            </span>
+          )}
+          <span className={`book-level-badge ${book.quizLevel}`}>
+            {QUIZ_LEVELS[book.quizLevel].label}
+          </span>
+          <span className="time">{book.minutes}분</span>
+        </div>
+        <div className="book-meta">
+          <span>{book.tag}</span>
+          <h3>{book.title}</h3>
+          <p>{book.desc}</p>
+        </div>
+      </div>
+      <div
+        className="shelf-book-spine"
         style={{ "--book": book.color, background: book.light }}
-        aria-label={`${book.title} 펼치기`}
+        aria-hidden="true"
       >
         <span className="spine-title">{book.title}</span>
-      </button>
-    );
-  }
-  return (
-    <button className="book-card" onClick={onClick}>
-      <div className="cover-wrap" style={{ background: book.light }}>
-        <BookCover book={book} />
-        {done && (
-          <span className="done-badge">
-            <Check size={15} /> 완독
-          </span>
-        )}
-        <span className={`book-level-badge ${book.quizLevel}`}>
-          {QUIZ_LEVELS[book.quizLevel].label}
-        </span>
-        <span className="time">{book.minutes}분</span>
-      </div>
-      <div className="book-meta">
-        <span>{book.tag}</span>
-        <h3>{book.title}</h3>
-        <p>{book.desc}</p>
       </div>
     </button>
   );
