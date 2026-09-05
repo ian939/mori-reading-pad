@@ -395,29 +395,16 @@ try {
     page.getByRole("navigation").getByRole("button", { name: "내 캐릭터" }),
     "Profile navigation after character registration",
   );
-  await page.getByRole("heading", { name: "읽기 모험 난이도" }).waitFor();
-  const levelOne = page.locator(".level-options").getByRole("radio", { name: /Lv\.1/ });
-  const levelTwo = page.locator(".level-options").getByRole("radio", { name: /Lv\.2/ });
-  assert.equal(await levelOne.getAttribute("aria-checked"), "true");
-  assert.equal(await page.locator(".level-options").getByRole("radio").count(), 2);
   assert.equal(
-    await page.locator(".level-options").getByRole("radio", { name: /Lv\.3/ }).count(),
+    await page.getByRole("heading", { name: "읽기 모험 난이도" }).count(),
     0,
-    "Lv.3 must stay removed from the child-facing level picker",
+    "The reading difficulty picker must not appear in My Character",
   );
-  await tapCenter(levelTwo, "Level two selection card");
-  assert.equal(await levelTwo.getAttribute("aria-checked"), "true");
-  assert.equal(
-    await page.evaluate(() => {
-      const session = JSON.parse(localStorage.getItem("mori-session-v1"));
-      return localStorage.getItem(`mori-user:${session.id}:quiz-level`);
-    }),
-    "lv2",
-  );
-  await tapCenter(
-    page.getByRole("button", { name: "오늘" }),
-    "Home navigation control",
-  );
+  await page.evaluate(() => {
+    const session = JSON.parse(localStorage.getItem("mori-session-v1"));
+    localStorage.setItem(`mori-user:${session.id}:quiz-level`, "lv2");
+  });
+  await page.reload({ waitUntil: "networkidle" });
 
   await tapCenter(
     page.getByRole("button", { name: /모험 시작하기/ }),
@@ -570,18 +557,11 @@ try {
   await page.locator(".saved-voice audio").waitFor();
   await page.getByRole("button", { name: /책장으로/ }).click();
   await page.goto(target, { waitUntil: "networkidle" });
-  await tapCenter(
-    page.getByRole("navigation").getByRole("button", { name: "내 캐릭터" }),
-    "Profile navigation after catalog",
-  );
-  await tapCenter(
-    page.getByRole("radio", { name: /Lv\.1/ }),
-    "Level one selection card",
-  );
-  await tapCenter(
-    page.getByRole("button", { name: "오늘" }),
-    "Home navigation after level change",
-  );
+  await page.evaluate(() => {
+    const session = JSON.parse(localStorage.getItem("mori-session-v1"));
+    localStorage.setItem(`mori-user:${session.id}:quiz-level`, "lv1");
+  });
+  await page.reload({ waitUntil: "networkidle" });
   await tapCenter(
     page.getByRole("button", { name: /모험 시작하기/ }),
     "Level one quiz start control",

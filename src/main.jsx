@@ -36,7 +36,6 @@ import { enableKidSafeInteractions } from "./kidSafeInteractions";
 import {
   CURRICULUM_QUESTIONS,
   QUIZ_LEVELS,
-  levelDetail,
 } from "./quizCurriculum";
 import {
   clearCharacterVariants,
@@ -894,7 +893,7 @@ const loadProgress = () => {
 
 function App() {
   const [books, setBooks] = useState(loadBooks);
-  const [quizLevel, setQuizLevel] = useState(loadQuizLevel);
+  const [quizLevel] = useState(loadQuizLevel);
   const [bookLevels, setBookLevels] = useState(loadBookLevels);
   const levelOf = (bookId) => bookLevels[bookId] || quizLevel;
   const setLevelFor = (bookId, level) =>
@@ -1168,11 +1167,6 @@ function App() {
     setChoice(previous?.response ?? null);
     setFeedbackMode("final");
     setView("quiz");
-  };
-  const selectQuizLevel = (level) => {
-    if (!QUIZ_LEVELS[level] || level === quizLevel) return;
-    setQuizLevel(level);
-    setToast(`${QUIZ_LEVELS[level].label} · ${QUIZ_LEVELS[level].name}로 바꿨어요.`);
   };
   const answer = () => {
     const question = selected.questions[quizIndex];
@@ -1733,8 +1727,6 @@ function App() {
             importCharacterSheet={importChildCharacterSheet}
             apiGenerationEnabled={API_CHARACTER_GENERATION_ENABLED}
             registerCharacter={registerChildCharacter}
-            quizLevel={quizLevel}
-            selectQuizLevel={selectQuizLevel}
           />
         )}
       </main>
@@ -1815,10 +1807,13 @@ function HomeView({
             <br />
             책장을 채워 보세요.
           </p>
-          <button className="level-shortcut" onClick={() => go("profile")}>
+          <div
+            className="level-shortcut current-level-summary"
+            aria-label={`현재 읽기 단계 ${level.label} ${level.name}`}
+          >
             <span>{level.label}</span>
-            {level.name} <ChevronRight size={15} />
-          </button>
+            {level.name}
+          </div>
           <button
             className="primary"
             onClick={() =>
@@ -3577,8 +3572,6 @@ function Profile({
   importCharacterSheet,
   apiGenerationEnabled,
   registerCharacter,
-  quizLevel,
-  selectQuizLevel,
 }) {
   const [name, setName] = useState(profile.name);
   const [selectedVariantId, setSelectedVariantId] = useState(
@@ -3758,56 +3751,6 @@ function Profile({
             지금은 이 기기의 익명 사용자 ID에 저장돼요. 로그인 도입 뒤에는 같은
             데이터가 Supabase 사용자 계정에 연결됩니다.
           </p>
-        </div>
-      </section>
-
-      <section className="level-setting" aria-labelledby="level-setting-title">
-        <div className="level-setting-heading">
-          <div>
-            <span className="overline">모든 책에 공통 적용</span>
-            <h2 id="level-setting-title">읽기 모험 난이도</h2>
-          </div>
-          <span className="current-level">현재 {QUIZ_LEVELS[quizLevel].label}</span>
-        </div>
-        <p>
-          아이가 편안하게 시작할 수 있는 단계를 골라 주세요. 언제든 바꿀 수
-          있고, 레벨별 완독 기록은 따로 남아요.
-        </p>
-        <div className="level-options" role="radiogroup" aria-label="퀴즈 난이도">
-          {Object.values(QUIZ_LEVELS).map((level, levelIndex) => {
-            const selectedLevel = quizLevel === level.id;
-            return (
-              <button
-                type="button"
-                role="radio"
-                aria-checked={selectedLevel}
-                className={`${level.id} ${selectedLevel ? "selected" : ""}`}
-                key={level.id}
-                onClick={() => selectQuizLevel(level.id)}
-              >
-                <span className="level-option-top">
-                  <strong>{level.label}</strong>
-                  <em>{level.age}</em>
-                  {selectedLevel && <Check size={20} aria-hidden="true" />}
-                </span>
-                <b>{level.name}</b>
-                <p>{level.summary}</p>
-                <small>{levelDetail(level.id)}</small>
-                <span
-                  className="difficulty-meter"
-                  aria-label={`난이도 ${levelIndex + 1}단계`}
-                >
-                  {[0, 1].map((meterIndex) => (
-                    <i
-                      className={meterIndex <= levelIndex ? "on" : ""}
-                      key={meterIndex}
-                    />
-                  ))}
-                  난이도 {["기본", "심화"][levelIndex]}
-                </span>
-              </button>
-            );
-          })}
         </div>
       </section>
 

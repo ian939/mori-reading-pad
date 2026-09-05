@@ -234,6 +234,9 @@ button {
   font-weight: 900;
   cursor: pointer;
 }
+.level-shortcut.current-level-summary {
+  cursor: default;
+}
 .level-shortcut > span {
   border-radius: 9px;
   background: #173f3f;
@@ -2096,128 +2099,6 @@ button {
   font-size: 11px;
   font-weight: 900;
 }
-.level-setting {
-  margin: 24px 0;
-  border-radius: 24px;
-  background: #fff;
-  padding: 17px;
-  box-shadow: 0 8px 24px #173f400d;
-}
-.level-setting-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.level-setting-heading h2 {
-  margin: 4px 0 0;
-  font: 400 24px "Jua";
-}
-.current-level {
-  border-radius: 15px;
-  background: #173f3f;
-  padding: 7px 10px;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 900;
-}
-.level-setting > p {
-  margin: 12px 0 16px;
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.55;
-}
-.level-options {
-  display: grid;
-  gap: 11px;
-}
-.level-options > button {
-  min-height: 190px;
-  border: 2px solid #e0e4df;
-  border-radius: 19px;
-  background: #fbfcf9;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 7px;
-  color: var(--ink);
-  text-align: left;
-}
-.level-options > button.selected.lv1 {
-  border-color: #4f927f;
-  background: #edf7f2;
-}
-.level-options > button.selected.lv2 {
-  border-color: #df765d;
-  background: #fff1eb;
-}
-.level-options > button.selected.lv3 {
-  border-color: #7567bd;
-  background: #f2efff;
-}
-.level-option-top {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.level-option-top strong {
-  border-radius: 10px;
-  background: #173f3f;
-  padding: 6px 8px;
-  color: #fff;
-  font-size: 12px;
-}
-.level-options .lv2 .level-option-top strong {
-  background: #c85f48;
-}
-.level-options .lv3 .level-option-top strong {
-  background: #6556aa;
-}
-.level-option-top em {
-  color: #6b807a;
-  font-size: 10px;
-  font-style: normal;
-  font-weight: 900;
-}
-.level-option-top svg {
-  margin-left: auto;
-  color: #3f8874;
-}
-.level-options button > b {
-  font: 400 19px "Jua";
-}
-.level-options button > p {
-  margin: 0;
-  color: #56736c;
-  font-size: 12px;
-  line-height: 1.55;
-}
-.level-options button > small {
-  color: #788a86;
-  font-size: 10px;
-  font-weight: 800;
-  line-height: 1.45;
-}
-.difficulty-meter {
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: #6c7e7a;
-  font-size: 10px;
-  font-weight: 900;
-}
-.difficulty-meter i {
-  width: 24px;
-  height: 6px;
-  border-radius: 5px;
-  background: #d9dfdb;
-}
-.difficulty-meter i.on {
-  background: #e0963c;
-}
 .catalog-filters {
   margin: 0 0 15px;
   border-radius: 18px;
@@ -3775,36 +3656,11 @@ button {
     font-size: 15px;
   }
   .recording-script,
-  .saved-voice,
-  .level-setting {
+  .saved-voice {
     padding: 24px;
   }
   .recorder-panel {
     min-height: 280px;
-  }
-  .level-setting-heading h2 {
-    font-size: 31px;
-  }
-  .level-setting > p {
-    font-size: 14px;
-  }
-  .level-options {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-  }
-  .level-options > button {
-    min-height: 230px;
-    padding: 20px;
-  }
-  .level-options button > b {
-    font-size: 24px;
-  }
-  .level-options button > p {
-    font-size: 14px;
-  }
-  .level-options button > small,
-  .difficulty-meter {
-    font-size: 12px;
   }
   .catalog-filters {
     grid-template-columns: 35px 1fr 1fr;
